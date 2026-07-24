@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Torre de las Nubes — Duelo AWS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#050716;
+    --sky-mid:#111a3d;
+    --sky-bottom:#2c3d6e;
+    --stone-1:#8a93a3;
+    --stone-2:#5b6577;
+    --stone-3:#3c4454;
+    --mortar:#232a36;
+    --moss:#4c7a45;
+    --wood:#6b4226;
+    --amber:#f2a641;
+    --aws:#ff9f2e;
+    --ink:#f3ecd8;
+    --ink-dim:#c8c0aa;
+    --panel:#141a30;
+    --panel-2:#1d2542;
+    --gold:#d9b34d;
+    --teal:#3fa1a1;
+    --danger:#e2493a;
+    --success:#59c27a;
+    --font-display:'Cinzel', serif;
+    --font-body:'Space Grotesk', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; width:100%; height:100%; overflow:hidden;
+    background:var(--sky-top); font-family:var(--font-body); color:var(--ink);
+    touch-action:none; -webkit-user-select:none; user-select:none;
+  }
+  #app{position:fixed; inset:0; overflow:hidden;}
+  canvas#gameCanvas{position:absolute; inset:0; width:100%; height:100%; display:block; cursor:pointer;}
+
+  /* ---------- faceted / gem-cut visual signature ---------- */
+  .facet-cut{
+    clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px);
+  }
+  .facet-cut-sm{
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  }
+
+  /* ---------- HUD ---------- */
+  #hud{
+    position:absolute; top:14px; left:0; right:0; display:flex; justify-content:center; gap:10px;
+    pointer-events:none; z-index:5; flex-wrap:wrap; padding:0 10px;
+  }
+  .hud-pill{
+    background:linear-gradient(180deg, rgba(29,37,66,.92), rgba(20,26,48,.92));
+    border:1px solid rgba(217,179,77,.45);
+    padding:7px 16px; font-family:var(--font-display); font-weight:700; font-size:14px;
+    letter-spacing:.03em; color:var(--gold);
+  }
+  .hud-pill span{color:var(--ink);}
+
+  /* ---------- overlays ---------- */
+  .overlay{
+    position:absolute; inset:0; z-index:20; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; background:radial-gradient(ellipse at 50% 30%, rgba(20,26,48,.55), rgba(4,5,14,.92));
+    padding:20px;
+  }
+  .overlay.hidden{display:none;}
+  .panel{
+    background:linear-gradient(160deg, var(--panel-2), var(--panel));
+    border:1px solid rgba(217,179,77,.5);
+    box-shadow:0 0 0 1px rgba(0,0,0,.3), 0 20px 60px rgba(0,0,0,.55);
+    max-width:460px; width:100%; padding:34px 30px 28px; text-align:center;
+  }
+  .crest{font-size:40px; margin-bottom:6px; filter:drop-shadow(0 0 10px rgba(242,166,65,.5));}
+  .panel h1{
+    font-family:var(--font-display); font-size:26px; margin:4px 0 12px; color:var(--gold);
+    letter-spacing:.02em;
+  }
+  .subtitle{color:var(--ink-dim); font-size:14.5px; line-height:1.5; margin:0 0 16px;}
+  .rules{
+    text-align:left; margin:0 0 22px; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px;
+  }
+  .rules li{
+    font-size:13.5px; line-height:1.5; color:var(--ink-dim); padding-left:22px; position:relative;
+  }
+  .rules li::before{
+    content:"◆"; position:absolute; left:0; top:0; color:var(--aws); font-size:11px;
+  }
+  .rules strong{color:var(--ink);}
+  .btn-primary{
+    font-family:var(--font-display); font-weight:700; font-size:15px; letter-spacing:.03em;
+    background:linear-gradient(180deg, var(--gold), #a67c22);
+    color:#241a06; border:none; padding:13px 30px; cursor:pointer;
+    clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+    transition:filter .15s, transform .15s;
+  }
+  .btn-primary:hover{filter:brightness(1.1); transform:translateY(-1px);}
+  .btn-primary:active{transform:translateY(0px) scale(.98);}
+
+  /* ---------- boss arena ---------- */
+  #bossScreen{ justify-content:flex-start; padding-top:min(4vh,34px); }
+  .arena{
+    width:100%; max-width:900px; display:flex; align-items:flex-start; justify-content:space-between;
+    gap:10px; padding:0 10px;
+  }
+  .combatant{display:flex; flex-direction:column; align-items:center; width:38%; min-width:130px;}
+  .hp-label{
+    font-family:var(--font-display); font-size:13px; font-weight:700; color:var(--ink-dim);
+    margin-bottom:6px; text-align:center; letter-spacing:.02em;
+  }
+  .hp-bar{display:flex; gap:4px; margin-bottom:10px; width:100%; justify-content:center;}
+  .pip{
+    height:14px; flex:1; max-width:46px; background:linear-gradient(180deg,#6fd190,#2f8f52);
+    border:1px solid rgba(0,0,0,.35);
+    clip-path: polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px);
+  }
+  .hp-bar.boss .pip{background:linear-gradient(180deg,#ff7a68,#c73427);}
+  .pip.lost{background:linear-gradient(180deg,#3a3f4d,#22252e); box-shadow:none;}
+
+  .fighter{position:relative; width:110px; height:150px;}
+  .facet{position:absolute;}
+  /* knight */
+  .knight-head{
+    width:34px; height:34px; left:38px; top:0; background:linear-gradient(160deg,#e8c98a,#b5895a);
+    clip-path: polygon(50% 0,100% 30%,90% 100%,10% 100%,0 30%);
+  }
+  .knight-body{
+    width:66px; height:76px; left:22px; top:28px;
+    background:linear-gradient(165deg,#4fb3b3,#1f6363);
+    clip-path: polygon(20% 0,80% 0,100% 18%,90% 100%,10% 100%,0 18%);
+    border:2px solid var(--gold);
+  }
+  .knight-shoulder-l{
+    width:26px; height:26px; left:4px; top:32px; background:var(--gold);
+    clip-path: polygon(0 40%,100% 0,100% 100%,0 100%);
+  }
+  .knight-shoulder-r{
+    width:26px; height:26px; right:4px; top:32px; background:var(--gold);
+    clip-path: polygon(0 0,100% 40%,100% 100%,0 100%);
+  }
+  .knight-sword{
+    width:8px; height:92px; right:-2px; top:24px; background:linear-gradient(180deg,#dfe6ea,#9aa7ad);
+    transform:rotate(18deg); box-shadow:0 0 6px rgba(255,255,255,.35);
+  }
+  .knight-legs{
+    width:50px; height:34px; left:30px; top:98px; background:linear-gradient(160deg,#2b3550,#1a2036);
+    clip-path: polygon(15% 0,85% 0,100% 100%,60% 100%,50% 60%,40% 100%,0 100%);
+  }
+  /* boss */
+  .boss-core{
+    width:78px; height:86px; left:16px; top:26px;
+    background:linear-gradient(165deg,#c0392b,#5c1b13);
+    clip-path: polygon(30% 0,70% 0,100% 25%,100% 80%,70% 100%,30% 100%,0 80%,0 25%);
+    border:2px solid #6e0f0f;
+  }
+  .boss-eye-l, .boss-eye-r{
+    width:12px; height:8px; top:44px; background:var(--aws); box-shadow:0 0 10px 2px var(--aws);
+    clip-path: polygon(0 50%,100% 0,100% 100%);
+  }
+  .boss-eye-l{left:32px;}
+  .boss-eye-r{right:32px; transform:scaleX(-1);}
+  .boss-crown{
+    width:60px; height:26px; left:25px; top:2px; background:linear-gradient(160deg,#8892a3,#4b5266);
+    clip-path: polygon(0 100%,15% 0,35% 60%,50% 0,65% 60%,85% 0,100% 100%);
+  }
+  .boss-arm-l, .boss-arm-r{
+    width:22px; height:60px; top:38px; background:linear-gradient(160deg,#79808f,#3a3f4d);
+    clip-path: polygon(20% 0,100% 10%,80% 100%,0 90%);
+  }
+  .boss-arm-l{left:-4px;}
+  .boss-arm-r{right:-4px; transform:scaleX(-1);}
+  .boss-legs{
+    width:56px; height:34px; left:27px; top:108px; background:linear-gradient(160deg,#4a5266,#262c3a);
+    clip-path: polygon(15% 0,85% 0,100% 100%,60% 100%,50% 60%,40% 100%,0 100%);
+  }
+  .vs-badge{
+    font-family:var(--font-display); font-size:22px; font-weight:900; color:var(--gold);
+    align-self:center; margin-top:50px; text-shadow:0 0 12px rgba(217,179,77,.6);
+  }
+
+  .banner{
+    position:absolute; top:38%; left:50%; transform:translate(-50%,-50%);
+    font-family:var(--font-display); font-size:30px; font-weight:900; letter-spacing:.03em;
+    padding:14px 34px; z-index:30; text-align:center;
+    clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+  }
+  .banner.hidden{display:none;}
+  .banner.win{background:linear-gradient(160deg,#69d68c,#227a44); color:#0b2414; box-shadow:0 0 40px rgba(89,194,122,.5);}
+  .banner.lose{background:linear-gradient(160deg,#ff7362,#8f2318); color:#2b0a06; box-shadow:0 0 40px rgba(226,73,58,.5);}
+
+  /* ---------- cards ---------- */
+  .cards-row{
+    display:flex; gap:14px; margin-top:18px; flex-wrap:wrap; justify-content:center;
+    max-width:960px; padding:0 12px; z-index:5;
+  }
+  .card{
+    width:150px; height:190px; perspective:1200px; cursor:pointer;
+  }
+  .card.locked{cursor:default;}
+  .card-inner{
+    position:relative; width:100%; height:100%; transition:transform .55s cubic-bezier(.4,.2,.2,1);
+    transform-style:preserve-3d;
+  }
+  .card.flipped .card-inner{transform:rotateY(180deg);}
+  .card-face{
+    position:absolute; inset:0; backface-visibility:hidden; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; padding:10px;
+    box-shadow:0 8px 22px rgba(0,0,0,.45);
+    clip-path: polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);
+  }
+  .card-front{
+    border:2px solid rgba(255,255,255,.25);
+  }
+  .card-front .abbr{font-family:var(--font-display); font-weight:900; font-size:30px; color:#1c1305; text-shadow:0 1px 0 rgba(255,255,255,.3);}
+  .card-front .svcname{font-family:var(--font-body); font-size:10.5px; font-weight:600; color:#1c1305; margin-top:4px; text-align:center; opacity:.85;}
+  .card-front .tap-hint{position:absolute; bottom:8px; font-size:9.5px; color:#1c1305; opacity:.6; letter-spacing:.05em;}
+  .card-back{
+    background:linear-gradient(165deg,#2a2338,#171226);
+    border:2px solid rgba(217,179,77,.55); transform:rotateY(180deg); justify-content:flex-start;
+    overflow-y:auto;
+  }
+  .card-back .qtext{font-size:11.5px; line-height:1.35; color:var(--ink); margin-bottom:8px; font-weight:600;}
+  .opt-btn{
+    width:100%; text-align:left; font-family:var(--font-body); font-size:10.5px; line-height:1.25;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.16); color:var(--ink-dim);
+    padding:6px 8px; margin-bottom:5px; cursor:pointer; border-radius:2px;
+  }
+  .opt-btn:hover{background:rgba(255,255,255,.12);}
+  .opt-btn.correct{background:rgba(89,194,122,.35); border-color:var(--success); color:#fff;}
+  .opt-btn.incorrect{background:rgba(226,73,58,.35); border-color:var(--danger); color:#fff;}
+  .opt-btn:disabled{cursor:default;}
+
+  #gameOverScreen .panel{max-width:420px;}
+  #gameOverDetail{color:var(--ink-dim); font-size:14px; margin:6px 0 22px;}
+
+  @media (max-width:520px){
+    .panel{padding:26px 20px 22px;}
+    .card{width:118px; height:168px;}
+    .fighter{width:90px; height:130px; transform:scale(.85);}
+    .vs-badge{font-size:17px; margin-top:44px;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="hud">
+    <div class="hud-pill facet-cut-sm">Piso <span id="floorNum">0</span></div>
+    <div class="hud-pill facet-cut-sm">Puerta en <span id="doorIn">5</span></div>
+  </div>
+
+  <div id="startScreen" class="overlay">
+    <div class="panel facet-cut">
+      <div class="crest">🏰</div>
+      <h1>Torre de las Nubes</h1>
+      <p class="subtitle">Construye la torre piso a piso mientras tu caballero asciende. Cada cierto número de pisos aparece una puerta: al llegar, un guardián de AWS te desafía.</p>
+      <ul class="rules">
+        <li><strong>Toca, haz clic o presiona Espacio</strong> para soltar el bloque y encajarlo en la torre.</li>
+        <li>Cada <strong>5 pisos</strong> hay una <strong>puerta</strong>. Al alcanzarla comienza un duelo de preguntas.</li>
+        <li>Elige una carta de servicio de AWS: acertar daña al guardián, fallar te daña a ti.</li>
+        <li>El número de cartas define cuántos aciertos necesitas y cuántos fallos puedes soportar.</li>
+      </ul>
+      <button id="startBtn" class="btn-primary">Comenzar a construir</button>
+    </div>
+  </div>
+
+  <div id="bossScreen" class="overlay hidden">
+    <div class="arena">
+      <div class="combatant">
+        <div class="hp-label">Tu vida</div>
+        <div class="hp-bar" id="playerHpBar"></div>
+        <div class="fighter">
+          <div class="facet knight-head"></div>
+          <div class="facet knight-shoulder-l"></div>
+          <div class="facet knight-shoulder-r"></div>
+          <div class="facet knight-body"></div>
+          <div class="facet knight-sword"></div>
+          <div class="facet knight-legs"></div>
+        </div>
+      </div>
+
+      <div class="vs-badge">VS</div>
+
+      <div class="combatant">
+        <div class="hp-label" id="bossName">Guardián</div>
+        <div class="hp-bar boss" id="bossHpBar"></div>
+        <div class="fighter">
+          <div class="facet boss-crown"></div>
+          <div class="facet boss-arm-l"></div>
+          <div class="facet boss-arm-r"></div>
+          <div class="facet boss-core"></div>
+          <div class="facet boss-eye-l"></div>
+          <div class="facet boss-eye-r"></div>
+          <div class="facet boss-legs"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="banner hidden" id="fightBanner"></div>
+    <div class="cards-row" id="cardsRow"></div>
+  </div>
+
+  <div id="gameOverScreen" class="overlay hidden">
+    <div class="panel facet-cut">
+      <div class="crest">💀</div>
+      <h1 id="gameOverTitle">Has caído de la torre</h1>
+      <p id="gameOverDetail"></p>
+      <button id="retryBtn" class="btn-primary">Reconstruir la torre</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

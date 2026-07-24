@@ -1,0 +1,19 @@
+{
+  "name": "torre-de-las-nubes",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Torre de las Nubes — Duelo AWS: juego de navegador tipo stack tower con duelos de preguntas sobre servicios AWS.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "check-circular": "madge --circular src/main.js"
+  },
+  "devDependencies": {
+    "vite": "^5.4.21",
+    "vitest": "^2.1.9",
+    "fast-check": "^3.23.2"
+  }
+}
