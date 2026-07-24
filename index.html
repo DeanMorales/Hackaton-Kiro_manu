@@ -68,6 +68,14 @@
     padding:20px;
   }
   .overlay.hidden{display:none;}
+  .overlay-content{
+    background:linear-gradient(160deg, var(--panel-2), var(--panel));
+    border:1px solid rgba(217,179,77,.5);
+    box-shadow:0 0 0 1px rgba(0,0,0,.3), 0 20px 60px rgba(0,0,0,.55);
+    border-radius:12px;
+    max-width:520px; width:100%; padding:34px 30px 28px; text-align:center;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
   .panel{
     background:linear-gradient(160deg, var(--panel-2), var(--panel));
     border:1px solid rgba(217,179,77,.5);
@@ -99,6 +107,15 @@
   }
   .btn-primary:hover{filter:brightness(1.1); transform:translateY(-1px);}
   .btn-primary:active{transform:translateY(0px) scale(.98);}
+  .btn-secondary{
+    font-family:var(--font-display); font-weight:700; font-size:15px; letter-spacing:.03em;
+    background:linear-gradient(180deg, rgba(63,161,161,.8), rgba(31,99,99,.8));
+    color:var(--ink); border:1px solid rgba(63,161,161,.5); padding:13px 30px; cursor:pointer;
+    clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+    transition:filter .15s, transform .15s;
+  }
+  .btn-secondary:hover{filter:brightness(1.15); transform:translateY(-1px);}
+  .btn-secondary:active{transform:translateY(0px) scale(.98);}
 
   /* ---------- boss arena ---------- */
   #bossScreen{ justify-content:flex-start; padding-top:min(4vh,34px); }
@@ -235,12 +252,110 @@
 
   #gameOverScreen .panel{max-width:420px;}
   #gameOverDetail{color:var(--ink-dim); font-size:14px; margin:6px 0 22px;}
+  .score-info{margin-bottom:18px;}
+  #finalScore{font-size:16px; color:var(--ink); margin:0 0 8px;}
+  #scoreRank{font-size:16px; font-weight:700; color:var(--aws); margin:0;}
+  #scoreRank.new-record{color:var(--gold); font-size:18px;}
+
+  /* ---------- leaderboard overlay ---------- */
+  #leaderboardScreen .overlay-content{max-width:520px; max-height:70vh; overflow:auto;}
+  .leaderboard-header{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(217,179,77,.3);
+  }
+  .leaderboard-header h2{
+    font-family:var(--font-display); font-size:22px; font-weight:700; color:var(--gold);
+    margin:0; letter-spacing:.02em;
+  }
+  .leaderboard-header .close-btn{
+    background:none; border:none; color:var(--ink-dim); font-size:28px; cursor:pointer;
+    padding:0; width:32px; height:32px; display:flex; align-items:center; justify-content:center;
+    transition:color .15s;
+  }
+  .leaderboard-header .close-btn:hover{color:var(--ink);}
+  .leaderboard-header .close-btn:focus{
+    outline:2px solid var(--gold); outline-offset:2px; color:var(--ink);
+  }
+
+  .leaderboard-body{
+    padding:0; overflow-y:auto; max-height:calc(70vh - 120px); overflow-x:hidden;
+  }
+
+  .leaderboard-table{
+    width:100%; border-collapse:collapse; margin-bottom:8px; table-layout:fixed;
+  }
+  .leaderboard-table thead th{
+    font-family:var(--font-display); font-weight:700; font-size:12px; letter-spacing:.02em;
+    color:var(--gold); text-align:center; padding:10px 8px; border-bottom:2px solid rgba(217,179,77,.5);
+    background-color:rgba(20,26,48,.4); position:sticky; top:0; z-index:2; word-wrap:break-word;
+  }
+  .leaderboard-table tbody tr{
+    border-bottom:1px solid rgba(255,255,255,.08); transition:background-color .2s ease-out;
+  }
+  .leaderboard-table tbody tr:hover{background-color:rgba(255,255,255,.06);}
+  .leaderboard-table tbody tr:focus-within{background-color:rgba(217,179,77,.08);}
+  .leaderboard-table tbody td{
+    font-size:13px; color:var(--ink); padding:11px 8px; text-align:center; word-break:break-word;
+    overflow-wrap:break-word;
+  }
+  .leaderboard-table td:first-child{
+    font-family:var(--font-display); font-weight:700; color:var(--gold); width:35px; text-align:center;
+    flex-shrink:0;
+  }
+  .leaderboard-table td:nth-child(2){
+    flex-grow:1; min-width:60px;
+  }
+  .leaderboard-table td:nth-child(3){
+    flex-grow:1; min-width:80px;
+  }
+  .score-value{
+    font-weight:700; color:var(--aws); text-align:right; padding-right:12px;
+  }
+  .score-date{
+    color:var(--ink-dim); font-size:12px; text-align:right; padding-right:12px;
+  }
+
+  #leaderboardEmpty{
+    text-align:center; padding:32px 12px; color:var(--ink-dim);
+  }
+  #leaderboardEmpty p{
+    margin:0; font-size:14px; line-height:1.6; letter-spacing:.01em;
+  }
+
+  .empty-state{
+    text-align:center; padding:32px 12px; color:var(--ink-dim); display:flex; 
+    flex-direction:column; align-items:center; justify-content:center;
+  }
+  .empty-state p{
+    margin:0; font-size:14px; line-height:1.6; letter-spacing:.01em;
+  }
+
+  .hidden{display:none;}
+  .leaderboard-table.hidden, #leaderboardEmpty.hidden, .empty-state.hidden{display:none;}
+  
+  .new-record{
+    color:var(--gold) !important; font-weight:700; font-size:18px; text-shadow:0 0 8px rgba(217,179,77,.4);
+  }
 
   @media (max-width:520px){
     .panel{padding:26px 20px 22px;}
+    .overlay-content{
+      max-width:95% !important; padding:26px 20px 22px;
+      border-radius:10px;
+    }
     .card{width:118px; height:168px;}
     .fighter{width:90px; height:130px; transform:scale(.85);}
     .vs-badge{font-size:17px; margin-top:44px;}
+    #leaderboardScreen .overlay-content{max-width:95%; max-height:85vh;}
+    .leaderboard-table tbody td{
+      font-size:12px; padding:8px 6px;
+    }
+    .score-value, .score-date{
+      padding-right:8px; font-size:11px;
+    }
+    .leaderboard-table thead th{
+      font-size:11px; padding:6px 4px;
+    }
   }
 </style>
 </head>
@@ -309,7 +424,36 @@
       <div class="crest">💀</div>
       <h1 id="gameOverTitle">Has caído de la torre</h1>
       <p id="gameOverDetail"></p>
+      <div class="score-info">
+        <p id="finalScore">Tu puntuación: <strong>0</strong></p>
+        <p id="scoreRank" class="rank-badge"></p>
+      </div>
       <button id="retryBtn" class="btn-primary">Reconstruir la torre</button>
+      <button id="viewLeaderboardBtn" class="btn-secondary" style="display:none; margin-top:10px;">Ver tabla de scores</button>
+    </div>
+  </div>
+
+  <div id="leaderboardScreen" class="overlay hidden">
+    <div class="overlay-content">
+      <div class="leaderboard-header">
+        <h2>Tabla de Scores</h2>
+        <button class="close-btn" aria-label="Cerrar tabla">✕</button>
+      </div>
+      <div class="leaderboard-body">
+        <table class="leaderboard-table" role="table" aria-label="Top 10 scores">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Puntaje</th>
+              <th scope="col">Fecha</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardTableBody"></tbody>
+        </table>
+        <div id="leaderboardEmpty" class="empty-state hidden">
+          <p>No hay scores aún. ¡Completa una partida para aparecer aquí!</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
