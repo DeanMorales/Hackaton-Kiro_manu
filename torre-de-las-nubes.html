@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Torre de las Nubes — Duelo AWS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#050716;
+    --sky-mid:#111a3d;
+    --sky-bottom:#2c3d6e;
+    --stone-1:#8a93a3;
+    --stone-2:#5b6577;
+    --stone-3:#3c4454;
+    --mortar:#232a36;
+    --moss:#4c7a45;
+    --wood:#6b4226;
+    --amber:#f2a641;
+    --aws:#ff9f2e;
+    --ink:#f3ecd8;
+    --ink-dim:#c8c0aa;
+    --panel:#141a30;
+    --panel-2:#1d2542;
+    --gold:#d9b34d;
+    --teal:#3fa1a1;
+    --danger:#e2493a;
+    --success:#59c27a;
+    --font-display:'Cinzel', serif;
+    --font-body:'Space Grotesk', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; width:100%; height:100%; overflow:hidden;
+    background:var(--sky-top); font-family:var(--font-body); color:var(--ink);
+    touch-action:none; -webkit-user-select:none; user-select:none;
+  }
+  #app{position:fixed; inset:0; overflow:hidden;}
+  canvas#gameCanvas{position:absolute; inset:0; width:100%; height:100%; display:block; cursor:pointer;}
+
+  /* ---------- faceted / gem-cut visual signature ---------- */
+  .facet-cut{
+    clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px);
+  }
+  .facet-cut-sm{
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  }
+
+  /* ---------- HUD ---------- */
+  #hud{
+    position:absolute; top:14px; left:0; right:0; display:flex; justify-content:center; gap:10px;
+    pointer-events:none; z-index:5; flex-wrap:wrap; padding:0 10px;
+  }
+  .hud-pill{
+    background:linear-gradient(180deg, rgba(29,37,66,.92), rgba(20,26,48,.92));
+    border:1px solid rgba(217,179,77,.45);
+    padding:7px 16px; font-family:var(--font-display); font-weight:700; font-size:14px;
+    letter-spacing:.03em; color:var(--gold);
+  }
+  .hud-pill span{color:var(--ink);}
+
+  /* ---------- overlays ---------- */
+  .overlay{
+    position:absolute; inset:0; z-index:20; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; background:radial-gradient(ellipse at 50% 30%, rgba(20,26,48,.55), rgba(4,5,14,.92));
+    padding:20px;
+  }
+  .overlay.hidden{display:none;}
+  .panel{
+    background:linear-gradient(160deg, var(--panel-2), var(--panel));
+    border:1px solid rgba(217,179,77,.5);
+    box-shadow:0 0 0 1px rgba(0,0,0,.3), 0 20px 60px rgba(0,0,0,.55);
+    max-width:460px; width:100%; padding:34px 30px 28px; text-align:center;
+  }
+  .crest{font-size:40px; margin-bottom:6px; filter:drop-shadow(0 0 10px rgba(242,166,65,.5));}
+  .panel h1{
+    font-family:var(--font-display); font-size:26px; margin:4px 0 12px; color:var(--gold);
+    letter-spacing:.02em;
+  }
+  .subtitle{color:var(--ink-dim); font-size:14.5px; line-height:1.5; margin:0 0 16px;}
+  .rules{
+    text-align:left; margin:0 0 22px; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px;
+  }
+  .rules li{
+    font-size:13.5px; line-height:1.5; color:var(--ink-dim); padding-left:22px; position:relative;
+  }
+  .rules li::before{
+    content:"◆"; position:absolute; left:0; top:0; color:var(--aws); font-size:11px;
+  }
+  .rules strong{color:var(--ink);}
+  .btn-primary{
+    font-family:var(--font-display); font-weight:700; font-size:15px; letter-spacing:.03em;
+    background:linear-gradient(180deg, var(--gold), #a67c22);
+    color:#241a06; border:none; padding:13px 30px; cursor:pointer;
+    clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+    transition:filter .15s, transform .15s;
+  }
+  .btn-primary:hover{filter:brightness(1.1); transform:translateY(-1px);}
+  .btn-primary:active{transform:translateY(0px) scale(.98);}
+
+  /* ---------- boss arena ---------- */
+  #bossScreen{ justify-content:flex-start; padding-top:min(4vh,34px); }
+  .arena{
+    width:100%; max-width:900px; display:flex; align-items:flex-start; justify-content:space-between;
+    gap:10px; padding:0 10px;
+  }
+  .combatant{display:flex; flex-direction:column; align-items:center; width:38%; min-width:130px;}
+  .hp-label{
+    font-family:var(--font-display); font-size:13px; font-weight:700; color:var(--ink-dim);
+    margin-bottom:6px; text-align:center; letter-spacing:.02em;
+  }
+  .hp-bar{display:flex; gap:4px; margin-bottom:10px; width:100%; justify-content:center;}
+  .pip{
+    height:14px; flex:1; max-width:46px; background:linear-gradient(180deg,#6fd190,#2f8f52);
+    border:1px solid rgba(0,0,0,.35);
+    clip-path: polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px);
+  }
+  .hp-bar.boss .pip{background:linear-gradient(180deg,#ff7a68,#c73427);}
+  .pip.lost{background:linear-gradient(180deg,#3a3f4d,#22252e); box-shadow:none;}
+
+  .fighter{position:relative; width:110px; height:150px;}
+  .facet{position:absolute;}
+  /* knight */
+  .knight-head{
+    width:34px; height:34px; left:38px; top:0; background:linear-gradient(160deg,#e8c98a,#b5895a);
+    clip-path: polygon(50% 0,100% 30%,90% 100%,10% 100%,0 30%);
+  }
+  .knight-body{
+    width:66px; height:76px; left:22px; top:28px;
+    background:linear-gradient(165deg,#4fb3b3,#1f6363);
+    clip-path: polygon(20% 0,80% 0,100% 18%,90% 100%,10% 100%,0 18%);
+    border:2px solid var(--gold);
+  }
+  .knight-shoulder-l{
+    width:26px; height:26px; left:4px; top:32px; background:var(--gold);
+    clip-path: polygon(0 40%,100% 0,100% 100%,0 100%);
+  }
+  .knight-shoulder-r{
+    width:26px; height:26px; right:4px; top:32px; background:var(--gold);
+    clip-path: polygon(0 0,100% 40%,100% 100%,0 100%);
+  }
+  .knight-sword{
+    width:8px; height:92px; right:-2px; top:24px; background:linear-gradient(180deg,#dfe6ea,#9aa7ad);
+    transform:rotate(18deg); box-shadow:0 0 6px rgba(255,255,255,.35);
+  }
+  .knight-legs{
+    width:50px; height:34px; left:30px; top:98px; background:linear-gradient(160deg,#2b3550,#1a2036);
+    clip-path: polygon(15% 0,85% 0,100% 100%,60% 100%,50% 60%,40% 100%,0 100%);
+  }
+  /* boss */
+  .boss-core{
+    width:78px; height:86px; left:16px; top:26px;
+    background:linear-gradient(165deg,#c0392b,#5c1b13);
+    clip-path: polygon(30% 0,70% 0,100% 25%,100% 80%,70% 100%,30% 100%,0 80%,0 25%);
+    border:2px solid #6e0f0f;
+  }
+  .boss-eye-l, .boss-eye-r{
+    width:12px; height:8px; top:44px; background:var(--aws); box-shadow:0 0 10px 2px var(--aws);
+    clip-path: polygon(0 50%,100% 0,100% 100%);
+  }
+  .boss-eye-l{left:32px;}
+  .boss-eye-r{right:32px; transform:scaleX(-1);}
+  .boss-crown{
+    width:60px; height:26px; left:25px; top:2px; background:linear-gradient(160deg,#8892a3,#4b5266);
+    clip-path: polygon(0 100%,15% 0,35% 60%,50% 0,65% 60%,85% 0,100% 100%);
+  }
+  .boss-arm-l, .boss-arm-r{
+    width:22px; height:60px; top:38px; background:linear-gradient(160deg,#79808f,#3a3f4d);
+    clip-path: polygon(20% 0,100% 10%,80% 100%,0 90%);
+  }
+  .boss-arm-l{left:-4px;}
+  .boss-arm-r{right:-4px; transform:scaleX(-1);}
+  .boss-legs{
+    width:56px; height:34px; left:27px; top:108px; background:linear-gradient(160deg,#4a5266,#262c3a);
+    clip-path: polygon(15% 0,85% 0,100% 100%,60% 100%,50% 60%,40% 100%,0 100%);
+  }
+  .vs-badge{
+    font-family:var(--font-display); font-size:22px; font-weight:900; color:var(--gold);
+    align-self:center; margin-top:50px; text-shadow:0 0 12px rgba(217,179,77,.6);
+  }
+
+  .banner{
+    position:absolute; top:38%; left:50%; transform:translate(-50%,-50%);
+    font-family:var(--font-display); font-size:30px; font-weight:900; letter-spacing:.03em;
+    padding:14px 34px; z-index:30; text-align:center;
+    clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+  }
+  .banner.hidden{display:none;}
+  .banner.win{background:linear-gradient(160deg,#69d68c,#227a44); color:#0b2414; box-shadow:0 0 40px rgba(89,194,122,.5);}
+  .banner.lose{background:linear-gradient(160deg,#ff7362,#8f2318); color:#2b0a06; box-shadow:0 0 40px rgba(226,73,58,.5);}
+
+  /* ---------- cards ---------- */
+  .cards-row{
+    display:flex; gap:14px; margin-top:18px; flex-wrap:wrap; justify-content:center;
+    max-width:960px; padding:0 12px; z-index:5;
+  }
+  .card{
+    width:150px; height:190px; perspective:1200px; cursor:pointer;
+  }
+  .card.locked{cursor:default;}
+  .card-inner{
+    position:relative; width:100%; height:100%; transition:transform .55s cubic-bezier(.4,.2,.2,1);
+    transform-style:preserve-3d;
+  }
+  .card.flipped .card-inner{transform:rotateY(180deg);}
+  .card-face{
+    position:absolute; inset:0; backface-visibility:hidden; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; padding:10px;
+    box-shadow:0 8px 22px rgba(0,0,0,.45);
+    clip-path: polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);
+  }
+  .card-front{
+    border:2px solid rgba(255,255,255,.25);
+  }
+  .card-front .abbr{font-family:var(--font-display); font-weight:900; font-size:30px; color:#1c1305; text-shadow:0 1px 0 rgba(255,255,255,.3);}
+  .card-front .svcname{font-family:var(--font-body); font-size:10.5px; font-weight:600; color:#1c1305; margin-top:4px; text-align:center; opacity:.85;}
+  .card-front .tap-hint{position:absolute; bottom:8px; font-size:9.5px; color:#1c1305; opacity:.6; letter-spacing:.05em;}
+  .card-back{
+    background:linear-gradient(165deg,#2a2338,#171226);
+    border:2px solid rgba(217,179,77,.55); transform:rotateY(180deg); justify-content:flex-start;
+    overflow-y:auto;
+  }
+  .card-back .qtext{font-size:11.5px; line-height:1.35; color:var(--ink); margin-bottom:8px; font-weight:600;}
+  .opt-btn{
+    width:100%; text-align:left; font-family:var(--font-body); font-size:10.5px; line-height:1.25;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.16); color:var(--ink-dim);
+    padding:6px 8px; margin-bottom:5px; cursor:pointer; border-radius:2px;
+  }
+  .opt-btn:hover{background:rgba(255,255,255,.12);}
+  .opt-btn.correct{background:rgba(89,194,122,.35); border-color:var(--success); color:#fff;}
+  .opt-btn.incorrect{background:rgba(226,73,58,.35); border-color:var(--danger); color:#fff;}
+  .opt-btn:disabled{cursor:default;}
+
+  #gameOverScreen .panel{max-width:420px;}
+  #gameOverDetail{color:var(--ink-dim); font-size:14px; margin:6px 0 22px;}
+
+  @media (max-width:520px){
+    .panel{padding:26px 20px 22px;}
+    .card{width:118px; height:168px;}
+    .fighter{width:90px; height:130px; transform:scale(.85);}
+    .vs-badge{font-size:17px; margin-top:44px;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="hud">
+    <div class="hud-pill facet-cut-sm">Piso <span id="floorNum">0</span></div>
+    <div class="hud-pill facet-cut-sm">Puerta en <span id="doorIn">5</span></div>
+  </div>
+
+  <div id="startScreen" class="overlay">
+    <div class="panel facet-cut">
+      <div class="crest">🏰</div>
+      <h1>Torre de las Nubes</h1>
+      <p class="subtitle">Construye la torre piso a piso mientras tu caballero asciende. Cada cierto número de pisos aparece una puerta: al llegar, un guardián de AWS te desafía.</p>
+      <ul class="rules">
+        <li><strong>Toca, haz clic o presiona Espacio</strong> para soltar el bloque y encajarlo en la torre.</li>
+        <li>Cada <strong>5 pisos</strong> hay una <strong>puerta</strong>. Al alcanzarla comienza un duelo de preguntas.</li>
+        <li>Elige una carta de servicio de AWS: acertar daña al guardián, fallar te daña a ti.</li>
+        <li>El número de cartas define cuántos aciertos necesitas y cuántos fallos puedes soportar.</li>
+      </ul>
+      <button id="startBtn" class="btn-primary">Comenzar a construir</button>
+    </div>
+  </div>
+
+  <div id="bossScreen" class="overlay hidden">
+    <div class="arena">
+      <div class="combatant">
+        <div class="hp-label">Tu vida</div>
+        <div class="hp-bar" id="playerHpBar"></div>
+        <div class="fighter">
+          <div class="facet knight-head"></div>
+          <div class="facet knight-shoulder-l"></div>
+          <div class="facet knight-shoulder-r"></div>
+          <div class="facet knight-body"></div>
+          <div class="facet knight-sword"></div>
+          <div class="facet knight-legs"></div>
+        </div>
+      </div>
+
+      <div class="vs-badge">VS</div>
+
+      <div class="combatant">
+        <div class="hp-label" id="bossName">Guardián</div>
+        <div class="hp-bar boss" id="bossHpBar"></div>
+        <div class="fighter">
+          <div class="facet boss-crown"></div>
+          <div class="facet boss-arm-l"></div>
+          <div class="facet boss-arm-r"></div>
+          <div class="facet boss-core"></div>
+          <div class="facet boss-eye-l"></div>
+          <div class="facet boss-eye-r"></div>
+          <div class="facet boss-legs"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="banner hidden" id="fightBanner"></div>
+    <div class="cards-row" id="cardsRow"></div>
+  </div>
+
+  <div id="gameOverScreen" class="overlay hidden">
+    <div class="panel facet-cut">
+      <div class="crest">💀</div>
+      <h1 id="gameOverTitle">Has caído de la torre</h1>
+      <p id="gameOverDetail"></p>
+      <button id="retryBtn" class="btn-primary">Reconstruir la torre</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* =========================================================
+   DATA: servicios AWS y banco de preguntas
+   ========================================================= */
+const AWS_SERVICES = [
+  {id:'ec2', abbr:'EC2', name:'Amazon EC2', color:'#ff9f2e'},
+  {id:'s3', abbr:'S3', name:'Amazon S3', color:'#57b46b'},
+  {id:'lambda', abbr:'λ', name:'AWS Lambda', color:'#b287ff'},
+  {id:'dynamodb', abbr:'DDB', name:'Amazon DynamoDB', color:'#4aa3ff'},
+  {id:'vpc', abbr:'VPC', name:'Amazon VPC', color:'#9b8bff'},
+  {id:'iam', abbr:'IAM', name:'AWS IAM', color:'#ff6b61'},
+];
+
+const QUESTIONS = {
+  ec2: [
+    {q:'¿Qué tipo de recurso es Amazon EC2?', o:['Una instancia de servidor virtual','Una base de datos administrada','Un sistema de archivos compartido','Un servicio de mensajería'], c:0},
+    {q:'¿Qué significa la sigla EC2?', o:['Elastic Compute Cloud','Elastic Container Cluster','Enhanced Compute Center','External Cloud Connector'], c:0},
+    {q:'¿Para qué sirve el "Auto Scaling" en EC2?', o:['Ajustar el número de instancias según la demanda','Cifrar discos automáticamente','Enrutar dominios','Facturar por segundo'], c:0},
+    {q:'¿Qué es una AMI en EC2?', o:['Una imagen preconfigurada para lanzar instancias','Un tipo de balanceador de carga','Un protocolo de red','Una base de datos NoSQL'], c:0},
+  ],
+  s3: [
+    {q:'¿Para qué se usa Amazon S3 principalmente?', o:['Almacenamiento de objetos','Cómputo serverless','Bases de datos relacionales','Redes privadas virtuales'], c:0},
+    {q:'¿Qué significa la sigla S3?', o:['Simple Storage Service','Secure Server System','Scalable Software Solution','Storage Security Suite'], c:0},
+    {q:'¿Cómo se organiza el contenido dentro de S3?', o:['En buckets y objetos','En tablas y filas','En VPCs y subredes','En funciones y capas'], c:0},
+    {q:'¿Qué clase de almacenamiento de S3 es más económica para datos poco accedidos?', o:['S3 Glacier','S3 Standard','S3 Intelligent-Tiering estándar','S3 Express'], c:0},
+  ],
+  lambda: [
+    {q:'AWS Lambda es un servicio de:', o:['Cómputo sin servidor (serverless)','Almacenamiento en frío','Red de entrega de contenido','Directorio de usuarios'], c:0},
+    {q:'¿Qué suele disparar (trigger) una función Lambda?', o:['Eventos como cambios en S3 o solicitudes API','Solo el reloj del sistema operativo','Únicamente clics de mouse','Cambios manuales del DNS'], c:0},
+    {q:'¿Cuál es una ventaja clave de Lambda?', o:['Solo pagas por el tiempo de ejecución usado','Debes administrar servidores manualmente','Requiere licencias anuales','Corre solo en tu computadora local'], c:0},
+    {q:'¿Cuál es aproximadamente el tiempo máximo de ejecución de una función Lambda?', o:['15 minutos','24 horas','5 segundos','Ilimitado'], c:0},
+  ],
+  dynamodb: [
+    {q:'Amazon DynamoDB es una base de datos:', o:['NoSQL administrada','Relacional SQL','En memoria caché únicamente','De archivos planos'], c:0},
+    {q:'¿Qué caracteriza a DynamoDB?', o:['Baja latencia y escalabilidad automática','Requiere servidores propios','Solo almacena imágenes','Es un servicio de correo'], c:0},
+    {q:'¿Qué es una "partition key" en DynamoDB?', o:['El atributo que determina cómo se distribuyen los datos','Un índice secundario obligatorio','Una contraseña de acceso','Un backup automático'], c:0},
+    {q:'¿Qué modelos de facturación ofrece DynamoDB?', o:['Bajo demanda o capacidad aprovisionada','Solo licencia anual fija','Siempre gratis','Pago por empleado'], c:0},
+  ],
+  vpc: [
+    {q:'¿Qué es una Amazon VPC?', o:['Una red virtual privada y aislada dentro de AWS','Un tipo de base de datos','Un servicio de correo electrónico','Una función serverless'], c:0},
+    {q:'¿Qué componente conecta una VPC a internet?', o:['Un Internet Gateway','Una Lambda Layer','Un DynamoDB Stream','Un IAM Role'], c:0},
+    {q:'¿Qué es una subred (subnet) pública?', o:['Una subred con ruta hacia un Internet Gateway','Una subred sin ningún acceso','Una base de datos compartida','Un grupo de usuarios IAM'], c:0},
+    {q:'¿Qué controla un "Security Group" en una VPC?', o:['El tráfico entrante y saliente de las instancias','El precio de las instancias','El idioma de la consola','El nombre del dominio'], c:0},
+  ],
+  iam: [
+    {q:'AWS IAM se usa para:', o:['Gestionar usuarios, roles y permisos','Almacenar archivos','Ejecutar código serverless','Enviar correos masivos'], c:0},
+    {q:'¿Qué es una "policy" en IAM?', o:['Un documento que define permisos','Un servidor virtual','Una base de datos','Un balanceador de carga'], c:0},
+    {q:'¿Qué principio de seguridad recomienda aplicar IAM?', o:['Otorgar el mínimo privilegio necesario','Dar acceso total a todos los usuarios','Compartir una sola contraseña para todos','Deshabilitar el cifrado'], c:0},
+    {q:'¿Qué permite hacer un "IAM Role"?', o:['Otorgar permisos temporales sin credenciales fijas','Almacenar datos en la nube','Enviar notificaciones push','Escalar instancias EC2 automáticamente'], c:0},
+  ],
+};
+
+const BOSS_NAMES = ['Centinela de Cómputo','Custodio de Datos','Arquitecto de Redes','Señor de la Nube'];
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function pickQuestion(serviceId, avoidText){
+  const pool = QUESTIONS[serviceId];
+  let pick = pool[Math.floor(Math.random()*pool.length)];
+  if(pool.length>1 && avoidText){
+    let tries=0;
+    while(pick.q===avoidText && tries<8){ pick = pool[Math.floor(Math.random()*pool.length)]; tries++; }
+  }
+  // build shuffled options with tracked correct index
+  const optionIdx = [0,1,2,3];
+  const order = shuffle(optionIdx);
+  const options = order.map(i=>pick.o[i]);
+  const correct = order.indexOf(pick.c);
+  return {text:pick.q, options, correct};
+}
+
+/* =========================================================
+   TINY WEBAUDIO SFX
+   ========================================================= */
+let actx=null;
+function beep(freq, dur, type, gain){
+  try{
+    if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.type=type||'sine'; o.frequency.value=freq;
+    g.gain.value = gain||0.06;
+    o.connect(g); g.connect(actx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+dur);
+    o.stop(actx.currentTime+dur+0.02);
+  }catch(e){}
+}
+const sfx = {
+  place:()=>beep(220,0.08,'square',0.05),
+  fall:()=>beep(110,0.5,'sawtooth',0.07),
+  correct:()=>{beep(660,0.09,'triangle',0.07); setTimeout(()=>beep(880,0.12,'triangle',0.07),90);},
+  wrong:()=>beep(140,0.28,'sawtooth',0.08),
+  win:()=>{beep(523,0.12,'triangle',0.08); setTimeout(()=>beep(659,0.12,'triangle',0.08),110); setTimeout(()=>beep(784,0.2,'triangle',0.08),220);},
+  lose:()=>{beep(200,0.2,'sawtooth',0.08); setTimeout(()=>beep(150,0.3,'sawtooth',0.08),150);},
+  door:()=>{beep(392,0.15,'triangle',0.06); setTimeout(()=>beep(494,0.18,'triangle',0.06),120);},
+};
+
+/* =========================================================
+   CANVAS SETUP
+   ========================================================= */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let W=0, H=0;
+function resize(){
+  W = canvas.clientWidth; H = canvas.clientHeight;
+  canvas.width = W; canvas.height = H;
+}
+window.addEventListener('resize', resize);
+resize();
+
+/* =========================================================
+   GAME STATE
+   ========================================================= */
+const DOOR_INTERVAL = 5;
+const BASE_WIDTH = 210;
+const MIN_WIDTH = 46;
+
+const state = {
+  screen:'start', // start | build | boss | gameover
+  floors:[],       // {bottom, top, x, width, height, isDoor}
+  moving:null,
+  camElev: 0,
+  camElevTarget: 0,
+  anchorScreenY: 0,
+  knight:{ elev:0, animating:false, fromElev:0, toElev:0, animStart:0, animDur:340,
+           falling:false, fallStart:0, fallDur:900, fallX:0 },
+  doorsPassed:0,
+  pendingBossLevel:0,
+  lastTs:0,
+  clouds:[],
+  torchSeed: Math.random()*1000,
+};
+
+function baseWidthAt(){ return BASE_WIDTH; }
+
+function makeBaseFloor(){
+  const w = BASE_WIDTH;
+  return { bottom:0, top:64, x:(W-w)/2, width:w, height:64, isDoor:false, seed:Math.random() };
+}
+
+function topFloor(){ return state.floors[state.floors.length-1]; }
+
+function newMovingBlock(afterFloor){
+  const h = 34 + Math.random()*20; // 34-54
+  const w = Math.max(MIN_WIDTH, Math.min(afterFloor.width, afterFloor.width - Math.random()*10));
+  const speed = Math.min(3.6, 1.6 + state.floors.length*0.045);
+  return {
+    x: afterFloor.x, y:0, width:w, height:h, dir:1, speed:speed,
+    minX: Math.max(0, afterFloor.x - 90), maxX: Math.min(W, afterFloor.x+afterFloor.width+90) - w,
+  };
+}
+
+function resetGame(){
+  state.floors = [makeBaseFloor()];
+  const f0 = state.floors[0];
+  state.camElevTarget = f0.top;
+  state.camElev = f0.top;
+  state.anchorScreenY = H*0.62;
+  state.knight.elev = f0.top;
+  state.knight.animating = false;
+  state.knight.falling = false;
+  state.doorsPassed = 0;
+  state.pendingBossLevel = 0;
+  state.moving = newMovingBlock(f0);
+  state.clouds = Array.from({length:7}, (_,i)=>({
+    x: Math.random()*1, y: 40+Math.random()*260, r: 30+Math.random()*40, speed: 0.15+Math.random()*0.2, seed:Math.random()*1000
+  }));
+  document.getElementById('floorNum').textContent = '0';
+  updateDoorCounter();
+}
+
+function updateDoorCounter(){
+  const placed = state.floors.length-1;
+  let remain = DOOR_INTERVAL - (placed % DOOR_INTERVAL);
+  if(remain===DOOR_INTERVAL && placed===0) remain = DOOR_INTERVAL;
+  document.getElementById('doorIn').textContent = remain;
+}
+
+/* =========================================================
+   INPUT
+   ========================================================= */
+function dropBlock(){
+  if(state.screen!=='build') return;
+  if(!state.moving) return;
+  if(state.knight.animating || state.knight.falling) return;
+
+  const prev = topFloor();
+  const moving = state.moving;
+  const left = Math.max(moving.x, prev.x);
+  const right = Math.min(moving.x+moving.width, prev.x+prev.width);
+  const overlap = right-left;
+
+  if(overlap < 16){
+    triggerFall();
+    return;
+  }
+
+  const willBeDoor = (state.floors.length) % DOOR_INTERVAL === 0; // this new floor's index (1-based placed count)
+  const newFloor = {
+    bottom: prev.top, top: prev.top+moving.height,
+    x:left, width:overlap, height:moving.height, isDoor:willBeDoor, seed:Math.random(),
+  };
+  state.floors.push(newFloor);
+  sfx.place();
+  if(newFloor.isDoor) sfx.door();
+
+  document.getElementById('floorNum').textContent = String(state.floors.length-1);
+  updateDoorCounter();
+
+  // knight climbs to the new floor
+  state.knight.animating = true;
+  state.knight.fromElev = state.knight.elev;
+  state.knight.toElev = newFloor.top;
+  state.knight.animStart = performance.now();
+  state.pendingBossLevel = newFloor.isDoor ? (state.doorsPassed+1) : 0;
+
+  // prepare next moving block
+  state.moving = newMovingBlock(newFloor);
+}
+
+function triggerFall(){
+  state.screen = 'falling';
+  state.knight.falling = true;
+  state.knight.fallStart = performance.now();
+  state.knight.fallX = 0;
+  sfx.fall();
+  setTimeout(()=>{
+    showGameOver('Has caído de la torre', `Llegaste hasta el piso ${state.floors.length-1}. El bloque no encajó a tiempo.`);
+  }, state.knight.fallDur+250);
+}
+
+function showGameOver(title, detail){
+  state.screen='gameover';
+  document.getElementById('gameOverTitle').textContent = title;
+  document.getElementById('gameOverDetail').textContent = detail;
+  document.getElementById('gameOverScreen').classList.remove('hidden');
+}
+
+canvas.addEventListener('pointerdown', (e)=>{ e.preventDefault(); dropBlock(); });
+window.addEventListener('keydown', (e)=>{
+  if(e.code==='Space'){ e.preventDefault(); dropBlock(); }
+});
+
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  document.getElementById('startScreen').classList.add('hidden');
+  resetGame();
+  state.screen='build';
+});
+document.getElementById('retryBtn').addEventListener('click', ()=>{
+  document.getElementById('gameOverScreen').classList.add('hidden');
+  resetGame();
+  state.screen='build';
+});
+
+/* =========================================================
+   BOSS FIGHT
+   ========================================================= */
+let fight = null; // {cardCount, playerPips, bossPips, cards:[{service,question,locked}], resolved}
+
+function startBossFight(level){
+  const cardCount = Math.min(level,4);
+  const services = shuffle(AWS_SERVICES).slice(0, cardCount);
+  fight = {
+    cardCount,
+    playerPips: cardCount,
+    bossPips: cardCount,
+    resolved:false,
+    cards: services.map(s=>({ service:s, question: pickQuestion(s.id, null), locked:false })),
+  };
+  document.getElementById('bossName').textContent = BOSS_NAMES[Math.min(level,4)-1] + ` — Nivel ${level}`;
+  renderPips('playerHpBar', fight.playerPips, fight.cardCount, false);
+  renderPips('bossHpBar', fight.bossPips, fight.cardCount, true);
+  renderCards();
+  document.getElementById('fightBanner').classList.add('hidden');
+  document.getElementById('bossScreen').classList.remove('hidden');
+  state.screen='boss';
+}
+
+function renderPips(elId, current, total, isBoss){
+  const el = document.getElementById(elId);
+  el.innerHTML='';
+  for(let i=0;i<total;i++){
+    const d=document.createElement('div');
+    d.className='pip' + (i>=current?' lost':'');
+    el.appendChild(d);
+  }
+}
+
+function renderCards(){
+  const row = document.getElementById('cardsRow');
+  row.innerHTML='';
+  fight.cards.forEach((card, idx)=>{
+    const el = document.createElement('div');
+    el.className='card';
+    el.dataset.idx = idx;
+    el.innerHTML = `
+      <div class="card-inner">
+        <div class="card-face card-front" style="background:linear-gradient(160deg, ${card.service.color}, ${shade(card.service.color,-30)})">
+          <div class="abbr">${card.service.abbr}</div>
+          <div class="svcname">${card.service.name}</div>
+          <div class="tap-hint">toca para responder</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="qtext"></div>
+          <div class="opts"></div>
+        </div>
+      </div>`;
+    el.addEventListener('click', ()=> onCardClick(idx));
+    row.appendChild(el);
+  });
+}
+
+function shade(hex, percent){
+  const num = parseInt(hex.replace('#',''),16);
+  let r=(num>>16)+percent, g=((num>>8)&0x00FF)+percent, b=(num&0x0000FF)+percent;
+  r=Math.max(0,Math.min(255,r)); g=Math.max(0,Math.min(255,g)); b=Math.max(0,Math.min(255,b));
+  return '#'+(0x1000000+r*0x10000+g*0x100+b).toString(16).slice(1);
+}
+
+function onCardClick(idx){
+  if(!fight || fight.resolved) return;
+  const card = fight.cards[idx];
+  if(card.locked) return;
+  const cardEl = document.querySelectorAll('#cardsRow .card')[idx];
+  if(!cardEl.classList.contains('flipped')){
+    // flip to reveal question
+    cardEl.classList.add('flipped');
+    const back = cardEl.querySelector('.card-back');
+    back.querySelector('.qtext').textContent = card.question.text;
+    const optsWrap = back.querySelector('.opts');
+    optsWrap.innerHTML='';
+    card.question.options.forEach((opt, oi)=>{
+      const b = document.createElement('button');
+      b.className='opt-btn'; b.textContent = opt;
+      b.addEventListener('click', (ev)=>{ ev.stopPropagation(); answerCard(idx, oi); });
+      optsWrap.appendChild(b);
+    });
+  }
+}
+
+function answerCard(idx, chosenIdx){
+  if(!fight || fight.resolved) return;
+  const card = fight.cards[idx];
+  if(card.locked) return;
+  card.locked = true;
+  const cardEl = document.querySelectorAll('#cardsRow .card')[idx];
+  cardEl.classList.add('locked');
+  const buttons = cardEl.querySelectorAll('.opt-btn');
+  buttons.forEach(b=>b.disabled=true);
+
+  const correct = chosenIdx === card.question.correct;
+  buttons[chosenIdx].classList.add(correct?'correct':'incorrect');
+  if(!correct) buttons[card.question.correct].classList.add('correct');
+
+  if(correct){
+    fight.bossPips = Math.max(0, fight.bossPips-1);
+    sfx.correct();
+  } else {
+    fight.playerPips = Math.max(0, fight.playerPips-1);
+    sfx.wrong();
+  }
+  renderPips('playerHpBar', fight.playerPips, fight.cardCount, false);
+  renderPips('bossHpBar', fight.bossPips, fight.cardCount, true);
+
+  if(fight.bossPips<=0){
+    fight.resolved=true;
+    sfx.win();
+    showBanner('¡Guardián derrotado!', 'win');
+    setTimeout(()=>{ endFight(true); }, 1300);
+    return;
+  }
+  if(fight.playerPips<=0){
+    fight.resolved=true;
+    sfx.lose();
+    showBanner('¡Has caído ante el guardián!', 'lose');
+    setTimeout(()=>{ endFight(false); }, 1200);
+    return;
+  }
+
+  // flip back with a new question after a short pause
+  setTimeout(()=>{
+    if(!fight || fight.resolved) return;
+    card.question = pickQuestion(card.service.id, card.question.text);
+    card.locked = false;
+    cardEl.classList.remove('flipped');
+    setTimeout(()=>{ cardEl.classList.remove('locked'); }, 560);
+  }, 950);
+}
+
+function showBanner(text, kind){
+  const b = document.getElementById('fightBanner');
+  b.textContent = text;
+  b.className = 'banner ' + kind;
+}
+
+function endFight(won){
+  document.getElementById('bossScreen').classList.add('hidden');
+  fight = null;
+  if(won){
+    state.doorsPassed += 1;
+    state.screen = 'build';
+  } else {
+    state.screen = 'falling';
+    state.knight.falling = true;
+    state.knight.fallStart = performance.now();
+    sfx.fall();
+    setTimeout(()=>{
+      showGameOver('El guardián te ha vencido', `Caíste en la puerta del piso ${state.floors.length-1}. ¡Vuelve a intentarlo!`);
+    }, state.knight.fallDur+250);
+  }
+}
+
+/* =========================================================
+   UPDATE LOOP
+   ========================================================= */
+function easeOutQuad(t){ return 1-(1-t)*(1-t); }
+
+function update(dt, now){
+  // camera smoothing
+  const tf = topFloor();
+  if(tf) state.camElevTarget = tf.top;
+  state.camElev += (state.camElevTarget - state.camElev) * Math.min(1, dt*0.006);
+
+  if(state.screen==='build' && state.moving && !state.knight.animating){
+    const m = state.moving;
+    m.x += m.dir*m.speed*(dt/16);
+    if(m.x < m.minX){ m.x = m.minX; m.dir=1; }
+    if(m.x > m.maxX){ m.x = m.maxX; m.dir=-1; }
+  }
+
+  if(state.knight.animating){
+    const t = Math.min(1, (now-state.knight.animStart)/state.knight.animDur);
+    state.knight.elev = state.knight.fromElev + (state.knight.toElev-state.knight.fromElev)*easeOutQuad(t);
+    if(t>=1){
+      state.knight.animating = false;
+      if(state.pendingBossLevel>0){
+        const lvl = state.pendingBossLevel;
+        state.pendingBossLevel = 0;
+        startBossFight(lvl);
+      }
+    }
+  }
+}
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+function elevToScreen(elev){ return H*0.62 - (elev - state.camElev); }
+
+function drawSky(){
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0, '#050716');
+  g.addColorStop(0.55, '#111a3d');
+  g.addColorStop(1, '#2c3d6e');
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,W,H);
+
+  // stars
+  ctx.fillStyle='rgba(255,255,255,.5)';
+  for(let i=0;i<40;i++){
+    const sx = (i*97 + 31) % W;
+    const sy = (i*53 + 17) % (H*0.5);
+    const tw = 0.5+0.5*Math.sin((performance.now()/600)+i);
+    ctx.globalAlpha = 0.25+0.4*tw;
+    ctx.fillRect(sx, sy, 2, 2);
+  }
+  ctx.globalAlpha=1;
+
+  // clouds drift with camera slightly (parallax)
+  ctx.fillStyle='rgba(200,210,235,.10)';
+  state.clouds.forEach(c=>{
+    const cx = ((c.x*W) + (performance.now()*0.006*c.speed)) % (W+160) - 80;
+    drawCloud(cx, c.y, c.r);
+  });
+
+  // distant hills
+  ctx.fillStyle='#1a2340';
+  ctx.beginPath();
+  ctx.moveTo(0,H);
+  for(let x=0;x<=W;x+=40){
+    ctx.lineTo(x, H-70-18*Math.sin(x*0.01+2));
+  }
+  ctx.lineTo(W,H); ctx.closePath(); ctx.fill();
+}
+
+function drawCloud(cx,cy,r){
+  ctx.beginPath();
+  ctx.arc(cx,cy,r*0.6,0,Math.PI*2);
+  ctx.arc(cx+r*0.6,cy+r*0.1,r*0.5,0,Math.PI*2);
+  ctx.arc(cx-r*0.55,cy+r*0.15,r*0.45,0,Math.PI*2);
+  ctx.fill();
+}
+
+function seededRand(seed){
+  const x = Math.sin(seed*999)*10000;
+  return x - Math.floor(x);
+}
+
+function drawFacetedBlock(x, yTop, w, h, seed, palette, isDoor){
+  // base gradient
+  const g = ctx.createLinearGradient(x,yTop,x+w,yTop+h);
+  g.addColorStop(0, palette[0]);
+  g.addColorStop(1, palette[1]);
+  ctx.fillStyle = g;
+  ctx.fillRect(x, yTop, w, h);
+
+  // low-poly facet triangles for texture
+  const cols = Math.max(2, Math.round(w/34));
+  const cellW = w/cols;
+  for(let i=0;i<cols;i++){
+    const fx = x + i*cellW;
+    const jitter = (seededRand(seed+i)-0.5)*h*0.4;
+    ctx.fillStyle = (i%2===0) ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.08)';
+    ctx.beginPath();
+    ctx.moveTo(fx, yTop);
+    ctx.lineTo(fx+cellW, yTop + jitter*0.2);
+    ctx.lineTo(fx+cellW*0.5, yTop+h*0.5+jitter);
+    ctx.closePath();
+    ctx.fill();
+  }
+  // mortar edge
+  ctx.strokeStyle = 'rgba(20,24,34,.55)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x+1, yTop+1, w-2, h-2);
+
+  if(isDoor){
+    const dw = Math.min(w*0.42, 60), dh = Math.min(h*0.86, 70);
+    const dx = x + w/2 - dw/2, dy = yTop + h - dh;
+    ctx.fillStyle = '#6b4226';
+    ctx.beginPath();
+    ctx.moveTo(dx, dy+dh);
+    ctx.lineTo(dx, dy+dh*0.35);
+    ctx.quadraticCurveTo(dx, dy, dx+dw/2, dy);
+    ctx.quadraticCurveTo(dx+dw, dy, dx+dw, dy+dh*0.35);
+    ctx.lineTo(dx+dw, dy+dh);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,.4)'; ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle='#f2a641';
+    ctx.beginPath(); ctx.arc(dx+dw*0.78, dy+dh*0.55, 2.6, 0, Math.PI*2); ctx.fill();
+    // small flag to signal a boss awaits
+    ctx.fillStyle='#e2493a';
+    ctx.beginPath();
+    ctx.moveTo(x+w/2, yTop-26); ctx.lineTo(x+w/2, yTop-2);
+    ctx.moveTo(x+w/2, yTop-26); ctx.lineTo(x+w/2+18, yTop-19); ctx.lineTo(x+w/2, yTop-12);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='#8a8a8a'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(x+w/2, yTop-26); ctx.lineTo(x+w/2, yTop-2); ctx.stroke();
+  }
+
+  // torches at floor edges
+  drawTorch(x-6, yTop+h*0.3, seed);
+  drawTorch(x+w-6, yTop+h*0.3, seed+7);
+}
+
+function drawTorch(tx, ty, seed){
+  ctx.fillStyle='#5b3a24';
+  ctx.fillRect(tx-2, ty, 4, 16);
+  const flick = 0.6+0.4*Math.sin(performance.now()/120 + seed);
+  const grad = ctx.createRadialGradient(tx,ty-6,0, tx,ty-6, 12*flick);
+  grad.addColorStop(0, 'rgba(255,196,102,.9)');
+  grad.addColorStop(1, 'rgba(255,196,102,0)');
+  ctx.fillStyle = grad;
+  ctx.beginPath(); ctx.arc(tx, ty-6, 12*flick, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#f2a641';
+  ctx.beginPath();
+  ctx.moveTo(tx, ty-2-8*flick);
+  ctx.quadraticCurveTo(tx+5, ty-6, tx, ty-14*flick);
+  ctx.quadraticCurveTo(tx-5, ty-6, tx, ty-2-8*flick);
+  ctx.fill();
+}
+
+function drawTower(){
+  const palette = [['#9aa3b3','#6b7488'], ['#8a93a3','#5b6577']];
+  state.floors.forEach((f, i)=>{
+    const yTop = elevToScreen(f.top);
+    const yBot = elevToScreen(f.bottom);
+    if(yBot < -60 || yTop > H+60) return;
+    drawFacetedBlock(f.x, yTop, f.width, yBot-yTop, f.seed*1000, palette[i%2], f.isDoor);
+  });
+}
+
+function drawMovingBlock(){
+  if(state.screen!=='build' || !state.moving || state.knight.animating) return;
+  const tf = topFloor();
+  const m = state.moving;
+  const yTop = elevToScreen(tf.top + m.height);
+  const nextIsDoor = (state.floors.length) % DOOR_INTERVAL === 0;
+  const palette = nextIsDoor ? ['#e8c96b','#b9932f'] : ['#b7c0d1','#8993a8'];
+  drawFacetedBlock(m.x, yTop, m.width, m.height, 42, palette, false);
+  if(nextIsDoor){
+    ctx.fillStyle='rgba(242,166,65,.9)';
+    ctx.font = '700 11px "Space Grotesk", sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText('¡puerta!', m.x+m.width/2, yTop-4);
+  }
+}
+
+function drawKnight(){
+  const tf = topFloor();
+  if(!tf) return;
+  let cx = tf.x + tf.width/2;
+  let feetY;
+  let wobble = 0;
+
+  if(state.knight.falling){
+    const t = Math.min(1, (performance.now()-state.knight.fallStart)/state.knight.fallDur);
+    feetY = elevToScreen(state.knight.elev) + t*t*260;
+    cx += t*70;
+    wobble = t*Math.PI*1.4;
+    ctx.globalAlpha = 1-t*0.7;
+  } else {
+    feetY = elevToScreen(state.knight.elev);
+  }
+
+  ctx.save();
+  ctx.translate(cx, feetY);
+  if(wobble) ctx.rotate(wobble);
+
+  // legs
+  ctx.fillStyle='#1a2036';
+  ctx.fillRect(-13, -26, 10, 26);
+  ctx.fillRect(3, -26, 10, 26);
+  // body
+  const bodyGrad = ctx.createLinearGradient(-18,-72,18,-26);
+  bodyGrad.addColorStop(0,'#4fb3b3'); bodyGrad.addColorStop(1,'#1f6363');
+  ctx.fillStyle=bodyGrad;
+  ctx.beginPath();
+  ctx.moveTo(-16,-72); ctx.lineTo(16,-72); ctx.lineTo(19,-58); ctx.lineTo(15,-26); ctx.lineTo(-15,-26); ctx.lineTo(-19,-58);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#d9b34d'; ctx.lineWidth=2; ctx.stroke();
+  // shoulders
+  ctx.fillStyle='#d9b34d';
+  ctx.beginPath(); ctx.moveTo(-24,-64); ctx.lineTo(-14,-72); ctx.lineTo(-14,-52); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(24,-64); ctx.lineTo(14,-72); ctx.lineTo(14,-52); ctx.closePath(); ctx.fill();
+  // sword
+  ctx.save(); ctx.translate(20,-58); ctx.rotate(0.35);
+  ctx.fillStyle='#dfe6ea'; ctx.fillRect(-3,-40,6,40);
+  ctx.fillStyle='#d9b34d'; ctx.fillRect(-7,0,14,5);
+  ctx.restore();
+  // head
+  const headGrad = ctx.createLinearGradient(-12,-96,12,-72);
+  headGrad.addColorStop(0,'#e8c98a'); headGrad.addColorStop(1,'#b5895a');
+  ctx.fillStyle=headGrad;
+  ctx.beginPath();
+  ctx.moveTo(0,-98); ctx.lineTo(12,-90); ctx.lineTo(10,-74); ctx.lineTo(-10,-74); ctx.lineTo(-12,-90);
+  ctx.closePath(); ctx.fill();
+
+  ctx.restore();
+  ctx.globalAlpha=1;
+}
+
+function render(){
+  drawSky();
+  drawTower();
+  drawMovingBlock();
+  if(state.screen==='build' || state.screen==='falling') drawKnight();
+}
+
+/* =========================================================
+   MAIN LOOP
+   ========================================================= */
+function loop(ts){
+  const dt = state.lastTs ? Math.min(48, ts-state.lastTs) : 16;
+  state.lastTs = ts;
+  update(dt, ts);
+  render();
+  requestAnimationFrame(loop);
+}
+
+resize();
+requestAnimationFrame(loop);
+
+})();
+</script>
+</body>
+</html>

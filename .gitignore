@@ -1,0 +1,37 @@
+# Dependencias
+node_modules/
+package-lock.json
+
+# Build outputs
+dist/
+build/
+
+# Archivos temporales y de prueba
+*_tmp.ps1
+verify_*.js
+test_*.js
+compare_tmp.ps1
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-*
+
+# Kiro (opcional - descomenta si no quieres compartir configuraciones locales)
+# .kiro/settings/
+
+# Environment variables (si en el futuro usas variables de entorno)
+.env
+.env.local
+.env*.local
