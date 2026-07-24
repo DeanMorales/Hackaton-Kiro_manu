@@ -12,8 +12,9 @@
     "check-circular": "madge --circular src/main.js"
   },
   "devDependencies": {
+    "fast-check": "^3.23.2",
+    "jsdom": "^29.1.1",
     "vite": "^5.4.21",
-    "vitest": "^2.1.9",
-    "fast-check": "^3.23.2"
+    "vitest": "^2.1.9"
   }
 }

@@ -5,6 +5,15 @@ import * as engine from './engine/tower.js';
 import * as combat from './combat/fight.js';
 import * as render from './render/draw.js';
 import * as ui from './ui/screens.js';
+import { scoreManager, scoreStore } from './data/scoreManager.js';
+import {
+  renderLeaderboard,
+  showLeaderboard,
+  hideLeaderboard,
+  updateGameOverScore,
+  formatDateLocale,
+  bindLeaderboardControls
+} from './ui/leaderboard.js';
 
 // Verificación de compatibilidad del navegador
 const canvas = document.getElementById('gameCanvas');
@@ -42,6 +51,16 @@ function onDrop() {
     engine.triggerFall(gameState, performance.now());
     sfx.fall();
     setTimeout(() => {
+      // Registrar score cuando el jugador cae
+      const scoreResult = scoreManager.recordScore(result.floorNum);
+      if (scoreResult) {
+        updateGameOverScore(
+          scoreResult.score,
+          scoreResult.isNewRecord,
+          scoreResult.rank
+        );
+      }
+      
       ui.showGameOverScreen('Has caído de la torre', `Llegaste hasta el piso ${result.floorNum}. El bloque no encajó a tiempo.`);
       gameState.screen = 'gameover';
     }, gameState.knight.fallDur + 250);
@@ -122,6 +141,16 @@ function endFight(won) {
     engine.triggerFall(gameState, performance.now());
     sfx.fall();
     setTimeout(() => {
+      // Registrar score cuando el jugador pierde contra el guardián
+      const scoreResult = scoreManager.recordScore(gameState.floors.length - 1);
+      if (scoreResult) {
+        updateGameOverScore(
+          scoreResult.score,
+          scoreResult.isNewRecord,
+          scoreResult.rank
+        );
+      }
+      
       ui.showGameOverScreen('El guardián te ha vencido', `Caíste en la puerta del piso ${gameState.floors.length - 1}. ¡Vuelve a intentarlo!`);
       gameState.screen = 'gameover';
     }, gameState.knight.fallDur + 250);
@@ -165,5 +194,46 @@ function loop(ts) {
 resize();
 gameState = engine.createTowerState(W, H);
 ui.bindInputHandlers({ onDrop, onStart, onRetry });
+
+// Initialize ScoreManager and bind leaderboard controls
+(async () => {
+  try {
+    await scoreManager.initialize();
+    
+    // Bind leaderboard overlay close controls
+    bindLeaderboardControls(() => hideLeaderboard());
+    
+    // Wire up "Ver tabla de scores" button in game over screen
+    const viewLeaderboardBtn = document.getElementById('viewLeaderboardBtn');
+    if (viewLeaderboardBtn) {
+      viewLeaderboardBtn.style.display = 'block';
+      viewLeaderboardBtn.addEventListener('click', () => {
+        const scores = scoreManager.getLeaderboard(10);
+        renderLeaderboard(scores);
+        showLeaderboard();
+      });
+    }
+    
+    // Expose clearLeaderboard for dev use
+    window.__torreNubes = window.__torreNubes || {};
+    window.__torreNubes.clearLeaderboard = async () => {
+      const confirmed = confirm(
+        '¿Limpiar tabla de scores? Esta acción no se puede deshacer.'
+      );
+      if (confirmed) {
+        await scoreManager.clear();
+        const empty = document.getElementById('leaderboardEmpty');
+        const table = document.querySelector('.leaderboard-table');
+        table.classList.add('hidden');
+        empty.classList.remove('hidden');
+        console.log('[Leaderboard] Cleared');
+      }
+    };
+    
+  } catch (err) {
+    console.error('[Main] Failed to initialize leaderboard system:', err);
+  }
+})();
+
 window.addEventListener('resize', resize);
 requestAnimationFrame(loop);
