@@ -1,4 +1,5 @@
 /* ===== UI: overlays y HUD del DOM ===== */
+import { sfx } from '../audio/sfx.js';
 
 /**
  * Actualiza el HUD con el número de piso actual y la cuenta regresiva hasta la próxima puerta.
@@ -115,6 +116,7 @@ export function renderCards(cards, onCardClick) {
 export function renderCardBack(cardEl, card, onAnswer, cardIdx) {
   if (!cardEl.classList.contains('flipped')) {
     // flip to reveal question
+    sfx.flipCard();
     cardEl.classList.add('flipped');
     const back = cardEl.querySelector('.card-back');
     back.querySelector('.qtext').textContent = card.question.text;

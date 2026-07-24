@@ -66,6 +66,7 @@ function onDrop() {
     }, gameState.knight.fallDur + 250);
   } else if (result.type === 'placed') {
     sfx.place();
+    sfx.jump();
     if (result.isDoor) sfx.door();
     ui.updateHud(result.floorNum, result.doorIn);
   }
