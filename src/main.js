@@ -90,7 +90,7 @@ function onCardClick(idx) {
   if (card.locked) return;
   
   const cardEl = document.querySelectorAll('#cardsRow .card')[idx];
-  ui.renderCardBack(cardEl, card, onAnswer, idx);
+  ui.openQuestionModal(cardEl, card, onAnswer, idx, { resolved: fight.resolved });
 }
 
 function onAnswer(cardIdx, chosenIdx) {
@@ -98,25 +98,17 @@ function onAnswer(cardIdx, chosenIdx) {
   
   const card = fight.cards[cardIdx];
   if (card.locked) return; // Verificar ANTES de llamar answerCard
-  
-  // Índice de la opción correcta ANTES de que answerCard pueda refrescar la pregunta.
-  const correctOptionIdx = card.question.correct;
 
   const result = combat.answerCard(fight, cardIdx, chosenIdx);
   
   if (!result) return;
 
-  // Marcar visualmente la respuesta correcta/incorrecta. Se bloquea temporalmente para
-  // evitar clics dobles durante la animación.
+  // El marcado visual de acierto/fallo y la deshabilitación de las opciones se
+  // realizan dentro de la Modal_Pregunta (`openQuestionModal` en screens.js),
+  // sobre los botones `.qmodal-opt`. Aquí solo aplicamos un bloqueo cosmético
+  // temporal a la Tarjeta de la fila (clase `.locked` → cursor por defecto).
   const cardEl = document.querySelectorAll('#cardsRow .card')[cardIdx];
   cardEl.classList.add('locked');
-  const buttons = cardEl.querySelectorAll('.opt-btn');
-  buttons.forEach(b => b.disabled = true);
-
-  buttons[chosenIdx].classList.add(result.correct ? 'correct' : 'incorrect');
-  if (!result.correct) {
-    buttons[correctOptionIdx].classList.add('correct');
-  }
 
   if (result.correct) {
     sfx.correct();
@@ -125,7 +117,13 @@ function onAnswer(cardIdx, chosenIdx) {
   }
 
   ui.renderPips('playerHpBar', fight.playerPips, fight.playerPipsMax);
-  ui.renderPips('bossHpBar', fight.bossPips, fight.bossPipsMax);
+  // En acierto sin resolver el combate, diferimos la actualización de la barra del
+  // jefe hasta que la Modal_Pregunta se cierre, para que el jugador PERCIBA el pip
+  // cambiar a `pip lost` (con su pulso) una vez el fondo vuelve a ser visible.
+  const deferBossBar = result.correct && result.outcome === null;
+  if (!deferBossBar) {
+    ui.renderPips('bossHpBar', fight.bossPips, fight.bossPipsMax);
+  }
 
   if (result.outcome === 'win') {
     engine.applyDuelWinSpeedBoost(gameState); // Requirement 2.1, 2.2, 2.3
@@ -137,28 +135,49 @@ function onAnswer(cardIdx, chosenIdx) {
     const BOSS_DEFEAT_PAUSE = 500; // ms: pausa para percibir el último decremento
     setTimeout(() => {
       ui.showBanner('¡Guardián derrotado!', 'win');
-      setTimeout(() => { endFight(true); }, 1300);
+      setTimeout(() => {
+        // Cerrar la Modal_Pregunta ANTES de finalizar el combate (R2.3). El disparo
+        // queda dentro de la ventana 0–2000 ms (500 + 1300 = 1800 ms) (R2.4).
+        ui.closeQuestionModal();
+        endFight(true);
+      }, 1300);
     }, BOSS_DEFEAT_PAUSE);
   } else if (result.outcome === 'lose') {
     sfx.lose();
     ui.showBanner('¡Has caído ante el guardián!', 'lose');
-    setTimeout(() => { endFight(false); }, 1200);
+    setTimeout(() => {
+      // Cerrar la Modal_Pregunta ANTES de finalizar el combate (R2.3). Disparo a
+      // 1200 ms, dentro de la ventana 0–2000 ms (R2.4).
+      ui.closeQuestionModal();
+      endFight(false);
+    }, 1200);
   } else if (result.correct) {
     // Acierto sin resolver el combate: la carta NO queda bloqueada. Tras mostrar el
-    // acierto, se voltea de vuelta al frente y se rehabilita para responder otra
-    // pregunta (answerCard ya refrescó `card.question`).
+    // acierto, se cierra la Modal_Pregunta (Animación_Regreso) y la Tarjeta origen
+    // vuelve a estar disponible para responder otra pregunta (R2.1).
+    // El disparo del cierre ocurre a 900 ms, dentro de la ventana 0–2000 ms (R2.4).
     setTimeout(() => {
-      cardEl.classList.remove('flipped');
-      // Al terminar el giro, reactivar la carta para un nuevo intento.
+      ui.closeQuestionModal();
+      // Actualizar la barra del jefe ahora que la modal se cierra: el pip acertado
+      // cambia de `pip` a `pip lost` (con su pulso) siendo visible para el jugador.
+      ui.renderPips('bossHpBar', fight.bossPips, fight.bossPipsMax);
+      // Al terminar el regreso, retirar el bloqueo cosmético para un nuevo intento.
       setTimeout(() => {
         if (!fight || fight.resolved) return;
         cardEl.classList.remove('locked');
-        buttons.forEach(b => b.disabled = false);
-      }, 560); // coincide con la duración de la transición de giro (.55s)
+      }, 560); // coincide con la duración de la Animación_Regreso
+    }, 900);
+  } else {
+    // Fallo sin resolver el combate: la Tarjeta origen queda bloqueada como hoy
+    // (clase `locked` y opciones deshabilitadas) hasta que el combate se resuelva.
+    // Además se marca como `failed` para mostrarla en gris/inhabilitada en la fila.
+    // Aun así se cierra la Modal_Pregunta para volver a la fila (R2.2). El disparo
+    // ocurre a 900 ms, dentro de la ventana 0–2000 ms (R2.4).
+    cardEl.classList.add('failed');
+    setTimeout(() => {
+      ui.closeQuestionModal();
     }, 900);
   }
-  // Si se falla, la carta queda bloqueada (clase `locked` y opciones deshabilitadas)
-  // de forma permanente hasta que el combate se resuelva.
 }
 
 function endFight(won) {
