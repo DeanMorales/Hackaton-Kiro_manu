@@ -250,6 +250,14 @@
   .opt-btn.incorrect{background:rgba(226,73,58,.35); border-color:var(--danger); color:#fff;}
   .opt-btn:disabled{cursor:default;}
 
+  #audioSettingsPanel .panel{
+    display:flex; flex-direction:column; gap:16px;
+    max-height:80vh; overflow-y:auto;
+  }
+  #audioSettingsPanel .panel h1{margin-bottom:0;}
+  #audioSettingsPanel .panel .subtitle{margin-bottom:0;}
+  #audioSettingsPanel input#volumeSlider{width:100%;}
+
   #gameOverScreen .panel{max-width:420px;}
   #gameOverDetail{color:var(--ink-dim); font-size:14px; margin:6px 0 22px;}
   .score-info{margin-bottom:18px;}
@@ -366,6 +374,7 @@
   <div id="hud">
     <div class="hud-pill facet-cut-sm">Piso <span id="floorNum">0</span></div>
     <div class="hud-pill facet-cut-sm">Puerta en <span id="doorIn">5</span></div>
+    <button id="settingsBtn" class="hud-pill facet-cut-sm" aria-label="Configuración de audio" style="pointer-events:auto; cursor:pointer;">⚙️</button>
   </div>
 
   <div id="startScreen" class="overlay">
@@ -430,6 +439,16 @@
       </div>
       <button id="retryBtn" class="btn-primary">Reconstruir la torre</button>
       <button id="viewLeaderboardBtn" class="btn-secondary" style="display:none; margin-top:10px;">Ver tabla de scores</button>
+    </div>
+  </div>
+
+  <div id="audioSettingsPanel" class="overlay hidden">
+    <div class="panel facet-cut">
+      <h1>Configuración de audio</h1>
+      <label class="subtitle" for="volumeSlider">Volumen de música</label>
+      <input type="range" id="volumeSlider" min="0" max="100" step="1" />
+      <button id="muteToggleBtn" class="btn-secondary" aria-pressed="false">Silenciar música</button>
+      <button id="closeAudioSettingsBtn" class="btn-primary">Cerrar</button>
     </div>
   </div>
 

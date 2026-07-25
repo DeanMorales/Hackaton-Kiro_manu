@@ -184,6 +184,53 @@ export function showIncompatibilityMessage(reason) {
   startScreen.classList.remove('hidden');
 }
 
+/**
+ * Muestra el panel de configuración de audio, reflejando el volumen y el estado de mute vigentes.
+ * @param {number} volumePercent - Volumen efectivo actual (0-100) a reflejar en el slider.
+ * @param {boolean} isMuted - Estado de silencio actual a reflejar en el botón de mute.
+ */
+export function showAudioSettingsPanel(volumePercent, isMuted) {
+  document.getElementById('volumeSlider').value = volumePercent;
+  setMuteButtonState(isMuted);
+  document.getElementById('audioSettingsPanel').classList.remove('hidden');
+}
+
+/**
+ * Oculta el panel de configuración de audio.
+ */
+export function hideAudioSettingsPanel() {
+  document.getElementById('audioSettingsPanel').classList.add('hidden');
+}
+
+/**
+ * Indica si el panel de configuración de audio está visible actualmente.
+ * @returns {boolean} `true` si el panel no tiene la clase 'hidden'.
+ */
+export function isAudioSettingsPanelVisible() {
+  return !document.getElementById('audioSettingsPanel').classList.contains('hidden');
+}
+
+/**
+ * Actualiza el texto y el atributo aria-pressed del botón de mute según el estado de silencio.
+ * @param {boolean} isMuted - Estado de silencio a reflejar.
+ */
+export function setMuteButtonState(isMuted) {
+  const btn = document.getElementById('muteToggleBtn');
+  btn.textContent = isMuted ? 'Activar música' : 'Silenciar música';
+  btn.setAttribute('aria-pressed', String(isMuted));
+}
+
+/**
+ * Conecta los listeners del panel de configuración de audio con sus callbacks.
+ * @param {Object} handlers - Objeto con { onToggleSettings, onVolumeChange, onToggleMute, onCloseSettings }.
+ */
+export function bindAudioSettingsHandlers({ onToggleSettings, onVolumeChange, onToggleMute, onCloseSettings }) {
+  document.getElementById('settingsBtn').addEventListener('click', onToggleSettings);
+  document.getElementById('volumeSlider').addEventListener('input', (e) => onVolumeChange(Number(e.target.value)));
+  document.getElementById('muteToggleBtn').addEventListener('click', onToggleMute);
+  document.getElementById('closeAudioSettingsBtn').addEventListener('click', onCloseSettings);
+}
+
 /* ===== UTILIDADES INTERNAS ===== */
 
 /**
