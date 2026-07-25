@@ -23,11 +23,26 @@ export function renderLeaderboard(scores) {
 
   scores.forEach((score, idx) => {
     const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${idx + 1}</td>
-      <td class="score-value">${score.score}</td>
-      <td class="score-date">${formatDateLocale(score.timestamp)}</td>
-    `;
+
+    const rankCell = document.createElement('td');
+    rankCell.textContent = String(idx + 1);
+
+    // El nombre se escribe vía textContent para evitar inyección de HTML.
+    const nameCell = document.createElement('td');
+    nameCell.className = 'score-name';
+    const name = typeof score.name === 'string' ? score.name.trim() : '';
+    nameCell.textContent = name || 'Anónimo';
+    if (!name) nameCell.classList.add('score-name-anon');
+
+    const scoreCell = document.createElement('td');
+    scoreCell.className = 'score-value';
+    scoreCell.textContent = String(score.score);
+
+    const dateCell = document.createElement('td');
+    dateCell.className = 'score-date';
+    dateCell.textContent = formatDateLocale(score.timestamp);
+
+    row.append(rankCell, nameCell, scoreCell, dateCell);
     tbody.appendChild(row);
   });
 }

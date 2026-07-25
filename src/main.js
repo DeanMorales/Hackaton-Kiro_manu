@@ -60,8 +60,8 @@ function onDrop() {
     music.enterFallingScreen();
     sfx.fall();
     setTimeout(() => {
-      // Registrar score cuando el jugador cae
-      const scoreResult = scoreManager.recordScore(result.floorNum);
+      // Registrar score cuando el jugador cae (con el nombre activo de la partida)
+      const scoreResult = scoreManager.recordScore(result.floorNum, gameState.playerName);
       if (scoreResult) {
         updateGameOverScore(
           scoreResult.score,
@@ -156,8 +156,8 @@ function endFight(won) {
     music.enterFallingScreen();
     sfx.fall();
     setTimeout(() => {
-      // Registrar score cuando el jugador pierde contra el guardián
-      const scoreResult = scoreManager.recordScore(gameState.floors.length - 1);
+      // Registrar score cuando el jugador pierde contra el guardián (con el nombre activo)
+      const scoreResult = scoreManager.recordScore(gameState.floors.length - 1, gameState.playerName);
       if (scoreResult) {
         updateGameOverScore(
           scoreResult.score,
