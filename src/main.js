@@ -124,6 +124,7 @@ function onAnswer(cardIdx, chosenIdx) {
   ui.renderPips('bossHpBar', fight.bossPips, fight.cardCount);
 
   if (result.outcome === 'win') {
+    engine.applyDuelWinSpeedBoost(gameState); // Requirement 2.1, 2.2, 2.3
     sfx.win();
     ui.showBanner('¡Guardián derrotado!', 'win');
     setTimeout(() => { endFight(true); }, 1300);

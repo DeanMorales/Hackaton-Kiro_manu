@@ -552,6 +552,8 @@ resize();
    ========================================================= */
 const DOOR_INTERVAL = 5;
 const BASE_WIDTH = 210;
+// tower-progression-scaling: Requirement 1.1
+const BASE_PLATFORM_WIDTH = BASE_WIDTH*3;
 const MIN_WIDTH = 46;
 
 const state = {
@@ -569,12 +571,14 @@ const state = {
   lastTs:0,
   clouds:[],
   torchSeed: Math.random()*1000,
+  moveSpeed: 1.6,
 };
 
 function baseWidthAt(){ return BASE_WIDTH; }
 
 function makeBaseFloor(){
-  const w = BASE_WIDTH;
+  // tower-progression-scaling: Requirement 1.1
+  const w = BASE_PLATFORM_WIDTH;
   return { bottom:0, top:64, x:(W-w)/2, width:w, height:64, isDoor:false, seed:Math.random() };
 }
 
@@ -583,9 +587,9 @@ function topFloor(){ return state.floors[state.floors.length-1]; }
 function newMovingBlock(afterFloor){
   const h = 34 + Math.random()*20; // 34-54
   const w = Math.max(MIN_WIDTH, Math.min(afterFloor.width, afterFloor.width - Math.random()*10));
-  const speed = Math.min(3.6, 1.6 + state.floors.length*0.045);
+  // tower-progression-scaling: Requirement 2.4
   return {
-    x: afterFloor.x, y:0, width:w, height:h, dir:1, speed:speed,
+    x: afterFloor.x, y:0, width:w, height:h, dir:1, speed: state.moveSpeed,
     minX: Math.max(0, afterFloor.x - 90), maxX: Math.min(W, afterFloor.x+afterFloor.width+90) - w,
   };
 }
@@ -601,6 +605,8 @@ function resetGame(){
   state.knight.falling = false;
   state.doorsPassed = 0;
   state.pendingBossLevel = 0;
+  // tower-progression-scaling: Requirement 3.4
+  state.moveSpeed = 1.6;
   state.moving = newMovingBlock(f0);
   state.clouds = Array.from({length:7}, (_,i)=>({
     x: Math.random()*1, y: 40+Math.random()*260, r: 30+Math.random()*40, speed: 0.15+Math.random()*0.2, seed:Math.random()*1000
@@ -843,6 +849,8 @@ function answerCard(idx, chosenIdx){
   if(fight.bossPips<=0){
     fight.resolved=true;
     sfx.win();
+    // tower-progression-scaling: Requirement 2.1, 2.2, 2.3
+    state.moveSpeed *= 1.30;
     showBanner('¡Guardián derrotado!', 'win');
     setTimeout(()=>{ endFight(true); }, 1300);
     return;
@@ -1060,13 +1068,28 @@ function drawTower(){
   });
 }
 
+// tower-progression-scaling: Requirement 4.1, 4.3, 4.4, 4.5, 4.6, 4.7
+const PROGRESS_PALETTES = [
+  ['#9aa3b3', '#6b7488'], // 0 duelos: gris neutro
+  ['#5fb37a', '#2f8f52'], // 1 duelo: verde
+  ['#4aa3ff', '#2b6fcb'], // 2 duelos: azul
+  ['#f2a641', '#b9932f'], // 3 duelos: naranja/dorado
+  ['#b287ff', '#7a4fd1'], // 4+ duelos: púrpura
+];
+
+function getBlockColorPalette(nivelProgreso) {
+  const safeLevel = Number.isFinite(nivelProgreso) ? Math.trunc(nivelProgreso) : 0;
+  const clamped = Math.max(0, Math.min(safeLevel, PROGRESS_PALETTES.length - 1));
+  return PROGRESS_PALETTES[clamped];
+}
+
 function drawMovingBlock(){
   if(state.screen!=='build' || !state.moving || state.knight.animating) return;
   const tf = topFloor();
   const m = state.moving;
   const yTop = elevToScreen(tf.top + m.height);
   const nextIsDoor = (state.floors.length) % DOOR_INTERVAL === 0;
-  const palette = nextIsDoor ? ['#e8c96b','#b9932f'] : ['#b7c0d1','#8993a8'];
+  const palette = nextIsDoor ? ['#e8c96b','#b9932f'] : getBlockColorPalette(state.doorsPassed);
   drawFacetedBlock(m.x, yTop, m.width, m.height, 42, palette, false);
   if(nextIsDoor){
     ctx.fillStyle='rgba(242,166,65,.9)';
