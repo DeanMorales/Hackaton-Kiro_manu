@@ -1,6 +1,7 @@
 /* ===== MAIN: inicialización y bucle principal ===== */
 
 import { sfx } from './audio/sfx.js';
+import { music } from './audio/music.js';
 import * as engine from './engine/tower.js';
 import * as combat from './combat/fight.js';
 import * as render from './render/draw.js';
@@ -49,6 +50,7 @@ function onDrop() {
 
   if (result.type === 'fell') {
     engine.triggerFall(gameState, performance.now());
+    music.enterFallingScreen();
     sfx.fall();
     setTimeout(() => {
       // Registrar score cuando el jugador cae
@@ -63,6 +65,7 @@ function onDrop() {
       
       ui.showGameOverScreen('Has caído de la torre', `Llegaste hasta el piso ${result.floorNum}. El bloque no encajó a tiempo.`);
       gameState.screen = 'gameover';
+      music.enterInactiveScreen();
     }, gameState.knight.fallDur + 250);
   } else if (result.type === 'placed') {
     sfx.place();
@@ -137,9 +140,11 @@ function endFight(won) {
     gameState.doorsPassed += 1;
     gameState.screen = 'build';
     gameState.pendingBossLevel = 0;
+    music.enterBuildScreen();
   } else {
     gameState.screen = 'falling';
     engine.triggerFall(gameState, performance.now());
+    music.enterFallingScreen();
     sfx.fall();
     setTimeout(() => {
       // Registrar score cuando el jugador pierde contra el guardián
@@ -154,6 +159,7 @@ function endFight(won) {
       
       ui.showGameOverScreen('El guardián te ha vencido', `Caíste en la puerta del piso ${gameState.floors.length - 1}. ¡Vuelve a intentarlo!`);
       gameState.screen = 'gameover';
+      music.enterInactiveScreen();
     }, gameState.knight.fallDur + 250);
   }
 }
@@ -161,13 +167,40 @@ function endFight(won) {
 function onStart() {
   ui.hideStartScreen();
   engine.resetGame(gameState, W, H);
+  music.notifyUserInteraction();
+  music.enterBuildScreen();
   gameState.screen = 'build';
 }
 
 function onRetry() {
   ui.hideGameOverScreen();
   engine.resetGame(gameState, W, H);
+  music.enterBuildScreen();
   gameState.screen = 'build';
+}
+
+function onToggleAudioSettings() {
+  music.notifyUserInteraction();
+  if (ui.isAudioSettingsPanelVisible()) {
+    ui.hideAudioSettingsPanel();
+  } else {
+    ui.showAudioSettingsPanel(music.getEffectiveVolumePercent(), music.isMuted());
+  }
+}
+
+function onVolumeChange(percent) {
+  music.notifyUserInteraction();
+  music.setVolume(percent);
+}
+
+function onToggleMute() {
+  music.notifyUserInteraction();
+  music.toggleMute();
+  ui.setMuteButtonState(music.isMuted());
+}
+
+function onCloseAudioSettings() {
+  ui.hideAudioSettingsPanel();
 }
 
 function loop(ts) {
@@ -185,6 +218,7 @@ function loop(ts) {
     ui.renderCards(fight.cards, onCardClick);
     gameState.screen = 'boss';
     gameState.pendingBossLevel = 0;
+    music.enterBossScreen();
   }
 
   render.render(ctx, W, H, gameState);
@@ -195,6 +229,13 @@ function loop(ts) {
 resize();
 gameState = engine.createTowerState(W, H);
 ui.bindInputHandlers({ onDrop, onStart, onRetry });
+ui.bindAudioSettingsHandlers({
+  onToggleSettings: onToggleAudioSettings,
+  onVolumeChange,
+  onToggleMute,
+  onCloseSettings: onCloseAudioSettings
+});
+music.init();
 
 // Initialize ScoreManager and bind leaderboard controls
 (async () => {
