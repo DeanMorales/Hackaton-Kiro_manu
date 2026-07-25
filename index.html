@@ -345,6 +345,30 @@
     color:var(--gold) !important; font-weight:700; font-size:18px; text-shadow:0 0 8px rgba(217,179,77,.4);
   }
 
+  /* ---------- enhanced welcome screen: name capture (additive) ---------- */
+  .welcome-msg{
+    color:var(--gold); font-family:var(--font-display); font-weight:700;
+    font-size:15px; line-height:1.45; letter-spacing:.02em; margin:0 0 16px;
+  }
+  .name-field{
+    background:linear-gradient(180deg, rgba(5,7,22,.85), rgba(20,26,48,.85));
+    border:1px solid rgba(217,179,77,.55);
+    padding:2px; margin:0 auto 8px; width:100%; max-width:260px;
+  }
+  #playerNameInput{
+    width:100%; box-sizing:border-box; border:none; background:transparent;
+    color:var(--ink); font-family:var(--font-body); font-size:15px;
+    letter-spacing:.02em; padding:11px 14px; text-align:center; outline:none;
+  }
+  #playerNameInput::placeholder{color:var(--ink-dim); opacity:.75;}
+  .name-hint{
+    color:var(--ink-dim); font-size:12px; line-height:1.4; margin:0 0 20px;
+  }
+  .player-name-display{
+    font-family:var(--font-display); font-weight:700; color:var(--gold);
+    font-size:18px; letter-spacing:.02em; margin:0 0 4px;
+  }
+
   @media (max-width:520px){
     .panel{padding:26px 20px 22px;}
     .overlay-content{
@@ -364,6 +388,11 @@
     .leaderboard-table thead th{
       font-size:11px; padding:6px 4px;
     }
+    .welcome-msg{font-size:14px;}
+    .name-field{max-width:100%;}
+    #playerNameInput{font-size:14px; padding:10px 12px;}
+    .name-hint{font-size:11px;}
+    .player-name-display{font-size:16px;}
   }
 </style>
 </head>
@@ -388,6 +417,14 @@
         <li>Elige una carta de servicio de AWS: acertar daña al guardián, fallar te daña a ti.</li>
         <li>El número de cartas define cuántos aciertos necesitas y cuántos fallos puedes soportar.</li>
       </ul>
+      <p class="welcome-msg">¿Listo para conquistar nuevos niveles y llevar tu conocimiento de AWS al límite?</p>
+      <div class="name-field facet-cut-sm">
+        <input id="playerNameInput" type="text" maxlength="8"
+               autocomplete="off" spellcheck="false"
+               placeholder="Tu nombre (opcional)"
+               aria-label="Tu nombre (opcional)">
+      </div>
+      <p class="name-hint">Puedes jugar sin nombre; la experiencia será genérica.</p>
       <button id="startBtn" class="btn-primary">Comenzar a construir</button>
     </div>
   </div>
@@ -432,6 +469,7 @@
     <div class="panel facet-cut">
       <div class="crest">💀</div>
       <h1 id="gameOverTitle">Has caído de la torre</h1>
+      <p id="gameOverPlayerName" class="player-name-display"></p>
       <p id="gameOverDetail"></p>
       <div class="score-info">
         <p id="finalScore">Tu puntuación: <strong>0</strong></p>

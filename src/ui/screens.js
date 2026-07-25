@@ -26,14 +26,34 @@ export function hideStartScreen() {
 }
 
 /**
- * Muestra la pantalla de game over con título y detalle.
+ * Muestra la pantalla de game over con título, detalle y, opcionalmente, el nombre del jugador.
+ * El nombre se escribe vía `textContent` para evitar inyección de HTML. Si el nombre es
+ * vacío o falsy, el elemento `#gameOverPlayerName` se vacía y se oculta.
  * @param {string} title - Título del mensaje de game over.
  * @param {string} detail - Detalle explicativo del game over.
+ * @param {string} [playerName] - Nombre opcional del jugador a mostrar.
  */
-export function showGameOverScreen(title, detail) {
-  document.getElementById('gameOverTitle').textContent = title;
-  document.getElementById('gameOverDetail').textContent = detail;
-  document.getElementById('gameOverScreen').classList.remove('hidden');
+export function showGameOverScreen(title, detail, playerName) {
+  const titleEl = document.getElementById('gameOverTitle');
+  if (titleEl) titleEl.textContent = title;
+
+  const detailEl = document.getElementById('gameOverDetail');
+  if (detailEl) detailEl.textContent = detail;
+
+  const nameEl = document.getElementById('gameOverPlayerName');
+  if (nameEl) {
+    const name = playerName || '';
+    if (name) {
+      nameEl.textContent = name;
+      nameEl.classList.remove('hidden');
+    } else {
+      nameEl.textContent = '';
+      nameEl.classList.add('hidden');
+    }
+  }
+
+  const screenEl = document.getElementById('gameOverScreen');
+  if (screenEl) screenEl.classList.remove('hidden');
 }
 
 /**
@@ -160,6 +180,13 @@ export function bindInputHandlers({ onDrop, onStart, onRetry }) {
     if (e.code === 'Space') {
       e.preventDefault();
       onDrop();
+    } else if (e.key === 'Enter') {
+      // Enter inicia la partida mientras la pantalla de bienvenida está visible.
+      const startScreen = document.getElementById('startScreen');
+      if (startScreen && !startScreen.classList.contains('hidden')) {
+        e.preventDefault();
+        onStart();
+      }
     }
   });
   document.getElementById('startBtn').addEventListener('click', onStart);
@@ -248,4 +275,37 @@ function shade(hex, percent) {
   g = Math.max(0, Math.min(255, g));
   b = Math.max(0, Math.min(255, b));
   return '#' + (0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1);
+}
+
+/* ===== UI: campo de nombre del jugador (pantalla de bienvenida) ===== */
+
+/**
+ * Conecta el campo de nombre del jugador con la lógica de sanitización y persistencia.
+ * Pre-rellena `#playerNameInput` con el nombre almacenado y, en cada evento `input`,
+ * sanitiza el valor visible y lo persiste. Degrada silenciosamente si el campo no existe.
+ * @param {{ getStored: Function, sanitize: Function, persist: Function }} deps - Dependencias inyectadas:
+ *   `getStored()` devuelve el nombre guardado, `sanitize(raw)` limpia el valor y `persist(raw)` lo almacena.
+ */
+export function bindPlayerNameInput(deps) {
+  const input = document.getElementById('playerNameInput');
+  if (!input) return;
+
+  // Pre-rellena el campo con el nombre almacenado previamente.
+  input.value = deps.getStored();
+
+  // Al escribir: sanitiza el valor visible y persiste el nombre.
+  input.addEventListener('input', () => {
+    const raw = input.value;
+    input.value = deps.sanitize(raw);
+    deps.persist(input.value);
+  });
+}
+
+/**
+ * Devuelve el valor crudo actual del campo de nombre del jugador.
+ * @returns {string} El valor actual de `#playerNameInput`, o `''` si el campo no existe.
+ */
+export function getPlayerNameInputValue() {
+  const input = document.getElementById('playerNameInput');
+  return input ? input.value : '';
 }

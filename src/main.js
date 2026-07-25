@@ -8,6 +8,13 @@ import * as render from './render/draw.js';
 import * as ui from './ui/screens.js';
 import { scoreManager, scoreStore } from './data/scoreManager.js';
 import {
+  commitName,
+  formatGameOverDetail,
+  sanitizeName,
+  persistIfValid,
+  loadStoredName
+} from './data/playerName.js';
+import {
   renderLeaderboard,
   showLeaderboard,
   hideLeaderboard,
@@ -63,7 +70,9 @@ function onDrop() {
         );
       }
       
-      ui.showGameOverScreen('Has caído de la torre', `Llegaste hasta el piso ${result.floorNum}. El bloque no encajó a tiempo.`);
+      // Detalle personalizado con el nombre activo (causa 'fall': caída de la torre).
+      const overResult = formatGameOverDetail(gameState.playerName, result.floorNum, 'fall');
+      ui.showGameOverScreen('Has caído de la torre', overResult.detail, overResult.playerName);
       gameState.screen = 'gameover';
       music.enterInactiveScreen();
     }, gameState.knight.fallDur + 250);
@@ -157,7 +166,9 @@ function endFight(won) {
         );
       }
       
-      ui.showGameOverScreen('El guardián te ha vencido', `Caíste en la puerta del piso ${gameState.floors.length - 1}. ¡Vuelve a intentarlo!`);
+      // Detalle personalizado con el nombre activo (causa 'boss': derrota ante el guardián).
+      const overResult = formatGameOverDetail(gameState.playerName, gameState.floors.length - 1, 'boss');
+      ui.showGameOverScreen('El guardián te ha vencido', overResult.detail, overResult.playerName);
       gameState.screen = 'gameover';
       music.enterInactiveScreen();
     }, gameState.knight.fallDur + 250);
@@ -165,6 +176,8 @@ function endFight(won) {
 }
 
 function onStart() {
+  // Recalcula el nombre activo a partir del valor visible del campo antes de iniciar la partida.
+  gameState.playerName = commitName(ui.getPlayerNameInputValue());
   ui.hideStartScreen();
   engine.resetGame(gameState, W, H);
   music.notifyUserInteraction();
@@ -173,10 +186,10 @@ function onStart() {
 }
 
 function onRetry() {
+  // Vuelve a la pantalla de bienvenida (el campo ya está pre-rellenado) para que el
+  // jugador pueda ajustar su nombre; el nombre activo se recalcula en el próximo onStart().
   ui.hideGameOverScreen();
-  engine.resetGame(gameState, W, H);
-  music.enterBuildScreen();
-  gameState.screen = 'build';
+  ui.showStartScreen();
 }
 
 function onToggleAudioSettings() {
@@ -228,7 +241,10 @@ function loop(ts) {
 // Inicialización
 resize();
 gameState = engine.createTowerState(W, H);
+gameState.playerName = '';
 ui.bindInputHandlers({ onDrop, onStart, onRetry });
+// Conecta el campo de nombre: pre-rellena con el nombre almacenado y persiste al escribir.
+ui.bindPlayerNameInput({ getStored: loadStoredName, sanitize: sanitizeName, persist: persistIfValid });
 ui.bindAudioSettingsHandlers({
   onToggleSettings: onToggleAudioSettings,
   onVolumeChange,

@@ -236,11 +236,41 @@
   #gameOverScreen .panel{max-width:420px;}
   #gameOverDetail{color:var(--ink-dim); font-size:14px; margin:6px 0 22px;}
 
+  /* ---------- enhanced welcome screen: name capture (additive) ---------- */
+  .welcome-msg{
+    color:var(--gold); font-family:var(--font-display); font-weight:700;
+    font-size:15px; line-height:1.45; letter-spacing:.02em; margin:0 0 16px;
+  }
+  .name-field{
+    background:linear-gradient(180deg, rgba(5,7,22,.85), rgba(20,26,48,.85));
+    border:1px solid rgba(217,179,77,.55);
+    padding:2px; margin:0 auto 8px; width:100%; max-width:260px;
+  }
+  #playerNameInput{
+    width:100%; box-sizing:border-box; border:none; background:transparent;
+    color:var(--ink); font-family:var(--font-body); font-size:15px;
+    letter-spacing:.02em; padding:11px 14px; text-align:center; outline:none;
+  }
+  #playerNameInput::placeholder{color:var(--ink-dim); opacity:.75;}
+  .name-hint{
+    color:var(--ink-dim); font-size:12px; line-height:1.4; margin:0 0 20px;
+  }
+  .player-name-display{
+    font-family:var(--font-display); font-weight:700; color:var(--gold);
+    font-size:18px; letter-spacing:.02em; margin:0 0 4px;
+  }
+  .player-name-display.hidden{display:none;}
+
   @media (max-width:520px){
     .panel{padding:26px 20px 22px;}
     .card{width:118px; height:168px;}
     .fighter{width:90px; height:130px; transform:scale(.85);}
     .vs-badge{font-size:17px; margin-top:44px;}
+    .welcome-msg{font-size:14px;}
+    .name-field{max-width:100%;}
+    #playerNameInput{font-size:14px; padding:10px 12px;}
+    .name-hint{font-size:11px;}
+    .player-name-display{font-size:16px;}
   }
 </style>
 </head>
@@ -264,6 +294,14 @@
         <li>Elige una carta de servicio de AWS: acertar daña al guardián, fallar te daña a ti.</li>
         <li>El número de cartas define cuántos aciertos necesitas y cuántos fallos puedes soportar.</li>
       </ul>
+      <p class="welcome-msg">¿Listo para conquistar nuevos niveles y llevar tu conocimiento de AWS al límite?</p>
+      <div class="name-field facet-cut-sm">
+        <input id="playerNameInput" type="text" maxlength="8"
+               autocomplete="off" spellcheck="false"
+               placeholder="Tu nombre (opcional)"
+               aria-label="Tu nombre (opcional)">
+      </div>
+      <p class="name-hint">Puedes jugar sin nombre; la experiencia será genérica.</p>
       <button id="startBtn" class="btn-primary">Comenzar a construir</button>
     </div>
   </div>
@@ -308,6 +346,7 @@
     <div class="panel facet-cut">
       <div class="crest">💀</div>
       <h1 id="gameOverTitle">Has caído de la torre</h1>
+      <p id="gameOverPlayerName" class="player-name-display"></p>
       <p id="gameOverDetail"></p>
       <button id="retryBtn" class="btn-primary">Reconstruir la torre</button>
     </div>
@@ -317,6 +356,81 @@
 <script>
 (function(){
 "use strict";
+
+/* =========================================================
+   PLAYER NAME: sanitización, validación y persistencia
+   (lógica de la feature "enhanced-welcome-screen", inline)
+   ========================================================= */
+const STORAGE_KEY = 'playerName';
+const MAX_NAME_LENGTH = 8;
+// Caracteres permitidos: letras (con acentos y ñ vía \p{L}), dígitos y espacios.
+const ALLOWED_CHARS = /[\p{L}\p{Nd} ]/u;
+// Detecta si hay al menos un carácter alfanumérico (letra o dígito).
+const ALPHANUMERIC = /[\p{L}\p{Nd}]/u;
+
+// Elimina caracteres no permitidos y recorta a MAX_NAME_LENGTH. Idempotente.
+function sanitizeName(raw){
+  const str = raw == null ? '' : String(raw);
+  let out = '';
+  for(const ch of str){
+    if(out.length >= MAX_NAME_LENGTH) break;
+    if(ALLOWED_CHARS.test(ch)) out += ch;
+  }
+  return out;
+}
+
+// Válido si el sanitizado tiene 1-8 caracteres y al menos un alfanumérico.
+function isValidName(raw){
+  const name = sanitizeName(raw);
+  return name.length >= 1 && name.length <= MAX_NAME_LENGTH && ALPHANUMERIC.test(name);
+}
+
+// Nombre activo de la partida: sanitizado si es válido, o '' en caso contrario.
+function commitName(raw){
+  return isValidName(raw) ? sanitizeName(raw) : '';
+}
+
+// Persiste el nombre sanitizado en localStorage solo si es válido.
+function persistIfValid(raw){
+  if(!isValidName(raw)) return false;
+  try{
+    localStorage.setItem(STORAGE_KEY, sanitizeName(raw));
+    return true;
+  }catch(err){
+    console.warn('[playerName] No se pudo persistir el nombre:', err);
+    return false;
+  }
+}
+
+// Lee el nombre almacenado; '' si no existe o hay error.
+function loadStoredName(){
+  try{
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if(stored == null) return '';
+    return String(stored);
+  }catch(err){
+    console.warn('[playerName] No se pudo leer el nombre almacenado:', err);
+    return '';
+  }
+}
+
+// Textos de cada causa de derrota, en variantes con nombre y genérica.
+const GAME_OVER_CAUSES = {
+  fall: { withName:'caíste de la torre', generic:'Caíste de la torre' },
+  boss: { withName:'fuiste derrotado ante el guardián', generic:'Fuiste derrotado ante el guardián' },
+};
+
+// Compone el detalle de Game Over, personalizado según haya nombre o no.
+function formatGameOverDetail(playerName, floor, cause){
+  const activeName = commitName(playerName);
+  const causeInfo = GAME_OVER_CAUSES[cause] || GAME_OVER_CAUSES.fall;
+  const parsedFloor = Math.trunc(Number(floor));
+  const safeFloor = Number.isFinite(parsedFloor) && parsedFloor > 0 ? parsedFloor : 0;
+  const detail = activeName
+    ? `${activeName}, ${causeInfo.withName} en el piso ${safeFloor}.`
+    : `${causeInfo.generic} en el piso ${safeFloor}.`;
+  return { detail, playerName: activeName };
+}
 
 /* =========================================================
    DATA: servicios AWS y banco de preguntas
@@ -442,6 +556,7 @@ const MIN_WIDTH = 46;
 
 const state = {
   screen:'start', // start | build | boss | gameover
+  playerName:'',   // nombre activo de la partida ('' = jugar sin nombre)
   floors:[],       // {bottom, top, x, width, height, isDoor}
   moving:null,
   camElev: 0,
@@ -550,31 +665,69 @@ function triggerFall(){
   state.knight.fallX = 0;
   sfx.fall();
   setTimeout(()=>{
-    showGameOver('Has caído de la torre', `Llegaste hasta el piso ${state.floors.length-1}. El bloque no encajó a tiempo.`);
+    // Detalle personalizado con el nombre activo (causa 'fall': caída de la torre).
+    const overResult = formatGameOverDetail(state.playerName, state.floors.length-1, 'fall');
+    showGameOver('Has caído de la torre', overResult.detail, overResult.playerName);
   }, state.knight.fallDur+250);
 }
 
-function showGameOver(title, detail){
+function showGameOver(title, detail, playerName){
   state.screen='gameover';
   document.getElementById('gameOverTitle').textContent = title;
   document.getElementById('gameOverDetail').textContent = detail;
+  const nameEl = document.getElementById('gameOverPlayerName');
+  if(nameEl){
+    const name = playerName || '';
+    if(name){
+      nameEl.textContent = name;
+      nameEl.classList.remove('hidden');
+    }else{
+      nameEl.textContent = '';
+      nameEl.classList.add('hidden');
+    }
+  }
   document.getElementById('gameOverScreen').classList.remove('hidden');
 }
 
 canvas.addEventListener('pointerdown', (e)=>{ e.preventDefault(); dropBlock(); });
 window.addEventListener('keydown', (e)=>{
   if(e.code==='Space'){ e.preventDefault(); dropBlock(); }
+  else if(e.key==='Enter'){
+    // Enter inicia la partida mientras la pantalla de bienvenida está visible.
+    const startScreen = document.getElementById('startScreen');
+    if(startScreen && !startScreen.classList.contains('hidden')){
+      e.preventDefault();
+      startGame();
+    }
+  }
 });
 
-document.getElementById('startBtn').addEventListener('click', ()=>{
+// Campo de nombre: pre-rellena con el nombre almacenado y persiste al escribir.
+(function bindPlayerNameInput(){
+  const input = document.getElementById('playerNameInput');
+  if(!input) return;
+  input.value = loadStoredName();
+  input.addEventListener('input', ()=>{
+    input.value = sanitizeName(input.value);
+    persistIfValid(input.value);
+  });
+})();
+
+function startGame(){
+  // Recalcula el nombre activo a partir del valor visible del campo antes de iniciar.
+  const input = document.getElementById('playerNameInput');
+  state.playerName = commitName(input ? input.value : '');
   document.getElementById('startScreen').classList.add('hidden');
   resetGame();
   state.screen='build';
-});
+}
+document.getElementById('startBtn').addEventListener('click', startGame);
 document.getElementById('retryBtn').addEventListener('click', ()=>{
+  // Vuelve a la pantalla de bienvenida (campo ya pre-rellenado) para permitir
+  // cambiar el nombre; el nombre activo se recalcula en el próximo inicio.
   document.getElementById('gameOverScreen').classList.add('hidden');
-  resetGame();
-  state.screen='build';
+  document.getElementById('startScreen').classList.remove('hidden');
+  state.screen='start';
 });
 
 /* =========================================================
@@ -730,7 +883,9 @@ function endFight(won){
     state.knight.fallStart = performance.now();
     sfx.fall();
     setTimeout(()=>{
-      showGameOver('El guardián te ha vencido', `Caíste en la puerta del piso ${state.floors.length-1}. ¡Vuelve a intentarlo!`);
+      // Detalle personalizado con el nombre activo (causa 'boss': derrota ante el guardián).
+      const overResult = formatGameOverDetail(state.playerName, state.floors.length-1, 'boss');
+      showGameOver('El guardián te ha vencido', overResult.detail, overResult.playerName);
     }, state.knight.fallDur+250);
   }
 }
