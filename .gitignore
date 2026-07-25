@@ -1,6 +1,5 @@
 # Dependencias
 node_modules/
-package-lock.json
 
 # Build outputs
 dist/
@@ -15,6 +14,7 @@ test_render_functions.js
 tower_test.js
 index.html
 torre-de-las-nubes.html
+vitest.config.js
 
 # Archivos de verificación y reportes de ejecución
 CRITERION_*.md
