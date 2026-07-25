@@ -47,9 +47,10 @@ export class ScoreManager {
    * determines if new record, inserts in descending order, and persists.
    *
    * @param {number} height - The height (score value) to record
+   * @param {string} [name=''] - Optional player name to associate with the score
    * @returns {object|null} { score, isNewRecord, rank } or null if invalid
    */
-  recordScore(height) {
+  recordScore(height, name = '') {
     // Validate: must be non-negative integer
     if (!Number.isInteger(height) || height < 0) {
       console.error('[ScoreManager] Invalid score:', height);
@@ -59,9 +60,13 @@ export class ScoreManager {
     // Generate unique ID (timestamp-based with random suffix)
     const id = this._generateId();
 
+    // Normalize the name: coerce to string; empty string means "anonymous".
+    const playerName = typeof name === 'string' ? name : '';
+
     // Create score object
     const score = {
       id,
+      name: playerName,
       score: height,
       timestamp: new Date().toISOString()
     };

@@ -114,6 +114,9 @@ export class LocalStorageScoreStore extends ScoreStore {
       typeof score === 'object' &&
       Number.isInteger(score.score) &&
       score.score >= 0 &&
+      // name es opcional para mantener compatibilidad con scores antiguos;
+      // si está presente debe ser string.
+      (score.name === undefined || typeof score.name === 'string') &&
       typeof score.timestamp === 'string' &&
       this._isValidISO8601(score.timestamp)
     );

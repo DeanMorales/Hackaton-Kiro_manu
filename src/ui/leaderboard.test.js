@@ -62,17 +62,27 @@ describe('Leaderboard UI Module', () => {
       expect(rows).toHaveLength(2);
     });
 
-    it('should display rank (1-indexed), score, and timestamp in each row', () => {
-      const scores = [{ id: '1', score: 1500, timestamp: '2024-01-15T14:30:00.000Z' }];
+    it('should display rank (1-indexed), name, score, and timestamp in each row', () => {
+      const scores = [{ id: '1', name: 'Ana', score: 1500, timestamp: '2024-01-15T14:30:00.000Z' }];
 
       renderLeaderboard(scores);
 
       const row = document.querySelector('tbody tr');
       const cells = row.querySelectorAll('td');
-      
+
       expect(cells[0].textContent).toBe('1'); // rank
-      expect(cells[1].textContent).toBe('1500'); // score
-      expect(cells[2].textContent).toMatch(/\d{2}\s\w+\s\d{4}/); // formatted date
+      expect(cells[1].textContent).toBe('Ana'); // name
+      expect(cells[2].textContent).toBe('1500'); // score
+      expect(cells[3].textContent).toMatch(/\d{2}\s\w+\s\d{4}/); // formatted date
+    });
+
+    it('should display "Anónimo" when a score has no name', () => {
+      const scores = [{ id: '1', score: 1500, timestamp: '2024-01-15T14:30:00.000Z' }];
+
+      renderLeaderboard(scores);
+
+      const cells = document.querySelectorAll('tbody tr td');
+      expect(cells[1].textContent).toBe('Anónimo');
     });
 
     it('should hide table and show empty state when scores is empty', () => {

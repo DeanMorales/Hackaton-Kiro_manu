@@ -116,10 +116,11 @@ describe('Button Click Handler - "Ver tabla de scores"', () => {
     // Verify first row (highest score = 111)
     const firstRow = rows[0];
     const cells = firstRow.querySelectorAll('td');
-    expect(cells.length).toBe(3);
+    expect(cells.length).toBe(4);
     expect(cells[0].textContent).toBe('1'); // Rank
-    expect(cells[1].textContent).toBe('111'); // Score
-    expect(cells[2].textContent).not.toBe(''); // Date (formatted)
+    expect(cells[1].textContent).toBe('Anónimo'); // Name (sin nombre => Anónimo)
+    expect(cells[2].textContent).toBe('111'); // Score
+    expect(cells[3].textContent).not.toBe(''); // Date (formatted)
   });
 
   it('should show empty state when no scores exist', async () => {

@@ -295,7 +295,7 @@
   .leaderboard-table thead th{
     font-family:var(--font-display); font-weight:700; font-size:12px; letter-spacing:.02em;
     color:var(--gold); text-align:center; padding:10px 8px; border-bottom:2px solid rgba(217,179,77,.5);
-    background-color:rgba(20,26,48,.4); position:sticky; top:0; z-index:2; word-wrap:break-word;
+    background-color:var(--panel-2); position:sticky; top:0; z-index:2; word-wrap:break-word;
   }
   .leaderboard-table tbody tr{
     border-bottom:1px solid rgba(255,255,255,.08); transition:background-color .2s ease-out;
@@ -315,6 +315,15 @@
   }
   .leaderboard-table td:nth-child(3){
     flex-grow:1; min-width:80px;
+  }
+  .score-name{
+    font-family:var(--font-display); font-weight:700; color:var(--ink);
+    text-align:left; padding-left:4px; white-space:nowrap; overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .score-name-anon{
+    font-family:var(--font-body); font-weight:400; color:var(--ink-dim);
+    font-style:italic;
   }
   .score-value{
     font-weight:700; color:var(--aws); text-align:right; padding-right:12px;
@@ -476,7 +485,7 @@
         <p id="scoreRank" class="rank-badge"></p>
       </div>
       <button id="retryBtn" class="btn-primary">Reconstruir la torre</button>
-      <button id="viewLeaderboardBtn" class="btn-secondary" style="display:none; margin-top:10px;">Ver tabla de scores</button>
+      <button id="viewLeaderboardBtn" class="btn-secondary" style="display:none; margin:10px auto 0;">Ver tabla de scores</button>
     </div>
   </div>
 
@@ -501,6 +510,7 @@
           <thead>
             <tr>
               <th scope="col">#</th>
+              <th scope="col">Nombre</th>
               <th scope="col">Puntaje</th>
               <th scope="col">Fecha</th>
             </tr>
