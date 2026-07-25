@@ -99,19 +99,23 @@ function onAnswer(cardIdx, chosenIdx) {
   const card = fight.cards[cardIdx];
   if (card.locked) return; // Verificar ANTES de llamar answerCard
   
+  // Índice de la opción correcta ANTES de que answerCard pueda refrescar la pregunta.
+  const correctOptionIdx = card.question.correct;
+
   const result = combat.answerCard(fight, cardIdx, chosenIdx);
   
   if (!result) return;
 
-  // Marcar visualmente la respuesta correcta/incorrecta
+  // Marcar visualmente la respuesta correcta/incorrecta. Se bloquea temporalmente para
+  // evitar clics dobles durante la animación.
   const cardEl = document.querySelectorAll('#cardsRow .card')[cardIdx];
   cardEl.classList.add('locked');
   const buttons = cardEl.querySelectorAll('.opt-btn');
   buttons.forEach(b => b.disabled = true);
-  
+
   buttons[chosenIdx].classList.add(result.correct ? 'correct' : 'incorrect');
   if (!result.correct) {
-    buttons[card.question.correct].classList.add('correct');
+    buttons[correctOptionIdx].classList.add('correct');
   }
 
   if (result.correct) {
@@ -120,26 +124,40 @@ function onAnswer(cardIdx, chosenIdx) {
     sfx.wrong();
   }
 
-  ui.renderPips('playerHpBar', fight.playerPips, fight.cardCount);
-  ui.renderPips('bossHpBar', fight.bossPips, fight.cardCount);
+  ui.renderPips('playerHpBar', fight.playerPips, fight.playerPipsMax);
+  ui.renderPips('bossHpBar', fight.bossPips, fight.bossPipsMax);
 
   if (result.outcome === 'win') {
     sfx.win();
-    ui.showBanner('¡Guardián derrotado!', 'win');
-    setTimeout(() => { endFight(true); }, 1300);
+    // El último decremento ya se pintó arriba (renderPips deja #bossHpBar en 0).
+    // Introducimos una breve pausa para que el jugador perciba la barra vaciarse
+    // ANTES de mostrar el banner de victoria. El temporizador hacia endFight(true)
+    // (~1300 ms) se mide desde el banner para no acortar el flujo total.
+    const BOSS_DEFEAT_PAUSE = 500; // ms: pausa para percibir el último decremento
+    setTimeout(() => {
+      ui.showBanner('¡Guardián derrotado!', 'win');
+      setTimeout(() => { endFight(true); }, 1300);
+    }, BOSS_DEFEAT_PAUSE);
   } else if (result.outcome === 'lose') {
     sfx.lose();
     ui.showBanner('¡Has caído ante el guardián!', 'lose');
     setTimeout(() => { endFight(false); }, 1200);
-  } else {
-    // Flip back con nueva pregunta después de una pausa
+  } else if (result.correct) {
+    // Acierto sin resolver el combate: la carta NO queda bloqueada. Tras mostrar el
+    // acierto, se voltea de vuelta al frente y se rehabilita para responder otra
+    // pregunta (answerCard ya refrescó `card.question`).
     setTimeout(() => {
-      if (!fight || fight.resolved) return;
-      combat.refreshCardQuestion(fight, cardIdx);
       cardEl.classList.remove('flipped');
-      setTimeout(() => { cardEl.classList.remove('locked'); }, 560);
-    }, 950);
+      // Al terminar el giro, reactivar la carta para un nuevo intento.
+      setTimeout(() => {
+        if (!fight || fight.resolved) return;
+        cardEl.classList.remove('locked');
+        buttons.forEach(b => b.disabled = false);
+      }, 560); // coincide con la duración de la transición de giro (.55s)
+    }, 900);
   }
+  // Si se falla, la carta queda bloqueada (clase `locked` y opciones deshabilitadas)
+  // de forma permanente hasta que el combate se resuelva.
 }
 
 function endFight(won) {
@@ -226,8 +244,8 @@ function loop(ts) {
     const lvl = updateResult.level;
     fight = combat.startBossFight(lvl);
     ui.showBossScreen(fight.bossLabel, fight.cardCount);
-    ui.renderPips('playerHpBar', fight.playerPips, fight.cardCount);
-    ui.renderPips('bossHpBar', fight.bossPips, fight.cardCount);
+    ui.renderPips('playerHpBar', fight.playerPips, fight.playerPipsMax);
+    ui.renderPips('bossHpBar', fight.bossPips, fight.bossPipsMax);
     ui.renderCards(fight.cards, onCardClick);
     gameState.screen = 'boss';
     gameState.pendingBossLevel = 0;

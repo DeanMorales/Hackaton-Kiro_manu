@@ -83,12 +83,42 @@ export function hideBossScreen() {
 
 /**
  * Renderiza las barras de vida (pips) de un combatiente.
+ *
+ * Actualiza en tiempo real: cuando el número de casillas no cambia (mismo `total`),
+ * reutiliza los elementos `.pip` existentes y solo alterna la clase `lost`. Esto
+ * permite que las transiciones/animaciones CSS se apliquen al pip que se pierde
+ * (feedback perceptible) en lugar de recrear todo el DOM en cada actualización.
+ * Cuando `total` cambia (nuevo combate), se reconstruye la barra desde cero.
+ *
  * @param {string} elId - ID del elemento contenedor de la barra de vida.
  * @param {number} current - Número de pips actuales (restantes).
  * @param {number} total - Número total de pips.
  */
 export function renderPips(elId, current, total) {
   const el = document.getElementById(elId);
+  if (!el) return;
+
+  const existing = el.querySelectorAll('.pip');
+
+  // Actualización en el lugar: el número de casillas coincide, así que solo
+  // cambiamos el estado de cada pip para que las transiciones CSS animen la pérdida.
+  if (existing.length === total) {
+    existing.forEach((pip, i) => {
+      const shouldBeLost = i >= current;
+      const wasLost = pip.classList.contains('lost');
+      if (shouldBeLost && !wasLost) {
+        // Pip recién perdido: marcar como perdido y disparar un pulso breve.
+        pip.classList.add('lost', 'just-lost');
+        setTimeout(() => pip.classList.remove('just-lost'), 400);
+      } else if (!shouldBeLost && wasLost) {
+        // Restaurar (p. ej. al reiniciar un combate con el mismo número de casillas).
+        pip.classList.remove('lost', 'just-lost');
+      }
+    });
+    return;
+  }
+
+  // Reconstrucción completa cuando cambia el número de casillas (nuevo combate).
   el.innerHTML = '';
   for (let i = 0; i < total; i++) {
     const d = document.createElement('div');
