@@ -128,6 +128,7 @@ function onAnswer(cardIdx, chosenIdx) {
   ui.renderPips('bossHpBar', fight.bossPips, fight.bossPipsMax);
 
   if (result.outcome === 'win') {
+    engine.applyDuelWinSpeedBoost(gameState); // Requirement 2.1, 2.2, 2.3
     sfx.win();
     // El último decremento ya se pintó arriba (renderPips deja #bossHpBar en 0).
     // Introducimos una breve pausa para que el jugador perciba la barra vaciarse

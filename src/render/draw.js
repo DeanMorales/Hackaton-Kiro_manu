@@ -127,6 +127,20 @@ export function drawTorch(ctx, tx, ty, seed) {
   ctx.fill();
 }
 
+const PROGRESS_PALETTES = [
+  ['#9aa3b3', '#6b7488'], // 0 duelos: gris neutro
+  ['#5fb37a', '#2f8f52'], // 1 duelo: verde
+  ['#4aa3ff', '#2b6fcb'], // 2 duelos: azul
+  ['#f2a641', '#b9932f'], // 3 duelos: naranja/dorado
+  ['#b287ff', '#7a4fd1'], // 4+ duelos: púrpura
+];
+
+export function getBlockColorPalette(nivelProgreso) {
+  const safeLevel = Number.isFinite(nivelProgreso) ? Math.trunc(nivelProgreso) : 0;
+  const clamped = Math.max(0, Math.min(safeLevel, PROGRESS_PALETTES.length - 1));
+  return PROGRESS_PALETTES[clamped];
+}
+
 export function drawTower(ctx, W, H, camElev, floors) {
   const palette = [['#9aa3b3','#6b7488'], ['#8a93a3','#5b6577']];
   floors.forEach((f, i) => {
@@ -137,14 +151,14 @@ export function drawTower(ctx, W, H, camElev, floors) {
   });
 }
 
-export function drawMovingBlock(ctx, W, H, camElev, screen, floors, moving, knightAnimating) {
+export function drawMovingBlock(ctx, W, H, camElev, screen, floors, moving, knightAnimating, nivelProgreso = 0) {
   if (screen !== 'build' || !moving || knightAnimating) return;
   const tf = floors[floors.length - 1];
   const m = moving;
   const yTop = elevToScreen(camElev, tf.top + m.height, H);
   const DOOR_INTERVAL = 5; // constante del engine
   const nextIsDoor = floors.length % DOOR_INTERVAL === 0;
-  const palette = nextIsDoor ? ['#e8c96b','#b9932f'] : ['#b7c0d1','#8993a8'];
+  const palette = nextIsDoor ? ['#e8c96b','#b9932f'] : getBlockColorPalette(nivelProgreso);
   drawFacetedBlock(ctx, m.x, yTop, m.width, m.height, 42, palette, false);
   if (nextIsDoor) {
     ctx.fillStyle = 'rgba(242,166,65,.9)';
@@ -210,7 +224,7 @@ export function drawKnight(ctx, topFloorRef, knight, camElev, H) {
 export function render(ctx, W, H, gameState) {
   drawSky(ctx, W, H, gameState.clouds);
   drawTower(ctx, W, H, gameState.camElev, gameState.floors);
-  drawMovingBlock(ctx, W, H, gameState.camElev, gameState.screen, gameState.floors, gameState.moving, gameState.knight.animating);
+  drawMovingBlock(ctx, W, H, gameState.camElev, gameState.screen, gameState.floors, gameState.moving, gameState.knight.animating, gameState.doorsPassed);
   if (gameState.screen === 'build' || gameState.screen === 'falling') {
     const topFloorRef = gameState.floors[gameState.floors.length - 1];
     drawKnight(ctx, topFloorRef, gameState.knight, gameState.camElev, H);

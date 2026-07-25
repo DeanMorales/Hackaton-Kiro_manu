@@ -5,6 +5,21 @@ export const DOOR_INTERVAL = 5;
 export const BASE_WIDTH = 210;
 export const MIN_WIDTH = 46;
 
+// --- tower-progression-scaling: constantes de progresión ---
+export const BASE_PLATFORM_WIDTH = BASE_WIDTH * 3; // 630px, Requirement 1.1
+export const SPEED_INCREMENT_FACTOR = 1.30;          // Requirement 2/3
+export const BASE_SPEED = 1.6;                       // Velocidad_Base original (sin *floors.length)
+
+// Requirement 1.1 / 1.3 / 1.4: ancho fijo de la Plataforma Base
+export function computeBasePlatformWidth() {
+  return BASE_PLATFORM_WIDTH; // 630, constante pura sin inputs
+}
+
+// Requirement 2.1 / 2.2 / 3.1 / 3.2 / 3.3: incremento compuesto de velocidad
+export function applySpeedBoost(currentSpeed) {
+  return currentSpeed * SPEED_INCREMENT_FACTOR;
+}
+
 // --- funciones puras extraídas para PBT (Requirement 1.2) ---
 
 export function computeOverlap(prevFloor, movingBlock) {
@@ -35,8 +50,8 @@ export function createTowerState(width, height) {
   const baseFloor = {
     bottom: 0,
     top: 64,
-    x: (width - BASE_WIDTH) / 2,
-    width: BASE_WIDTH,
+    x: (width - computeBasePlatformWidth()) / 2,
+    width: computeBasePlatformWidth(),
     height: 64,
     isDoor: false,
     seed: Math.random(),
@@ -54,6 +69,7 @@ export function createTowerState(width, height) {
     screen: 'start', // start | build | boss | gameover | falling
     floors: [baseFloor],
     moving: null,
+    moveSpeed: BASE_SPEED, // Requirement 1.5 / 3.4: velocidad persistente en el estado
     camElev: baseFloor.top,
     camElevTarget: baseFloor.top,
     anchorScreenY: height * 0.62,
@@ -84,14 +100,13 @@ export function topFloor(state) {
 export function newMovingBlock(state, afterFloor) {
   const h = 34 + Math.random() * 20; // 34-54
   const w = Math.max(MIN_WIDTH, Math.min(afterFloor.width, afterFloor.width - Math.random() * 10));
-  const speed = Math.min(3.6, 1.6 + state.floors.length * 0.045);
   return {
     x: afterFloor.x,
     y: 0,
     width: w,
     height: h,
     dir: 1,
-    speed: speed,
+    speed: state.moveSpeed, // Requirement 2.4: velocidad persistida en el estado
     minX: Math.max(0, afterFloor.x - 90),
     maxX: Math.min(/* width not available here, will be passed from main */ afterFloor.x + afterFloor.width + 90) - w,
   };
@@ -101,8 +116,8 @@ export function resetGame(state, width, height) {
   const baseFloor = {
     bottom: 0,
     top: 64,
-    x: (width - BASE_WIDTH) / 2,
-    width: BASE_WIDTH,
+    x: (width - computeBasePlatformWidth()) / 2,
+    width: computeBasePlatformWidth(),
     height: 64,
     isDoor: false,
     seed: Math.random(),
@@ -110,6 +125,7 @@ export function resetGame(state, width, height) {
   
   state.screen = 'start';
   state.floors = [baseFloor];
+  state.moveSpeed = BASE_SPEED; // Requirement 3.4: reiniciar velocidad al reconstruir
   state.camElevTarget = baseFloor.top;
   state.camElev = baseFloor.top;
   state.anchorScreenY = height * 0.62;
@@ -175,6 +191,12 @@ export function dropBlock(state, width) {
     floorNum: state.floors.length - 1,
     doorIn: updateDoorCounter(state).remain,
   };
+}
+
+// Requirement 2.1 / 2.2 / 2.3: aplicar incremento de velocidad tras ganar un duelo
+export function applyDuelWinSpeedBoost(state) {
+  state.moveSpeed = applySpeedBoost(state.moveSpeed);
+  return state.moveSpeed;
 }
 
 export function triggerFall(state, now) {

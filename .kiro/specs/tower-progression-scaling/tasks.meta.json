@@ -1,0 +1,275 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Añadir constantes y funciones puras en `src/engine/tower.js`": [
+      {
+        "executionId": "fa0f0235-9e95-4715-a432-5e59e4e5abf0",
+        "chatSessionId": "sess_a115e0dd-a877-4c0a-bc6a-c674014e539c",
+        "timestamp": 1784967549576
+      },
+      {
+        "executionId": "fa0f0235-9e95-4715-a432-5e59e4e5abf0",
+        "chatSessionId": "sess_a115e0dd-a877-4c0a-bc6a-c674014e539c",
+        "timestamp": 1784967728828
+      }
+    ],
+    "1. Implementar utilidades puras de ancho y velocidad en el motor": [
+      {
+        "executionId": "fa0f0235-9e95-4715-a432-5e59e4e5abf0",
+        "chatSessionId": "sess_a115e0dd-a877-4c0a-bc6a-c674014e539c",
+        "timestamp": 1784967729157
+      }
+    ],
+    "2. Integrar ancho fijo y velocidad persistente en el estado del motor": [
+      {
+        "executionId": "093b4e6a-dc72-440b-bfb9-bd0209897d4a",
+        "chatSessionId": "sess_034e318b-aebb-49cc-8699-66baa3c1bf76",
+        "timestamp": 1784967897267
+      },
+      {
+        "executionId": "093b4e6a-dc72-440b-bfb9-bd0209897d4a",
+        "chatSessionId": "sess_034e318b-aebb-49cc-8699-66baa3c1bf76",
+        "timestamp": 1784967989839
+      }
+    ],
+    "2.1 Modificar `createTowerState` y `resetGame` en `src/engine/tower.js`": [
+      {
+        "executionId": "a2829845-d9ee-4b81-a125-459feb8a1449",
+        "chatSessionId": "sess_dacb0238-9364-4274-bde6-6e7a27f25c71",
+        "timestamp": 1784968032154
+      },
+      {
+        "executionId": "a2829845-d9ee-4b81-a125-459feb8a1449",
+        "chatSessionId": "sess_dacb0238-9364-4274-bde6-6e7a27f25c71",
+        "timestamp": 1784968106847
+      }
+    ],
+    "2.3 Modificar `newMovingBlock` en `src/engine/tower.js` para leer `state.moveSpeed`": [
+      {
+        "executionId": "291cf364-3fa2-404f-a3b7-a61710d99763",
+        "chatSessionId": "sess_1ae14ba5-bfc0-4faf-827c-40bc9890ef52",
+        "timestamp": 1784968627249
+      },
+      {
+        "executionId": "291cf364-3fa2-404f-a3b7-a61710d99763",
+        "chatSessionId": "sess_1ae14ba5-bfc0-4faf-827c-40bc9890ef52",
+        "timestamp": 1784968705306
+      }
+    ],
+    "2.5 Añadir `applyDuelWinSpeedBoost(state)` exportado en `src/engine/tower.js`": [
+      {
+        "executionId": "63219ba1-1125-45f1-bba5-42ab2953a5ef",
+        "chatSessionId": "sess_d006efd8-188d-4fd8-9d80-bc09abfb8fde",
+        "timestamp": 1784969014671
+      },
+      {
+        "executionId": "63219ba1-1125-45f1-bba5-42ab2953a5ef",
+        "chatSessionId": "sess_d006efd8-188d-4fd8-9d80-bc09abfb8fde",
+        "timestamp": 1784969069853
+      }
+    ],
+    "3. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "764669a7-7074-4bc2-9f29-db45031414f6",
+        "chatSessionId": "sess_aff8b558-a564-42bd-9248-acc532861e3f",
+        "timestamp": 1784969130700
+      },
+      {
+        "executionId": "764669a7-7074-4bc2-9f29-db45031414f6",
+        "chatSessionId": "sess_aff8b558-a564-42bd-9248-acc532861e3f",
+        "timestamp": 1784969192392
+      }
+    ],
+    "4.1 Modificar la rama `outcome === 'win'` en `onAnswer` de `src/main.js`": [
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969203296
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969393497
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969687809
+      }
+    ],
+    "5.1 Añadir `PROGRESS_PALETTES` y `getBlockColorPalette(nivelProgreso)` en `src/render/draw.js`": [
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969203466
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969222175
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969364412
+      }
+    ],
+    "5.3 Modificar `drawMovingBlock` en `src/render/draw.js`": [
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969203621
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969394088
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969688580
+      }
+    ],
+    "5.4 Modificar `render(ctx, W, H, gameState)` en `src/render/draw.js`": [
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969203829
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969728416
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969835604
+      }
+    ],
+    "6. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969203998
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969858789
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784970024530
+      }
+    ],
+    "7.1 Añadir `BASE_PLATFORM_WIDTH` y actualizar la creación de la Plataforma Base": [
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969204266
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784970032089
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784970133047
+      }
+    ],
+    "7.2 Añadir `state.moveSpeed` en la inicialización y en `resetGame()` del monolito": [
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969204414
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784970140190
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784970334295
+      }
+    ],
+    "7.3 Actualizar `newMovingBlock(afterFloor)` del monolito para usar `state.moveSpeed`": [
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969204557
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784970338225
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784970398039
+      }
+    ],
+    "7.4 Añadir el incremento de velocidad en `answerCard()` del monolito": [
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969204719
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784970401524
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784970439187
+      }
+    ],
+    "7.5 Añadir `getBlockColorPalette(nivelProgreso)` local y conectarlo a `drawMovingBlock()` del monolito": [
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969204872
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784970442954
+      },
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784970503035
+      }
+    ],
+    "4. Conectar el incremento de velocidad al resultado del duelo en `main.js`": [
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969687977
+      }
+    ],
+    "5. Implementar paleta de color progresiva en el render": [
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784969835814
+      }
+    ],
+    "7. Replicar manualmente los cambios en el monolito `torre-de-las-nubes.html`": [
+      {
+        "executionId": "f68e2254-47db-4956-97e1-ae1a0bfd06f5",
+        "chatSessionId": "sess_46921d6d-c886-434e-a0a4-c8100e39b4cb",
+        "timestamp": 1784970503219
+      }
+    ]
+  }
+}
