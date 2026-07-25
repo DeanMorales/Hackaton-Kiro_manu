@@ -11,6 +11,22 @@ build/
 verify_*.js
 test_*.js
 compare_tmp.ps1
+test_render_functions.js
+tower_test.js
+index.html
+torre-de-las-nubes.html
+
+# Archivos de verificación y reportes de ejecución
+CRITERION_*.md
+TASK_*.md
+VERIFICATION_*.md
+LEADERBOARD_*.md
+E2E_*.md
+*_SUMMARY.md
+*_EXECUTION_*.md
+*_VERIFICATION_*.md
+*_TEST_*.md
+*_COMPLETION_*.md
 
 # Logs
 *.log
