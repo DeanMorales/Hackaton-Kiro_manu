@@ -144,14 +144,16 @@ export function drawTorch(ctx, tx, ty, seed) {
 }
 
 // ── Gradiente de color para los bloques apilados ──────────────────────────────
-// Piso 1 = #2E3A46  →  Piso 40 = #FFFFFF (nivel 8, tras 8 duelos × 5 pisos).
-// Se extiende linealmente si el jugador supera el piso 40.
+// El gradiente oscila como péndulo infinito cada 30 pisos, empezando en #FFFFFF:
+//   Pisos   1-30 : #FFFFFF → #2E3A46
+//   Pisos  31-60 : #2E3A46 → #FFFFFF
+//   Pisos  61-90 : #FFFFFF → #2E3A46  …y así sin límite.
 const AWS_GRADIENT = [
   '#2E3A46','#26387D','#1D35B5','#1533EC','#0E48C8',
   '#075DA5','#007281','#19578A','#313B92','#4A209B',
   '#864867','#C37134','#FF9900','#FFBB55','#FFDDAA','#FFFFFF',
 ];
-const AWS_GRADIENT_MAX_FLOOR = 40;
+const AWS_GRADIENT_MAX_FLOOR = 30; // pisos por ciclo de gradiente
 
 function hexToRgb(hex) {
   const n = parseInt(hex.replace('#', ''), 16);
@@ -172,14 +174,27 @@ function rgbToHex([r, g, b]) {
 
 /**
  * Devuelve el color hex para un piso dado (1-indexed).
- * Piso 1 → AWS_GRADIENT[0] (#2E3A46), Piso 40 → AWS_GRADIENT[15] (#FFFFFF).
+ * El gradiente oscila infinitamente cada AWS_GRADIENT_MAX_FLOOR pisos,
+ * empezando en #FFFFFF (dirección opuesta al array):
+ *   ciclo par  (0, 2, 4…): AWS_GRADIENT[last] → AWS_GRADIENT[0]  (#FFFFFF → #2E3A46)
+ *   ciclo impar (1, 3, 5…): AWS_GRADIENT[0] → AWS_GRADIENT[last] (#2E3A46 → #FFFFFF)
  */
 export function getFloorColor(floorIndex) {
-  const stops = AWS_GRADIENT.length;
-  const t = Math.min(1, Math.max(0, (floorIndex - 1) / (AWS_GRADIENT_MAX_FLOOR - 1)));
-  const pos = t * (stops - 1);
-  const lo = Math.floor(pos);
-  const hi = Math.min(stops - 1, lo + 1);
+  const stops    = AWS_GRADIENT.length;          // 16
+  const cycle    = AWS_GRADIENT_MAX_FLOOR;       // 30 pisos por ciclo
+  // posición dentro del ciclo actual (0 … cycle-1)
+  const pos0     = (floorIndex - 1) % cycle;
+  // número de ciclo completo (0-based)
+  const cycleNum = Math.floor((floorIndex - 1) / cycle);
+  // t normalizado 0→1 dentro del ciclo
+  let t = pos0 / (cycle - 1);
+  // ciclos pares van #FFFFFF→#2E3A46 (t invertido respecto al array)
+  // ciclos impares van #2E3A46→#FFFFFF (dirección normal del array)
+  if (cycleNum % 2 === 0) t = 1 - t;
+  // mapear t al array de paradas
+  const pos  = t * (stops - 1);
+  const lo   = Math.floor(pos);
+  const hi   = Math.min(stops - 1, lo + 1);
   const frac = pos - lo;
   return rgbToHex(lerpRgb(hexToRgb(AWS_GRADIENT[lo]), hexToRgb(AWS_GRADIENT[hi]), frac));
 }
