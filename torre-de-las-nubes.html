@@ -587,10 +587,19 @@ function topFloor(){ return state.floors[state.floors.length-1]; }
 function newMovingBlock(afterFloor){
   const h = 34 + Math.random()*20; // 34-54
   const w = Math.max(MIN_WIDTH, Math.min(afterFloor.width, afterFloor.width - Math.random()*10));
+
+  const minX = Math.max(0, afterFloor.x - 90);
+  const maxX = Math.min(W, afterFloor.x + afterFloor.width + 90) - w;
+
+  // El bloque puede arrancar desde la derecha o desde la izquierda aleatoriamente
+  const startFromRight = Math.random() < 0.5;
+  const dir = startFromRight ? -1 : 1;
+  const x = startFromRight ? maxX : minX;
+
   // tower-progression-scaling: Requirement 2.4
   return {
-    x: afterFloor.x, y:0, width:w, height:h, dir:1, speed: state.moveSpeed,
-    minX: Math.max(0, afterFloor.x - 90), maxX: Math.min(W, afterFloor.x+afterFloor.width+90) - w,
+    x, y:0, width:w, height:h, dir, speed: state.moveSpeed,
+    minX, maxX,
   };
 }
 

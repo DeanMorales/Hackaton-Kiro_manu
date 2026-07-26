@@ -97,18 +97,27 @@ export function topFloor(state) {
   return state.floors[state.floors.length - 1];
 }
 
-export function newMovingBlock(state, afterFloor) {
+export function newMovingBlock(state, afterFloor, canvasWidth) {
   const h = 34 + Math.random() * 20; // 34-54
   const w = Math.max(MIN_WIDTH, Math.min(afterFloor.width, afterFloor.width - Math.random() * 10));
+
+  const minX = Math.max(0, afterFloor.x - 90);
+  const maxX = Math.min(canvasWidth ?? (afterFloor.x + afterFloor.width + 90), afterFloor.x + afterFloor.width + 90) - w;
+
+  // El bloque puede arrancar desde la derecha o desde la izquierda aleatoriamente
+  const startFromRight = Math.random() < 0.5;
+  const dir = startFromRight ? -1 : 1;
+  const x = startFromRight ? maxX : minX;
+
   return {
-    x: afterFloor.x,
+    x,
     y: 0,
     width: w,
     height: h,
-    dir: 1,
+    dir,
     speed: state.moveSpeed, // Requirement 2.4: velocidad persistida en el estado
-    minX: Math.max(0, afterFloor.x - 90),
-    maxX: Math.min(/* width not available here, will be passed from main */ afterFloor.x + afterFloor.width + 90) - w,
+    minX,
+    maxX,
   };
 }
 
@@ -134,7 +143,7 @@ export function resetGame(state, width, height) {
   state.knight.falling = false;
   state.doorsPassed = 0;
   state.pendingBossLevel = 0;
-  state.moving = newMovingBlock(state, baseFloor);
+  state.moving = newMovingBlock(state, baseFloor, width);
   state.clouds = Array.from({length: 7}, (_, i) => ({
     x: Math.random() * 1,
     y: 40 + Math.random() * 260,
@@ -142,9 +151,6 @@ export function resetGame(state, width, height) {
     speed: 0.15 + Math.random() * 0.2,
     seed: Math.random() * 1000,
   }));
-  
-  // Fix maxX now that we have width
-  state.moving.maxX = Math.min(width, baseFloor.x + baseFloor.width + 90) - state.moving.width;
 }
 
 export function updateDoorCounter(state) {
@@ -179,8 +185,7 @@ export function dropBlock(state, width) {
   state.pendingBossLevel = newFloor.isDoor ? (state.doorsPassed + 1) : 0;
 
   // prepare next moving block
-  const nextMoving = newMovingBlock(state, newFloor);
-  nextMoving.maxX = Math.min(width, newFloor.x + newFloor.width + 90) - nextMoving.width;
+  const nextMoving = newMovingBlock(state, newFloor, width);
   state.moving = nextMoving;
 
   return {
