@@ -120,12 +120,17 @@
   .btn-secondary:active{transform:translateY(0px) scale(.98);}
 
   /* ---------- boss arena ---------- */
-  #bossScreen{ justify-content:flex-start; padding-top:min(4vh,34px); }
-  .arena{
-    width:100%; max-width:900px; display:flex; align-items:flex-start; justify-content:space-between;
-    gap:10px; padding:0 10px;
+  #bossScreen{ justify-content:flex-start; padding-top:min(4vh,34px); background:none; }
+  /* Contenedores de barra de vida posicionados de forma absoluta dentro de
+     #bossScreen (que hereda position:absolute de .overlay), alineados
+     horizontalmente con COMBAT_LAYOUT.warriorXRatio/bossXRatio en
+     src/render/bossFightRender.js, para que queden sobre sus sprites reales. */
+  .combatant-hp{
+    position:absolute; top:min(4vh,34px); width:180px;
+    display:flex; flex-direction:column; align-items:center;
   }
-  .combatant{display:flex; flex-direction:column; align-items:center; width:38%; min-width:130px;}
+  .combatant-hp-player{ left:24%; transform:translateX(-50%); }
+  .combatant-hp-boss{ left:76%; transform:translateX(-50%); }
   .hp-label{
     font-family:var(--font-display); font-size:13px; font-weight:700; color:var(--ink-dim);
     margin-bottom:6px; text-align:center; letter-spacing:.02em;
@@ -138,6 +143,7 @@
     transition: background .3s ease, box-shadow .3s ease, filter .3s ease, transform .18s ease;
   }
   .hp-bar.boss .pip{background:linear-gradient(180deg,#ff7a68,#c73427);}
+  .hp-bar.boss .pip.lost{background:linear-gradient(180deg,#3a3f4d,#22252e); box-shadow:none;}
   .pip.lost{background:linear-gradient(180deg,#3a3f4d,#22252e); box-shadow:none;}
   /* Pulso breve del pip recién perdido: da feedback perceptible en tiempo real. */
   .pip.just-lost{animation: pipHit .4s ease;}
@@ -149,67 +155,6 @@
   @media (prefers-reduced-motion: reduce){
     .pip{transition:none;}
     .pip.just-lost{animation:none;}
-  }
-
-  .fighter{position:relative; width:110px; height:150px;}
-  .facet{position:absolute;}
-  /* knight */
-  .knight-head{
-    width:34px; height:34px; left:38px; top:0; background:linear-gradient(160deg,#e8c98a,#b5895a);
-    clip-path: polygon(50% 0,100% 30%,90% 100%,10% 100%,0 30%);
-  }
-  .knight-body{
-    width:66px; height:76px; left:22px; top:28px;
-    background:linear-gradient(165deg,#4fb3b3,#1f6363);
-    clip-path: polygon(20% 0,80% 0,100% 18%,90% 100%,10% 100%,0 18%);
-    border:2px solid var(--gold);
-  }
-  .knight-shoulder-l{
-    width:26px; height:26px; left:4px; top:32px; background:var(--gold);
-    clip-path: polygon(0 40%,100% 0,100% 100%,0 100%);
-  }
-  .knight-shoulder-r{
-    width:26px; height:26px; right:4px; top:32px; background:var(--gold);
-    clip-path: polygon(0 0,100% 40%,100% 100%,0 100%);
-  }
-  .knight-sword{
-    width:8px; height:92px; right:-2px; top:24px; background:linear-gradient(180deg,#dfe6ea,#9aa7ad);
-    transform:rotate(18deg); box-shadow:0 0 6px rgba(255,255,255,.35);
-  }
-  .knight-legs{
-    width:50px; height:34px; left:30px; top:98px; background:linear-gradient(160deg,#2b3550,#1a2036);
-    clip-path: polygon(15% 0,85% 0,100% 100%,60% 100%,50% 60%,40% 100%,0 100%);
-  }
-  /* boss */
-  .boss-core{
-    width:78px; height:86px; left:16px; top:26px;
-    background:linear-gradient(165deg,#c0392b,#5c1b13);
-    clip-path: polygon(30% 0,70% 0,100% 25%,100% 80%,70% 100%,30% 100%,0 80%,0 25%);
-    border:2px solid #6e0f0f;
-  }
-  .boss-eye-l, .boss-eye-r{
-    width:12px; height:8px; top:44px; background:var(--aws); box-shadow:0 0 10px 2px var(--aws);
-    clip-path: polygon(0 50%,100% 0,100% 100%);
-  }
-  .boss-eye-l{left:32px;}
-  .boss-eye-r{right:32px; transform:scaleX(-1);}
-  .boss-crown{
-    width:60px; height:26px; left:25px; top:2px; background:linear-gradient(160deg,#8892a3,#4b5266);
-    clip-path: polygon(0 100%,15% 0,35% 60%,50% 0,65% 60%,85% 0,100% 100%);
-  }
-  .boss-arm-l, .boss-arm-r{
-    width:22px; height:60px; top:38px; background:linear-gradient(160deg,#79808f,#3a3f4d);
-    clip-path: polygon(20% 0,100% 10%,80% 100%,0 90%);
-  }
-  .boss-arm-l{left:-4px;}
-  .boss-arm-r{right:-4px; transform:scaleX(-1);}
-  .boss-legs{
-    width:56px; height:34px; left:27px; top:108px; background:linear-gradient(160deg,#4a5266,#262c3a);
-    clip-path: polygon(15% 0,85% 0,100% 100%,60% 100%,50% 60%,40% 100%,0 100%);
-  }
-  .vs-badge{
-    font-family:var(--font-display); font-size:22px; font-weight:900; color:var(--gold);
-    align-self:center; margin-top:50px; text-shadow:0 0 12px rgba(217,179,77,.6);
   }
 
   .banner{
@@ -224,8 +169,9 @@
 
   /* ---------- cards ---------- */
   .cards-row{
-    display:flex; gap:14px; margin-top:18px; flex-wrap:wrap; justify-content:center;
-    max-width:960px; padding:0 12px; z-index:5;
+    position:absolute; left:50%; bottom:min(3vh, 24px); transform:translateX(-50%);
+    display:flex; gap:14px; flex-wrap:wrap; justify-content:center;
+    max-width:960px; width:100%; padding:0 12px; z-index:5;
   }
   .card{
     width:150px; height:190px; perspective:1200px; cursor:pointer;
@@ -440,8 +386,7 @@
       border-radius:10px;
     }
     .card{width:118px; height:168px;}
-    .fighter{width:90px; height:130px; transform:scale(.85);}
-    .vs-badge{font-size:17px; margin-top:44px;}
+    .combatant-hp{width:140px;}
     #leaderboardScreen .overlay-content{max-width:95%; max-height:85vh;}
     .leaderboard-table tbody td{
       font-size:12px; padding:8px 6px;
@@ -494,37 +439,14 @@
   </div>
 
   <div id="bossScreen" class="overlay hidden">
-    <div class="arena">
-      <div class="combatant">
-        <div class="hp-label">Tu vida</div>
-        <div class="hp-bar" id="playerHpBar"></div>
-        <div class="fighter">
-          <div class="facet knight-head"></div>
-          <div class="facet knight-shoulder-l"></div>
-          <div class="facet knight-shoulder-r"></div>
-          <div class="facet knight-body"></div>
-          <div class="facet knight-sword"></div>
-          <div class="facet knight-legs"></div>
-        </div>
-      </div>
-
-      <div class="vs-badge">VS</div>
-
-      <div class="combatant">
-        <div class="hp-label" id="bossName">Guardián</div>
-        <div class="hp-bar boss" id="bossHpBar"></div>
-        <div class="fighter">
-          <div class="facet boss-crown"></div>
-          <div class="facet boss-arm-l"></div>
-          <div class="facet boss-arm-r"></div>
-          <div class="facet boss-core"></div>
-          <div class="facet boss-eye-l"></div>
-          <div class="facet boss-eye-r"></div>
-          <div class="facet boss-legs"></div>
-        </div>
-      </div>
+    <div class="combatant-hp combatant-hp-player">
+      <div class="hp-label">Tu vida</div>
+      <div class="hp-bar" id="playerHpBar"></div>
     </div>
-
+    <div class="combatant-hp combatant-hp-boss">
+      <div class="hp-label" id="bossName">Guardián</div>
+      <div class="hp-bar boss" id="bossHpBar"></div>
+    </div>
     <div class="banner hidden" id="fightBanner"></div>
     <div class="cards-row" id="cardsRow"></div>
   </div>

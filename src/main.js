@@ -6,6 +6,8 @@ import * as engine from './engine/tower.js';
 import * as combat from './combat/fight.js';
 import * as render from './render/draw.js';
 import * as ui from './ui/screens.js';
+import { SpriteAnimationEngine } from './render/spriteEngine.js';
+import { selectBoss, BOSS_ROSTER } from './data/bossRoster.js';
 import { scoreManager, scoreStore } from './data/scoreManager.js';
 import {
   commitName,
@@ -39,6 +41,45 @@ if (!window.AudioContext && !window.webkitAudioContext) {
 let W = 0, H = 0;
 let gameState = null;
 let fight = null;
+let combatUiState = null;
+
+// Sprite_Animation_Engine instances (una por Sprite_Character), precargadas de
+// forma asíncrona en paralelo con el resto de la inicialización del módulo (ver
+// IIFE async más abajo, junto a `resize()`/`gameState = ...`). Ningún combate
+// puede iniciarse (ver guard `spritesReady` en loop()) hasta que ambas queden listas.
+let warriorEngine = null;
+const bossEngines = new Map();
+// Battle_Background images (una por BOSS_ROSTER entry), precargadas en paralelo
+// con los Sprite_Animation_Engine. Mapea `entry.id -> HTMLImageElement` cargada.
+// Se guarda en un Map local (no se muta BOSS_ROSTER) para no alterar el módulo
+// compartido de datos con estado de carga que rompería re-imports en tests.
+const backgroundImages = new Map();
+let spritesReady = false;
+
+/**
+ * Precarga una imagen de fondo de combate (mejor esfuerzo: nunca lanza).
+ * Sigue el mismo patrón de precarga best-effort que SpriteAnimationEngine.load
+ * usa para las imágenes de sprites: si falla, se registra con console.error y
+ * se resuelve igual, sin bloquear el resto de la inicialización.
+ * @param {string} src
+ * @returns {Promise<HTMLImageElement | null>}
+ */
+function loadBackgroundImage(src) {
+  return new Promise((resolve) => {
+    try {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => {
+        console.error(`[Main] Failed to load Battle_Background image "${src}"`);
+        resolve(null);
+      };
+      img.src = src;
+    } catch (err) {
+      console.error(`[Main] Exception while preloading Battle_Background image "${src}"`, err);
+      resolve(null);
+    }
+  });
+}
 
 function resize() {
   W = canvas.clientWidth;
@@ -86,6 +127,7 @@ function onDrop() {
 
 function onCardClick(idx) {
   if (!fight || fight.resolved) return;
+  if (combatUiState && combatUiState.reactionInProgress) return;
   const card = fight.cards[idx];
   if (card.locked) return;
   
@@ -128,61 +170,102 @@ function onAnswer(cardIdx, chosenIdx) {
   if (result.outcome === 'win') {
     engine.applyDuelWinSpeedBoost(gameState); // Requirement 2.1, 2.2, 2.3
     sfx.win();
-    // El último decremento ya se pintó arriba (renderPips deja #bossHpBar en 0).
-    // Introducimos una breve pausa para que el jugador perciba la barra vaciarse
-    // ANTES de mostrar el banner de victoria. El temporizador hacia endFight(true)
-    // (~1300 ms) se mide desde el banner para no acortar el flujo total.
-    const BOSS_DEFEAT_PAUSE = 500; // ms: pausa para percibir el último decremento
-    setTimeout(() => {
-      ui.showBanner('¡Guardián derrotado!', 'win');
-      setTimeout(() => {
-        // Cerrar la Modal_Pregunta ANTES de finalizar el combate (R2.3). El disparo
-        // queda dentro de la ventana 0–2000 ms (500 + 1300 = 1800 ms) (R2.4).
-        ui.closeQuestionModal();
-        endFight(true);
-      }, 1300);
-    }, BOSS_DEFEAT_PAUSE);
+    playWinSequence();
   } else if (result.outcome === 'lose') {
     sfx.lose();
-    ui.showBanner('¡Has caído ante el guardián!', 'lose');
-    setTimeout(() => {
-      // Cerrar la Modal_Pregunta ANTES de finalizar el combate (R2.3). Disparo a
-      // 1200 ms, dentro de la ventana 0–2000 ms (R2.4).
-      ui.closeQuestionModal();
-      endFight(false);
-    }, 1200);
+    playLoseSequence();
   } else if (result.correct) {
-    // Acierto sin resolver el combate: la carta NO queda bloqueada. Tras mostrar el
-    // acierto, se cierra la Modal_Pregunta (Animación_Regreso) y la Tarjeta origen
-    // vuelve a estar disponible para responder otra pregunta (R2.1).
-    // El disparo del cierre ocurre a 900 ms, dentro de la ventana 0–2000 ms (R2.4).
-    setTimeout(() => {
-      ui.closeQuestionModal();
-      // Actualizar la barra del jefe ahora que la modal se cierra: el pip acertado
-      // cambia de `pip` a `pip lost` (con su pulso) siendo visible para el jugador.
-      ui.renderPips('bossHpBar', fight.bossPips, fight.bossPipsMax);
-      // Al terminar el regreso, retirar el bloqueo cosmético para un nuevo intento.
-      setTimeout(() => {
-        if (!fight || fight.resolved) return;
-        cardEl.classList.remove('locked');
-      }, 560); // coincide con la duración de la Animación_Regreso
-    }, 900);
+    playCorrectNonResolvingSequence(cardEl);
   } else {
-    // Fallo sin resolver el combate: la Tarjeta origen queda bloqueada como hoy
-    // (clase `locked` y opciones deshabilitadas) hasta que el combate se resuelva.
-    // Además se marca como `failed` para mostrarla en gris/inhabilitada en la fila.
-    // Aun así se cierra la Modal_Pregunta para volver a la fila (R2.2). El disparo
-    // ocurre a 900 ms, dentro de la ventana 0–2000 ms (R2.4).
     cardEl.classList.add('failed');
-    setTimeout(() => {
-      ui.closeQuestionModal();
-    }, 900);
+    playIncorrectNonResolvingSequence();
   }
+}
+
+/* ===== Orquestación de Combat_Reaction (Animation_Sequence) ===== */
+
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const MODAL_CLOSE_PAUSE_MS = {
+  win: 500,
+  lose: 1200,
+  correctNonResolving: 900,
+  incorrectNonResolving: 900,
+};
+
+function resumeIdleBoth() {
+  combatUiState.warriorEngine.play('idle');
+  combatUiState.bossEngine.play('idle');
+}
+
+/** Boss ataca (con alternancia si aplica) -> guerrero bloqueo/herido según Card_Attempt_State. */
+async function playFailureReaction() {
+  const { bossEntry } = combatUiState;
+  const attackAnim = bossEntry.attackAnimations.length > 1
+    ? bossEntry.attackAnimations[combatUiState.attackAlternateIndex % 2]
+    : bossEntry.attackAnimations[0];
+  if (bossEntry.attackAnimations.length > 1) combatUiState.attackAlternateIndex++;
+
+  await combatUiState.bossEngine.play(attackAnim, { once: true });
+  const reactionAnim = combatUiState.failedAnswerCount === 0 ? 'bloqueo' : 'herido';
+  combatUiState.failedAnswerCount++;
+  await combatUiState.warriorEngine.play(reactionAnim, { once: true });
+}
+
+async function playWinSequence() {
+  await wait(MODAL_CLOSE_PAUSE_MS.win);
+  ui.closeQuestionModal();
+  combatUiState.reactionInProgress = true;
+  ui.setCardsInteractionLocked(true);
+  await combatUiState.warriorEngine.play('ataque', { once: true });
+  await combatUiState.bossEngine.play('herido', { once: true });
+  ui.showBanner('¡Guardián derrotado!', 'win');
+  await combatUiState.bossEngine.play('morir', { once: true });
+  endFight(true);
+}
+
+async function playLoseSequence() {
+  await wait(MODAL_CLOSE_PAUSE_MS.lose);
+  ui.closeQuestionModal();
+  combatUiState.reactionInProgress = true;
+  ui.setCardsInteractionLocked(true);
+  await playFailureReaction();
+  ui.showBanner('¡Has caído ante el guardián!', 'lose');
+  await combatUiState.warriorEngine.play('morir', { once: true });
+  endFight(false);
+}
+
+async function playCorrectNonResolvingSequence(cardEl) {
+  await wait(MODAL_CLOSE_PAUSE_MS.correctNonResolving);
+  ui.closeQuestionModal();
+  ui.renderPips('bossHpBar', fight.bossPips, fight.bossPipsMax);
+  combatUiState.reactionInProgress = true;
+  ui.setCardsInteractionLocked(true);
+  await combatUiState.warriorEngine.play('ataque', { once: true });
+  await combatUiState.bossEngine.play('herido', { once: true });
+  if (fight && !fight.resolved) cardEl.classList.remove('locked');
+  resumeIdleBoth();
+  combatUiState.reactionInProgress = false;
+  ui.setCardsInteractionLocked(false);
+}
+
+async function playIncorrectNonResolvingSequence() {
+  await wait(MODAL_CLOSE_PAUSE_MS.incorrectNonResolving);
+  ui.closeQuestionModal();
+  combatUiState.reactionInProgress = true;
+  ui.setCardsInteractionLocked(true);
+  await playFailureReaction();
+  resumeIdleBoth();
+  combatUiState.reactionInProgress = false;
+  ui.setCardsInteractionLocked(false);
 }
 
 function endFight(won) {
   ui.hideBossScreen();
   fight = null;
+  combatUiState = null;
   if (won) {
     gameState.doorsPassed += 1;
     gameState.screen = 'build';
@@ -254,16 +337,45 @@ function onCloseAudioSettings() {
   ui.hideAudioSettingsPanel();
 }
 
+// engine.update() señala `shouldStartBoss` una única vez, exactamente en el frame
+// en que la animación de subida del caballero termina (ver engine/tower.js: la
+// rama `if (state.knight.animating)` solo emite la señal en la transición
+// true->false, y `gameState.pendingBossLevel` no se reinicia hasta que loop() lo
+// consume). Si en ese frame los Sprite_Animation_Engine aún no están listos
+// (`spritesReady === false`), la señal se perdería para siempre si no la
+// retuviéramos aquí: `pendingStartBossLevel` la retiene hasta que loop() pueda
+// consumirla, sin necesidad de tocar el mecanismo de `pendingBossLevel` en
+// engine/tower.js.
+let pendingStartBossLevel = null;
+
 function loop(ts) {
   const dt = gameState.lastTs ? Math.min(48, ts - gameState.lastTs) : 16;
   gameState.lastTs = ts;
+  gameState.lastDt = dt;
 
   const updateResult = engine.update(gameState, dt, ts, W);
-  
+
   if (updateResult.shouldStartBoss) {
-    const lvl = updateResult.level;
+    pendingStartBossLevel = updateResult.level;
+  }
+
+  if (pendingStartBossLevel !== null && spritesReady) {
+    const lvl = pendingStartBossLevel;
+    pendingStartBossLevel = null;
+    const bossEntry = selectBoss(gameState.doorsPassed);
     fight = combat.startBossFight(lvl);
-    ui.showBossScreen(fight.bossLabel, fight.cardCount);
+    combatUiState = {
+      bossEntry,
+      warriorEngine,
+      bossEngine: bossEngines.get(bossEntry.id),
+      backgroundImage: backgroundImages.get(bossEntry.id),
+      failedAnswerCount: 0,
+      attackAlternateIndex: 0,
+      reactionInProgress: false,
+    };
+    combatUiState.warriorEngine.play('idle');
+    combatUiState.bossEngine.play('idle');
+    ui.showBossScreen(`${bossEntry.displayName} — Nivel ${lvl}`, fight.cardCount);
     ui.renderPips('playerHpBar', fight.playerPips, fight.playerPipsMax);
     ui.renderPips('bossHpBar', fight.bossPips, fight.bossPipsMax);
     ui.renderCards(fight.cards, onCardClick);
@@ -272,7 +384,7 @@ function loop(ts) {
     music.enterBossScreen();
   }
 
-  render.render(ctx, W, H, gameState);
+  render.render(ctx, W, H, gameState, combatUiState);
   requestAnimationFrame(loop);
 }
 
@@ -290,6 +402,28 @@ ui.bindAudioSettingsHandlers({
   onCloseSettings: onCloseAudioSettings
 });
 music.init();
+
+// Precarga de los Sprite_Animation_Engine (Warrior_Sprite + los 5 Boss_Sprite),
+// en paralelo con el resto de la inicialización del módulo. `loop()` ya se
+// dispara vía requestAnimationFrame antes de que estas Promises puedan
+// resolver; el guard `spritesReady` en loop() evita construir `combatUiState`
+// hasta que esta IIFE complete.
+(async () => {
+  try {
+    warriorEngine = await SpriteAnimationEngine.load('/sprites/guerrero/guerrero.json', '/sprites/guerrero');
+    await Promise.all([
+      ...BOSS_ROSTER.map(async (entry) => {
+        bossEngines.set(entry.id, await SpriteAnimationEngine.load(entry.jsonPath, '/sprites/bosses/' + entry.id));
+      }),
+      ...BOSS_ROSTER.map(async (entry) => {
+        backgroundImages.set(entry.id, await loadBackgroundImage(entry.background));
+      }),
+    ]);
+    spritesReady = true;
+  } catch (err) {
+    console.error('[Main] Failed to preload Sprite_Animation_Engine instances:', err);
+  }
+})();
 
 // Initialize ScoreManager and bind leaderboard controls
 (async () => {

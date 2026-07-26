@@ -733,3 +733,27 @@ export function getPlayerNameInputValue() {
   const input = document.getElementById('playerNameInput');
   return input ? input.value : '';
 }
+
+/* ===== UI: bloqueo de cartas durante una Combat_Reaction ===== */
+
+/**
+ * Habilita o deshabilita la interacción con las cartas de combate mientras una
+ * Combat_Reaction está en curso. No afecta a las cartas que ya tienen la clase
+ * `locked` permanente (combate ya resuelto para esa carta): esas permanecen
+ * deshabilitadas independientemente de `isLocked`.
+ * @param {boolean} isLocked - `true` para deshabilitar los botones `.opt-btn` y marcar
+ *   la carta con `reaction-locked`; `false` para volver a habilitarlos.
+ */
+export function setCardsInteractionLocked(isLocked) {
+  document.querySelectorAll('#cardsRow .card').forEach(cardEl => {
+    if (cardEl.classList.contains('locked')) return;
+    const buttons = cardEl.querySelectorAll('.opt-btn');
+    if (isLocked) {
+      cardEl.classList.add('reaction-locked');
+      buttons.forEach(b => b.disabled = true);
+    } else {
+      cardEl.classList.remove('reaction-locked');
+      buttons.forEach(b => b.disabled = false);
+    }
+  });
+}
