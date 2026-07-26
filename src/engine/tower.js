@@ -1,6 +1,8 @@
 /* =========================================================
    ENGINE: estado y física de la torre
    ========================================================= */
+import { nextBiomeForSession, nextTimeOfDayForSession } from '../data/environmentRoster.js';
+
 export const DOOR_INTERVAL = 5;
 export const BASE_WIDTH = 210;
 export const MIN_WIDTH = 46;
@@ -90,6 +92,8 @@ export function createTowerState(width, height) {
     lastTs: 0,
     clouds,
     torchSeed: Math.random() * 1000,
+    activeBiome: nextBiomeForSession(),
+    activeTimeOfDay: nextTimeOfDayForSession(),
   };
 }
 
@@ -144,6 +148,8 @@ export function resetGame(state, width, height) {
   state.doorsPassed = 0;
   state.pendingBossLevel = 0;
   state.moving = newMovingBlock(state, baseFloor, width);
+  state.activeBiome = nextBiomeForSession(); // Requirement 6.1, 6.4
+  state.activeTimeOfDay = nextTimeOfDayForSession(); // Requirement 6.1, 6.4
   state.clouds = Array.from({length: 7}, (_, i) => ({
     x: Math.random() * 1,
     y: 40 + Math.random() * 260,

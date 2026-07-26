@@ -544,6 +544,8 @@ public/audio/bosses/boss_5_brujo/morir/.gitkeep
 
 `boss_1_titan_guerrero` recibe `ataque_1`/`ataque_2` en vez de `ataque` (Requirement 13.2, Alternating_Attack_Boss); el guerrero no recibe carpetas para `idle`/`ataque` porque esos eventos ya tienen o no requieren archivo en `AUDIO_MAP` (Requirement 13.3 solo pide `bloqueo`/`herido`/`morir`).
 
+> **Nota informativa (no forma parte del alcance original de este Requirement):** `public/audio/guerrero/ataque/attack_sword.wav` ya no es un directorio placeholder vacío: contiene un Audio_File real provisto por el usuario. Se reproduce mediante el nuevo Sound_Event `attack` de `sfx.js` (`AUDIO_MAP.attack = 'guerrero/ataque/attack_sword.wav'`), invocado desde `src/main.js` justo antes de iniciar la Animation_Sequence `'ataque'` del `Warrior_Sprite` (en `playWinSequence()` y `playCorrectNonResolvingSequence()`), para que el sonido de espada quede sincronizado con la animación en vez de con el acierto de la pregunta. Esto no debe confundirse con el Sound_Event `correct`, que sigue existiendo para el feedback inmediato exigido por el Requirement 12, pero que ahora usa el Synthesizer (ya no tiene entrada en `AUDIO_MAP`).
+
 ## Data Models
 
 ```

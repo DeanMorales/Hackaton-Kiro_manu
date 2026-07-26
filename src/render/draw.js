@@ -6,40 +6,54 @@ export function elevToScreen(camElev, elev, H) {
   return H * 0.62 - (elev - camElev);
 }
 
-export function drawSky(ctx, W, H, clouds) {
+export function drawSky(ctx, W, H, clouds, activeBiome, activeTimeOfDay) {
   const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, '#050716');
-  g.addColorStop(0.55, '#111a3d');
-  g.addColorStop(1, '#2c3d6e');
+  activeTimeOfDay.skyGradientStops.forEach(([offset, color]) => g.addColorStop(offset, color));
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
 
+  // sun/moon cue
+  drawSunMoonCue(ctx, W, H, activeTimeOfDay.sunMoonCue);
+
   // stars
-  ctx.fillStyle = 'rgba(255,255,255,.5)';
-  for (let i = 0; i < 40; i++) {
-    const sx = (i * 97 + 31) % W;
-    const sy = (i * 53 + 17) % (H * 0.5);
-    const tw = 0.5 + 0.5 * Math.sin((performance.now() / 600) + i);
-    ctx.globalAlpha = 0.25 + 0.4 * tw;
-    ctx.fillRect(sx, sy, 2, 2);
+  if (activeTimeOfDay.starVisibility) {
+    ctx.fillStyle = 'rgba(255,255,255,.5)';
+    for (let i = 0; i < 40; i++) {
+      const sx = (i * 97 + 31) % W;
+      const sy = (i * 53 + 17) % (H * 0.5);
+      const tw = 0.5 + 0.5 * Math.sin((performance.now() / 600) + i);
+      ctx.globalAlpha = 0.25 + 0.4 * tw;
+      ctx.fillRect(sx, sy, 2, 2);
+    }
+    ctx.globalAlpha = 1;
   }
-  ctx.globalAlpha = 1;
 
   // clouds drift with camera slightly (parallax)
-  ctx.fillStyle = 'rgba(200,210,235,.10)';
+  ctx.fillStyle = activeTimeOfDay.cloudColor;
   clouds.forEach(c => {
     const cx = ((c.x * W) + (performance.now() * 0.006 * c.speed)) % (W + 160) - 80;
     drawCloud(ctx, cx, c.y, c.r);
   });
 
   // distant hills
-  ctx.fillStyle = '#1a2340';
+  ctx.fillStyle = activeBiome.hillColor;
   ctx.beginPath();
   ctx.moveTo(0, H);
   for (let x = 0; x <= W; x += 40) {
     ctx.lineTo(x, H - 70 - 18 * Math.sin(x * 0.01 + 2));
   }
   ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+}
+
+export function drawSunMoonCue(ctx, W, H, cue) {
+  const cx = cue.xRatio * W, cy = cue.yRatio * H;
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, cue.radius * 2.2);
+  grad.addColorStop(0, cue.color);
+  grad.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = grad;
+  ctx.beginPath(); ctx.arc(cx, cy, cue.radius * 2.2, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = cue.color;
+  ctx.beginPath(); ctx.arc(cx, cy, cue.radius * 0.55, 0, Math.PI * 2); ctx.fill();
 }
 
 export function drawCloud(ctx, cx, cy, r) {
@@ -180,6 +194,101 @@ export function floorPalette(floorIndex) {
   return [base, dark];
 }
 
+/**
+ * Dibuja la banda de suelo (Ground_Visual) que ancla la torre al fondo,
+ * desde el borde inferior de baseFloor hasta el borde inferior del canvas,
+ * ocupando todo el ancho visible.
+ */
+export function drawGround(ctx, W, H, camElev, baseFloor, activeBiome) {
+  if (!baseFloor) return;
+  const groundY = elevToScreen(camElev, baseFloor.bottom, H);
+  const bandTop = Math.min(groundY, H);
+  if (bandTop >= H) return;
+
+  const g = ctx.createLinearGradient(0, bandTop, 0, H);
+  g.addColorStop(0, activeBiome.groundColors[0]);
+  g.addColorStop(1, activeBiome.groundColors[1]);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, bandTop, W, H - bandTop);
+
+  drawVegetationCues(ctx, W, bandTop, H, activeBiome.vegetationCue);
+}
+
+/**
+ * Distribuye señales de vegetación (Requirement 8.1, 8.2, 8.4, 8.5) a lo ancho
+ * de la banda del Ground_Visual. No-op para 'none' (Tundra/Desierto).
+ */
+function drawVegetationCues(ctx, W, bandTop, H, cue) {
+  if (cue === 'none') return;
+  const count = Math.max(6, Math.round(W / 90));
+  for (let i = 0; i < count; i++) {
+    const fx = (i + 0.5) * (W / count);
+    const jitter = seededRand(i * 13.7) * (H - bandTop) * 0.4;
+    const fy = bandTop + jitter;
+    drawVegetationCue(ctx, fx, fy, cue, i);
+  }
+}
+
+/**
+ * Dibuja una única señal de vegetación en (x, y), low-poly, consistente con
+ * el estilo de facetas de drawFacetedBlock. `seed` varía tamaño/forma.
+ */
+function drawVegetationCue(ctx, x, y, cue, seed) {
+  if (cue === 'dryGrassTufts') {
+    // Sabana: 3 briznas finas y altas, tono seco amarillento
+    const s = 9 + seededRand(seed) * 7;
+    ctx.fillStyle = '#c9a227';
+    for (let i = 0; i < 3; i++) {
+      const lean = (seededRand(seed + i * 3.1) - 0.5) * s * 0.9;
+      const baseOffset = (i - 1) * s * 0.3;
+      const tipX = x + baseOffset + lean;
+      const tipY = y - s * (0.85 + seededRand(seed + i * 1.7) * 0.35);
+      const baseW = 1.4 + seededRand(seed + i * 2.2) * 0.9;
+      ctx.beginPath();
+      ctx.moveTo(x + baseOffset - baseW, y);
+      ctx.lineTo(tipX, tipY);
+      ctx.lineTo(x + baseOffset + baseW, y);
+      ctx.closePath();
+      ctx.fill();
+    }
+  } else if (cue === 'bushes') {
+    // Bosque_Templado: clump redondeado (dos semicírculos superpuestos), verde
+    ctx.fillStyle = '#2f6b2f';
+    const r = 7 + seededRand(seed) * 5;
+    ctx.beginPath();
+    ctx.arc(x, y, r, Math.PI, 0);
+    ctx.closePath();
+    ctx.fill();
+    const r2 = r * (0.6 + seededRand(seed + 4.4) * 0.3);
+    const dx = (seededRand(seed + 5.5) - 0.5) * r * 1.1;
+    ctx.beginPath();
+    ctx.arc(x + dx, y, r2, Math.PI, 0);
+    ctx.closePath();
+    ctx.fill();
+  } else if (cue === 'conifers') {
+    // Taiga: silueta de pino apilado (3 triángulos escalonados), verde oscuro,
+    // distinta de la forma redondeada de 'bushes'
+    ctx.fillStyle = '#1f3d2f';
+    const h = 16 + seededRand(seed) * 9;
+    const w = h * 0.52;
+    const tiers = 3;
+    for (let t = 0; t < tiers; t++) {
+      const tierH = h / tiers;
+      const tierTop = y - h + t * tierH;
+      const tierW = w * (1 - t * 0.22);
+      ctx.beginPath();
+      ctx.moveTo(x, tierTop);
+      ctx.lineTo(x - tierW / 2, tierTop + tierH * 1.3);
+      ctx.lineTo(x + tierW / 2, tierTop + tierH * 1.3);
+      ctx.closePath();
+      ctx.fill();
+    }
+    // tronco corto
+    ctx.fillStyle = '#3a2a1f';
+    ctx.fillRect(x - w * 0.06, y - h * 0.12, w * 0.12, h * 0.14);
+  }
+}
+
 export function drawTower(ctx, W, H, camElev, floors) {
   floors.forEach((f, i) => {
     const yTop = elevToScreen(camElev, f.top, H);
@@ -265,7 +374,8 @@ export function drawKnight(ctx, topFloorRef, knight, camElev, H) {
 }
 
 export function render(ctx, W, H, gameState, combatUiState) {
-  drawSky(ctx, W, H, gameState.clouds);
+  drawSky(ctx, W, H, gameState.clouds, gameState.activeBiome, gameState.activeTimeOfDay);
+  drawGround(ctx, W, H, gameState.camElev, gameState.floors[0], gameState.activeBiome);
   drawTower(ctx, W, H, gameState.camElev, gameState.floors);
   drawMovingBlock(ctx, W, H, gameState.camElev, gameState.screen, gameState.floors, gameState.moving, gameState.knight.animating);
   if (gameState.screen === 'build' || gameState.screen === 'falling') {

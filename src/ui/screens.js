@@ -636,13 +636,18 @@ export function showIncompatibilityMessage(reason) {
 }
 
 /**
- * Muestra el panel de configuración de audio, reflejando el volumen y el estado de mute vigentes.
- * @param {number} volumePercent - Volumen efectivo actual (0-100) a reflejar en el slider.
- * @param {boolean} isMuted - Estado de silencio actual a reflejar en el botón de mute.
+ * Muestra el panel de configuración de audio, reflejando el volumen y el estado de mute vigentes
+ * tanto de la música como de los efectos de combate.
+ * @param {number} volumePercent - Volumen efectivo actual de música (0-100) a reflejar en el slider.
+ * @param {boolean} isMuted - Estado de silencio actual de música a reflejar en el botón de mute.
+ * @param {number} combatSfxVolumePercent - Volumen efectivo actual de efectos de combate (0-100).
+ * @param {boolean} combatSfxIsMuted - Estado de silencio actual de efectos de combate.
  */
-export function showAudioSettingsPanel(volumePercent, isMuted) {
+export function showAudioSettingsPanel(volumePercent, isMuted, combatSfxVolumePercent, combatSfxIsMuted) {
   document.getElementById('volumeSlider').value = volumePercent;
   setMuteButtonState(isMuted);
+  document.getElementById('combatSfxVolumeSlider').value = combatSfxVolumePercent;
+  setCombatSfxMuteButtonState(combatSfxIsMuted);
   document.getElementById('audioSettingsPanel').classList.remove('hidden');
 }
 
@@ -672,13 +677,30 @@ export function setMuteButtonState(isMuted) {
 }
 
 /**
- * Conecta los listeners del panel de configuración de audio con sus callbacks.
- * @param {Object} handlers - Objeto con { onToggleSettings, onVolumeChange, onToggleMute, onCloseSettings }.
+ * Actualiza el texto y el atributo aria-pressed del botón de mute de
+ * efectos de combate según el estado de silencio.
+ * @param {boolean} isMuted - Estado de silencio a reflejar.
  */
-export function bindAudioSettingsHandlers({ onToggleSettings, onVolumeChange, onToggleMute, onCloseSettings }) {
+export function setCombatSfxMuteButtonState(isMuted) {
+  const btn = document.getElementById('combatSfxMuteToggleBtn');
+  btn.textContent = isMuted ? 'Activar efectos de combate' : 'Silenciar efectos de combate';
+  btn.setAttribute('aria-pressed', String(isMuted));
+}
+
+/**
+ * Conecta los listeners del panel de configuración de audio con sus callbacks.
+ * @param {Object} handlers - Objeto con { onToggleSettings, onVolumeChange, onToggleMute,
+ *   onCombatSfxVolumeChange, onToggleCombatSfxMute, onCloseSettings }.
+ */
+export function bindAudioSettingsHandlers({
+  onToggleSettings, onVolumeChange, onToggleMute,
+  onCombatSfxVolumeChange, onToggleCombatSfxMute, onCloseSettings
+}) {
   document.getElementById('settingsBtn').addEventListener('click', onToggleSettings);
   document.getElementById('volumeSlider').addEventListener('input', (e) => onVolumeChange(Number(e.target.value)));
   document.getElementById('muteToggleBtn').addEventListener('click', onToggleMute);
+  document.getElementById('combatSfxVolumeSlider').addEventListener('input', (e) => onCombatSfxVolumeChange(Number(e.target.value)));
+  document.getElementById('combatSfxMuteToggleBtn').addEventListener('click', onToggleCombatSfxMute);
   document.getElementById('closeAudioSettingsBtn').addEventListener('click', onCloseSettings);
 }
 

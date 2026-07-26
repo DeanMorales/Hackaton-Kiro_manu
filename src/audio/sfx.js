@@ -13,9 +13,13 @@ function beep(freq, dur, type, gain){
   }catch(e){}
 }
 /* Mapeo Sound_Event -> nombre de archivo de audio.
-   'win' no tiene entrada: siempre usa el Synthesizer. */
+   'win' no tiene entrada: siempre usa el Synthesizer.
+   'correct' tampoco tiene entrada: el feedback inmediato de acierto
+   (Requirement 12) usa el Synthesizer. El sonido de espada del guerrero
+   ya no se dispara desde aquí: el Combat_Sfx_Player (src/audio/combatSfx.js)
+   es el único mecanismo que reproduce el sonido de la Animation_Sequence
+   'ataque' del Warrior_Sprite (ver src/main.js). */
 const AUDIO_MAP = {
-  correct: 'attack_sword.wav',
   place: 'Blocks.wav',
   door: 'door-open.wav',
   fall: 'drop.wav',

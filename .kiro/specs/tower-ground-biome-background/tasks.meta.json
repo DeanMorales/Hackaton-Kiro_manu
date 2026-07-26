@@ -1,0 +1,480 @@
+{
+  "pbtResults": {
+    "1.4 Escribir prueba de propiedad para la rotación determinística de ambos catálogos": {
+      "status": "passed",
+      "lastRunTimestamp": 1785060761342
+    },
+    "1.5 Escribir prueba de propiedad para la rotación aleatoria con repetición de ambos catálogos": {
+      "status": "passed",
+      "lastRunTimestamp": 1785061279583
+    },
+    "1.7 Escribir prueba de propiedad para la independencia entre ambas rotaciones": {
+      "status": "passed",
+      "lastRunTimestamp": 1785061884225
+    },
+    "3.3 Escribir prueba de propiedad para la inmutabilidad de Active_Biome/Active_Time_Of_Day durante la sesión": {
+      "status": "passed",
+      "lastRunTimestamp": 1785062723338
+    },
+    "6.3 Escribir prueba de propiedad para la cobertura del Ground_Visual": {
+      "status": "passed",
+      "lastRunTimestamp": 1785063720629
+    },
+    "9.1 Escribir prueba estática (no generativa) de ausencia de carga de assets de imagen": {
+      "status": "passed",
+      "lastRunTimestamp": 1785064216586
+    },
+    "9.2 Escribir prueba de propiedad para la no interferencia con combate/puntuación/física de pisos": {
+      "status": "passed",
+      "lastRunTimestamp": 1785064242383
+    }
+  },
+  "executionHistory": {
+    "1.1 Definir `BIOME_CATALOG` con las 5 entradas (Tundra, Sabana, Desierto, Bosque_Templado, Taiga), cada una con `id`, `displayName`, `hillColor`, `groundColors` (`[claro, oscuro]`) y `vegetationCue`, en el orden exacto de catálogo": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785059701865
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785059711698
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785059834991
+      }
+    ],
+    "1.2 Definir `TIME_OF_DAY_CATALOG` con las 4 entradas (Mañana, Día, Tarde, Noche), cada una con `id`, `displayName`, `skyGradientStops`, `starVisibility`, `cloudColor` y `sunMoonCue`, en el orden exacto de catálogo": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785059701955
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785059839499
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785060449486
+      }
+    ],
+    "1.3 Implementar las funciones puras `selectBiome(sessionsStarted)` y `selectTimeOfDay(sessionsStarted)`, replicando exactamente el patrón fijo-luego-aleatorio de `selectBoss` (`src/data/bossRoster.js`) sobre cada catálogo": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785059702016
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785060453463
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785060616767
+      }
+    ],
+    "1.6 Implementar los wrappers con estado `nextBiomeForSession()`/`nextTimeOfDayForSession()`, dueños de los dos contadores en memoria a nivel de módulo (`biomeSessionCounter`, `timeOfDaySessionCounter`), incrementándolos internamente en exactamente 1 por invocación, sin que ninguna función exportada del módulo los reinicie (solo la reinstanciación del módulo los reinicia)": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785059702075
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785061314584
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785061437617
+      }
+    ],
+    "2. Checkpoint — módulo de datos completo": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785059702135
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785062307022
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785062351690
+      }
+    ],
+    "3.1 Modificar `createTowerState(width, height)` para importar y llamar una vez a `nextBiomeForSession()`/`nextTimeOfDayForSession()`, almacenando los resultados como `activeBiome`/`activeTimeOfDay` en el estado devuelto": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785059702213
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785062356024
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785062481775
+      }
+    ],
+    "3.2 Modificar `resetGame(state, width, height)` para llamar una vez a `nextBiomeForSession()`/`nextTimeOfDayForSession()`, reemplazando `state.activeBiome`/`state.activeTimeOfDay`": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785059702319
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785062485881
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785062608875
+      }
+    ],
+    "4. Checkpoint — integración en el motor completa": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785059702435
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785062881808
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785062917741
+      }
+    ],
+    "5.1 Cambiar la firma a `drawSky(ctx, W, H, clouds, activeBiome, activeTimeOfDay)`; sustituir los stops de gradiente fijos por `activeTimeOfDay.skyGradientStops`, la condición del bucle de estrellas por `if (activeTimeOfDay.starVisibility)`, el `fillStyle` de las nubes por `activeTimeOfDay.cloudColor`, y el `fillStyle` de las colinas por `activeBiome.hillColor`, preservando exactamente el algoritmo/forma de dibujo existente (dirección del gradiente, fórmula de grilla de estrellas, fórmula de parallax de nubes, silueta senoidal de colinas)": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785059702529
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785062924880
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063160675
+      }
+    ],
+    "5.2 Implementar el nuevo helper `drawSunMoonCue(ctx, W, H, cue)`, invocado desde `drawSky`, dibujando un resplandor de gradiente radial más un círculo sólido en `cue.xRatio`/`cue.yRatio` usando `cue.color`/`cue.radius`": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785059702614
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063165009
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063231024
+      }
+    ],
+    "6.1 Implementar `drawGround(ctx, W, H, camElev, baseFloor, activeBiome)`: calcular `bandTop` vía `elevToScreen(camElev, baseFloor.bottom, H)` acotado a `H`, retornar sin dibujar (`no-op`) si `!baseFloor` o `bandTop >= H`, y rellenar un rectángulo con gradiente lineal desde `bandTop` hasta `H`, abarcando todo el ancho `W`, usando `activeBiome.groundColors`": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785059702698
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063380276
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063448025
+      }
+    ],
+    "6.2 Implementar los helpers `drawVegetationCues(ctx, W, bandTop, H, cue)` y `drawVegetationCue(ctx, x, y, cue, seed)`: no-op para `'none'`, y formas low-poly distintas para `'dryGrassTufts'`, `'bushes'` y `'conifers'` (cada una visualmente distinta entre sí, consistente con el estilo low-poly ya usado por `drawFacetedBlock`)": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785059702788
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063453394
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063563370
+      }
+    ],
+    "7.1 Modificar `render(ctx, W, H, gameState, combatUiState)` para invocar `drawSky(ctx, W, H, gameState.clouds, gameState.activeBiome, gameState.activeTimeOfDay)` y luego `drawGround(ctx, W, H, gameState.camElev, gameState.floors[0], gameState.activeBiome)` antes de `drawTower(...)`, sin modificar `drawTower`/`drawMovingBlock`/`drawKnight`/el bloque de `bossFightRender`": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785059702872
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063883482
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063948058
+      }
+    ],
+    "8. Checkpoint — integración de render completa": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785059702953
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785064087973
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785064133088
+      }
+    ],
+    "10. Checkpoint final": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785059703036
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785064271279
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785064314122
+      }
+    ],
+    "1.4 Escribir prueba de propiedad para la rotación determinística de ambos catálogos": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785060632612
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785060645364
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785060868403
+      }
+    ],
+    "1.5 Escribir prueba de propiedad para la rotación aleatoria con repetición de ambos catálogos": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785060650447
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785061303053
+      }
+    ],
+    "1. Implementar `src/data/environmentRoster.js` (nuevo)": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785061437794
+      }
+    ],
+    "1.7 Escribir prueba de propiedad para la independencia entre ambas rotaciones": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785061444768
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785062104204
+      }
+    ],
+    "1.8 Escribir pruebas unitarias de los catálogos y las selecciones puras": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785061445342
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785062303448
+      }
+    ],
+    "3. Integrar la selección de Active_Biome/Active_Time_Of_Day en `src/engine/tower.js`": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785062608944
+      }
+    ],
+    "3.3 Escribir prueba de propiedad para la inmutabilidad de Active_Biome/Active_Time_Of_Day durante la sesión": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785062613891
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785062747228
+      }
+    ],
+    "3.4 Escribir pruebas unitarias de la integración en el motor": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785062614394
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785062878349
+      }
+    ],
+    "5. Extender `drawSky` en `src/render/draw.js` para leer Active_Biome/Active_Time_Of_Day (Environment_Renderer)": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063231097
+      }
+    ],
+    "5.3 Escribir pruebas unitarias de `drawSky`": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063235448
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063371543
+      }
+    ],
+    "6. Implementar `Ground_Visual`: nueva función `drawGround` en `src/render/draw.js`": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063563453
+      }
+    ],
+    "6.3 Escribir prueba de propiedad para la cobertura del Ground_Visual": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063570092
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063795590
+      }
+    ],
+    "6.4 Escribir pruebas unitarias de `drawGround`": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063570778
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063878253
+      }
+    ],
+    "7. Integrar `drawGround` y los nuevos parámetros de `drawSky` en `render()`": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063948168
+      }
+    ],
+    "7.2 Escribir pruebas unitarias de la integración en `render()`": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785063952602
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785064084382
+      }
+    ],
+    "9.1 Escribir prueba estática (no generativa) de ausencia de carga de assets de imagen": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785064137576
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785064266063
+      }
+    ],
+    "9.2 Escribir prueba de propiedad para la no interferencia con combate/puntuación/física de pisos": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785064138297
+      },
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785064266916
+      }
+    ],
+    "9. Verificar los invariantes globales de la feature (sin nuevas superficies de implementación)": [
+      {
+        "executionId": "12d251bf-0f82-4110-ba38-e39f3243df76",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785064266146
+      }
+    ]
+  }
+}
