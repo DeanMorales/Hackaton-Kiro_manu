@@ -1,0 +1,611 @@
+{
+  "pbtResults": {
+    "1.3 Escribir prueba de propiedad para la resolución de rutas sin tabla de mapeo manual": {
+      "status": "passed",
+      "lastRunTimestamp": 1785067073118
+    },
+    "1.6 Escribir prueba de propiedad para el bucle de idle frente a la reproducción única de animaciones de acción": {
+      "status": "passed",
+      "lastRunTimestamp": 1785067371963
+    },
+    "1.7 Escribir prueba de propiedad para la ausencia de solapamiento por rol": {
+      "status": "passed",
+      "lastRunTimestamp": 1785067576820
+    },
+    "1.8 Escribir prueba de propiedad para la robustez ante fallos de reproducción": {
+      "status": "passed",
+      "lastRunTimestamp": 1785067947268
+    },
+    "1.12 Escribir prueba de propiedad para el descarte de preferencias inválidas": {
+      "status": "passed",
+      "lastRunTimestamp": 1785068257197
+    },
+    "1.14 Escribir prueba de propiedad para el volumen real consistente aplicado a todo sonido activo": {
+      "status": "passed",
+      "lastRunTimestamp": 1785068594575
+    },
+    "7.3 Escribir prueba de propiedad para la independencia total respecto a la música y a los efectos de sfx.js restantes": {
+      "status": "passed",
+      "lastRunTimestamp": 1785070278833
+    }
+  },
+  "executionHistory": {
+    "1.1 Implementar el estado interno del módulo (`activeSounds` Map, `effectiveVolume = DEFAULT_VOLUME = 0.30`, `muted = false`, `PREF_KEY = 'torre-nubes-combat-sfx-pref'`) y la función `realVolume()`": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066862605
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066869423
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066931562
+      }
+    ],
+    "1.2 Implementar `buildUrl(folderId, animName)` (fórmula dinámica, sin tabla de mapeo: `guerrero` → `/audio/guerrero/<animName>/<animName>.wav`, cualquier otro `folderId` → `/audio/bosses/<folderId>/<animName>/<animName>.wav`)": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066862730
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066936040
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066991349
+      }
+    ],
+    "1.4 Implementar `stopEntry(entry)` (detiene `pause()`+`currentTime=0` de forma segura con try/catch)": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066862794
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785067005551
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785067090471
+      }
+    ],
+    "1.5 Implementar la función pública `play(role, folderId, animName)`: chequeo de no-op por mismo `folderId`+`animName` activo para ese `role` (Requirement 4.4/2.1c), `stopEntry` de la entrada previa del mismo rol (Requirement 4.1/4.2), guard de `typeof Audio === 'undefined'`, construcción de `new Audio(buildUrl(...))` envuelta en try/catch, `audioElement.loop = animName === 'idle'`, `audioElement.volume = realVolume()`, listener `error` que swallow, registro en `activeSounds`, y `.play()` síncrono envuelto en try/catch con `.catch()` en la Promise devuelta": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066862882
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785067097767
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785067160804
+      }
+    ],
+    "1.9 Implementar `applyVolumeToActiveSounds()` (recorre `activeSounds.values()`, asigna `realVolume()` a cada `audioElement.volume` sin pausar/reiniciar)": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066862963
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785067167398
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785067252482
+      }
+    ],
+    "1.10 Implementar `loadPreference()`/`savePreference(volume, muted)` (mismo patrón que `music.js`: JSON en localStorage bajo `PREF_KEY`, validación de `volume` numérico finito en [0,1] y `muted` booleano, try/catch en save sin relanzar)": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066863028
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785067970256
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068035192
+      }
+    ],
+    "1.13 Implementar la API pública `combatSfx` (`init`, `play`, `setVolume`, `toggleMute`, `getEffectiveVolumePercent`, `isMuted`) — `init()` carga preferencia o aplica default, sin precargar/crear ningún `HTMLAudioElement`": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066863092
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068381628
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068448259
+      }
+    ],
+    "2. Checkpoint — módulo `combatSfx.js` completo": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066863161
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068738327
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068781654
+      }
+    ],
+    "3.1 Eliminar la entrada `attack: 'guerrero/ataque/attack_sword.wav'` de `AUDIO_MAP`": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066863214
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068786596
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068894666
+      }
+    ],
+    "3.2 Eliminar la propiedad `attack:()=>dispatch('attack')` del objeto exportado `sfx`": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066863278
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068787306
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068895470
+      }
+    ],
+    "4.1 Importar `combatSfx` en `main.js` y añadir `combatSfx.init()` junto a `music.init()` en la inicialización del módulo": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066863362
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068993684
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069053137
+      }
+    ],
+    "4.2 Implementar `playWarriorAnim(name, opts)` y `playBossAnim(name, opts)` (wrappers que llaman `combatSfx.play('warrior'|'boss', folderId, name)` de forma síncrona antes de delegar/retornar `combatUiState.warriorEngine.play(name, opts)`/`combatUiState.bossEngine.play(name, opts)`)": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066863435
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069058017
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069122483
+      }
+    ],
+    "4.3 Sustituir cada llamada directa a `combatUiState.warriorEngine.play(...)`/`combatUiState.bossEngine.play(...)` en `resumeIdleBoth()`, `playFailureReaction()`, `playWinSequence()`, `playLoseSequence()`, `playCorrectNonResolvingSequence()`, y el bloque de inicio de Boss_Fight dentro de `loop()`, por la llamada al wrapper correspondiente (`playWarriorAnim`/`playBossAnim`), preservando la semántica exacta de `await`/retorno de Promise": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066863495
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069129332
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069252535
+      }
+    ],
+    "4.4 Eliminar las dos líneas `sfx.attack();` de `playWinSequence()` y `playCorrectNonResolvingSequence()`": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066863547
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069256941
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069330171
+      }
+    ],
+    "5. Checkpoint — integración en main.js completa (sin modificar spriteEngine.js/fight.js/bossRoster.js)": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066863597
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069583348
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069640591
+      }
+    ],
+    "6.1 Añadir en `index.html`, dentro de `#audioSettingsPanel`, el marcado `#combatSfxVolumeSlider` + `#combatSfxMuteToggleBtn` con las etiquetas \"Volumen de efectos de combate\"/\"Silenciar efectos de combate\", junto a (sin remover) los controles de música existentes": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066863658
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069645964
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069714584
+      }
+    ],
+    "6.2 Extender `showAudioSettingsPanel(volumePercent, isMuted, combatSfxVolumePercent, combatSfxIsMuted)` en `src/ui/screens.js` para reflejar los dos valores nuevos, e implementar `setCombatSfxMuteButtonState(isMuted)`": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066863710
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069719803
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069833770
+      }
+    ],
+    "6.3 Extender `bindAudioSettingsHandlers({...})` en `src/ui/screens.js` con `onCombatSfxVolumeChange`/`onToggleCombatSfxMute`, cableando los listeners `input`/`click` de los nuevos controles": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066863762
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069838457
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069904718
+      }
+    ],
+    "7.1 Actualizar `onToggleAudioSettings()` para pasar `combatSfx.getEffectiveVolumePercent()`/`combatSfx.isMuted()` a `ui.showAudioSettingsPanel(...)`, junto a los valores de `music` ya existentes": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066863814
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069912468
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785070078256
+      }
+    ],
+    "7.2 Implementar `onCombatSfxVolumeChange(percent)` y `onToggleCombatSfxMute()` (sin invocar ninguna función de `music.js`), y registrar ambos en `ui.bindAudioSettingsHandlers({...})`": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066863877
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785070083377
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785070149220
+      }
+    ],
+    "8. Checkpoint — panel de configuración de audio completo": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066863948
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785070387972
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785070429234
+      }
+    ],
+    "9. Checkpoint final": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785066864030
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785070433903
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785070556650
+      }
+    ],
+    "1.3 Escribir prueba de propiedad para la resolución de rutas sin tabla de mapeo manual": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785067006198
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785067089762
+      }
+    ],
+    "1.6 Escribir prueba de propiedad para el bucle de idle frente a la reproducción única de animaciones de acción": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785067166326
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785067390453
+      }
+    ],
+    "1.7 Escribir prueba de propiedad para la ausencia de solapamiento por rol": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785067394662
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785067610137
+      }
+    ],
+    "1.8 Escribir prueba de propiedad para la robustez ante fallos de reproducción": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785067615351
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785067965587
+      }
+    ],
+    "1.11 Escribir prueba de propiedad para el round-trip de persistencia de preferencias válidas": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068040283
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068375822
+      }
+    ],
+    "1.12 Escribir prueba de propiedad para el descarte de preferencias inválidas": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068040778
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068376648
+      }
+    ],
+    "1. Implementar `src/audio/combatSfx.js` (nuevo módulo)": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068448333
+      }
+    ],
+    "1.14 Escribir prueba de propiedad para el volumen real consistente aplicado a todo sonido activo": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068453301
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068632529
+      }
+    ],
+    "1.15 Escribir pruebas unitarias del módulo `combatSfx.js`": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068454115
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068734396
+      }
+    ],
+    "3. Eliminar `sfx.attack()` de `src/audio/sfx.js`": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068895625
+      }
+    ],
+    "3.3 Escribir pruebas unitarias de la eliminación de `attack` en `sfx.js`": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068900603
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785068989087
+      }
+    ],
+    "4. Integrar `combatSfx` en `src/main.js` mediante wrappers, sin modificar `spriteEngine.js`/`fight.js`/`bossRoster.js`": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069330317
+      }
+    ],
+    "4.5 Escribir prueba de propiedad estática para la eliminación completa y verificable de `sfx.attack()`": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069335201
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069435489
+      }
+    ],
+    "4.6 Escribir pruebas unitarias de la integración en `main.js`": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069335840
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069579283
+      }
+    ],
+    "6. Extender el `Audio_Settings_Panel` con el segundo par de controles (volumen + mute de efectos de combate)": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069904809
+      }
+    ],
+    "6.4 Escribir pruebas unitarias de los nuevos controles del panel": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785069911069
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785070076178
+      }
+    ],
+    "7. Cablear los nuevos controles en `src/main.js`, manteniendo independencia total de `music.js`": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785070149306
+      }
+    ],
+    "7.4 Escribir pruebas unitarias de la independencia entre `combatSfx` y `music`": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785070155424
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785070383955
+      }
+    ],
+    "7.3 Escribir prueba de propiedad para la independencia total respecto a la música y a los efectos de sfx.js restantes": [
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785070156271
+      },
+      {
+        "executionId": "70612b9d-0f30-4b10-86a1-6259fa9596ce",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785070297260
+      }
+    ]
+  }
+}

@@ -2,6 +2,7 @@
 
 import { sfx } from './audio/sfx.js';
 import { music } from './audio/music.js';
+import { combatSfx } from './audio/combatSfx.js';
 import * as engine from './engine/tower.js';
 import * as combat from './combat/fight.js';
 import * as render from './render/draw.js';
@@ -196,8 +197,17 @@ const MODAL_CLOSE_PAUSE_MS = {
 };
 
 function resumeIdleBoth() {
-  combatUiState.warriorEngine.play('idle');
-  combatUiState.bossEngine.play('idle');
+  playWarriorAnim('idle');
+  playBossAnim('idle');
+}
+
+function playWarriorAnim(name, opts) {
+  combatSfx.play('warrior', 'guerrero', name);
+  return combatUiState.warriorEngine.play(name, opts);
+}
+function playBossAnim(name, opts) {
+  combatSfx.play('boss', combatUiState.bossEntry.id, name);
+  return combatUiState.bossEngine.play(name, opts);
 }
 
 /** Boss ataca (con alternancia si aplica) -> guerrero bloqueo/herido según Card_Attempt_State. */
@@ -208,10 +218,10 @@ async function playFailureReaction() {
     : bossEntry.attackAnimations[0];
   if (bossEntry.attackAnimations.length > 1) combatUiState.attackAlternateIndex++;
 
-  await combatUiState.bossEngine.play(attackAnim, { once: true });
+  await playBossAnim(attackAnim, { once: true });
   const reactionAnim = combatUiState.failedAnswerCount === 0 ? 'bloqueo' : 'herido';
   combatUiState.failedAnswerCount++;
-  await combatUiState.warriorEngine.play(reactionAnim, { once: true });
+  await playWarriorAnim(reactionAnim, { once: true });
 }
 
 async function playWinSequence() {
@@ -219,10 +229,10 @@ async function playWinSequence() {
   ui.closeQuestionModal();
   combatUiState.reactionInProgress = true;
   ui.setCardsInteractionLocked(true);
-  await combatUiState.warriorEngine.play('ataque', { once: true });
-  await combatUiState.bossEngine.play('herido', { once: true });
+  await playWarriorAnim('ataque', { once: true });
+  await playBossAnim('herido', { once: true });
   ui.showBanner('¡Guardián derrotado!', 'win');
-  await combatUiState.bossEngine.play('morir', { once: true });
+  await playBossAnim('morir', { once: true });
   endFight(true);
 }
 
@@ -233,7 +243,7 @@ async function playLoseSequence() {
   ui.setCardsInteractionLocked(true);
   await playFailureReaction();
   ui.showBanner('¡Has caído ante el guardián!', 'lose');
-  await combatUiState.warriorEngine.play('morir', { once: true });
+  await playWarriorAnim('morir', { once: true });
   endFight(false);
 }
 
@@ -243,8 +253,8 @@ async function playCorrectNonResolvingSequence(cardEl) {
   ui.renderPips('bossHpBar', fight.bossPips, fight.bossPipsMax);
   combatUiState.reactionInProgress = true;
   ui.setCardsInteractionLocked(true);
-  await combatUiState.warriorEngine.play('ataque', { once: true });
-  await combatUiState.bossEngine.play('herido', { once: true });
+  await playWarriorAnim('ataque', { once: true });
+  await playBossAnim('herido', { once: true });
   if (fight && !fight.resolved) cardEl.classList.remove('locked');
   resumeIdleBoth();
   combatUiState.reactionInProgress = false;
@@ -318,7 +328,10 @@ function onToggleAudioSettings() {
   if (ui.isAudioSettingsPanelVisible()) {
     ui.hideAudioSettingsPanel();
   } else {
-    ui.showAudioSettingsPanel(music.getEffectiveVolumePercent(), music.isMuted());
+    ui.showAudioSettingsPanel(
+      music.getEffectiveVolumePercent(), music.isMuted(),
+      combatSfx.getEffectiveVolumePercent(), combatSfx.isMuted()
+    );
   }
 }
 
@@ -331,6 +344,15 @@ function onToggleMute() {
   music.notifyUserInteraction();
   music.toggleMute();
   ui.setMuteButtonState(music.isMuted());
+}
+
+function onCombatSfxVolumeChange(percent) {
+  combatSfx.setVolume(percent);
+}
+
+function onToggleCombatSfxMute() {
+  combatSfx.toggleMute();
+  ui.setCombatSfxMuteButtonState(combatSfx.isMuted());
 }
 
 function onCloseAudioSettings() {
@@ -373,8 +395,8 @@ function loop(ts) {
       attackAlternateIndex: 0,
       reactionInProgress: false,
     };
-    combatUiState.warriorEngine.play('idle');
-    combatUiState.bossEngine.play('idle');
+    playWarriorAnim('idle');
+    playBossAnim('idle');
     ui.showBossScreen(`${bossEntry.displayName} — Nivel ${lvl}`, fight.cardCount);
     ui.renderPips('playerHpBar', fight.playerPips, fight.playerPipsMax);
     ui.renderPips('bossHpBar', fight.bossPips, fight.bossPipsMax);
@@ -399,9 +421,12 @@ ui.bindAudioSettingsHandlers({
   onToggleSettings: onToggleAudioSettings,
   onVolumeChange,
   onToggleMute,
+  onCombatSfxVolumeChange,
+  onToggleCombatSfxMute,
   onCloseSettings: onCloseAudioSettings
 });
 music.init();
+combatSfx.init();
 
 // Precarga de los Sprite_Animation_Engine (Warrior_Sprite + los 5 Boss_Sprite),
 // en paralelo con el resto de la inicialización del módulo. `loop()` ya se
