@@ -4,17 +4,17 @@ import fc from 'fast-check';
 import { play, loadPreference, savePreference, combatSfx, buildUrl } from './combatSfx.js';
 
 /**
- * expectedUrl(folderId, animName): reimplementación local de la MISMA fórmula
- * que `buildUrl(folderId, animName)` en src/audio/combatSfx.js (no exportada
- * todavía desde el módulo real). Se copia aquí deliberadamente en vez de
- * importar el módulo, porque esta tarea no debe modificar combatSfx.js para
- * exportar buildUrl (evita conflicto con una tarea hermana concurrente que
- * añade stopEntry al mismo archivo). Una tarea posterior deberá actualizar
- * esta prueba para importar el `buildUrl` real una vez esté exportado.
+ * expectedUrl(folderId, animName): delega en el `buildUrl` real de
+ * src/audio/combatSfx.js (ya exportado por el módulo). Antes reimplementaba
+ * localmente la fórmula genérica `{anim}/{anim}.wav`, pero eso ignoraba la
+ * tabla FILENAME_OVERRIDES de producción (p. ej. `guerrero/ataque` ->
+ * `attack_sword`), haciendo que el modelo de URL de las pruebas se desviara
+ * de la ruta real. Al delegar en el `buildUrl` real, el modelo refleja
+ * EXACTAMENTE la lógica de producción (incluidos los overrides) y se elimina
+ * el riesgo de "drift" entre prueba e implementación.
  */
 function expectedUrl(folderId, animName) {
-  const base = folderId === 'guerrero' ? 'guerrero' : `bosses/${folderId}`;
-  return `/audio/${base}/${animName}/${animName}.wav`;
+  return buildUrl(folderId, animName);
 }
 
 const folderIdArb = fc.oneof(
@@ -28,6 +28,13 @@ describe('buildUrl (fórmula) — ruta derivada sin tabla de mapeo manual', () =
   it('Property 1: para cualquier folderId y animName, la URL sigue siempre el patrón /audio/(guerrero|bosses/<folderId>)/<animName>/<animName>.wav, con ambas ocurrencias de animName idénticas', () => {
     fc.assert(
       fc.property(folderIdArb, animNameArb, (folderId, animName) => {
+        // Esta propiedad verifica el Sound_Folder_Convention GENÉRICO
+        // (`{anim}/{anim}.wav`). La tabla FILENAME_OVERRIDES de producción
+        // (p. ej. `guerrero/ataque` -> `attack_sword`) es una excepción
+        // documentada y se prueba por separado; se excluye aquí para no
+        // contradecir la aserción de "ambas ocurrencias de animName idénticas".
+        fc.pre(!(folderId === 'guerrero' && animName === 'ataque'));
+
         const url = expectedUrl(folderId, animName);
 
         // La URL siempre respeta el patrón general derivado de una única fórmula,

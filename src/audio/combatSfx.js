@@ -24,15 +24,28 @@ function realVolume() {
 }
 
 /**
+ * Sound_Filename_Overrides: excepciones puntuales al Sound_Folder_Convention
+ * (`{anim}/{anim}.wav`). El Character_Voice_Sound del ataque del Warrior_Sprite
+ * vive en disco como `attack_sword.wav` (no `ataque.wav`), por lo que la
+ * convención por defecto resolvería una ruta inexistente y el ataque del
+ * guerrero quedaría mudo al acertar durante un duelo. La clave es
+ * `"{folderId}/{animName}"` y el valor es el nombre de archivo real (sin `.wav`).
+ */
+const FILENAME_OVERRIDES = {
+  'guerrero/ataque': 'attack_sword',
+};
+
+/**
  * buildUrl(folderId, animName): resuelve la ruta del Character_Voice_Sound
- * siguiendo el Sound_Folder_Convention, sin tabla de mapeo manual
- * (Requirement 1.3, 1.4). `folderId` es 'guerrero' para el Warrior_Sprite,
- * o el `id` de un BOSS_ROSTER entry (p. ej. 'boss_1_titan_guerrero') para
- * el Boss_Sprite activo.
+ * siguiendo el Sound_Folder_Convention (`{anim}/{anim}.wav`), con soporte para
+ * excepciones puntuales vía FILENAME_OVERRIDES (Requirement 1.3, 1.4).
+ * `folderId` es 'guerrero' para el Warrior_Sprite, o el `id` de un BOSS_ROSTER
+ * entry (p. ej. 'boss_1_titan_guerrero') para el Boss_Sprite activo.
  */
 function buildUrl(folderId, animName) {
   const base = folderId === 'guerrero' ? 'guerrero' : `bosses/${folderId}`;
-  return `/audio/${base}/${animName}/${animName}.wav`;
+  const fileName = FILENAME_OVERRIDES[`${folderId}/${animName}`] || animName;
+  return `/audio/${base}/${animName}/${fileName}.wav`;
 }
 
 /**
