@@ -1,5 +1,7 @@
 /* ===== RENDER: dibujo del mundo de juego en canvas ===== */
 
+import * as bossFightRender from './bossFightRender.js';
+
 export function elevToScreen(camElev, elev, H) {
   return H * 0.62 - (elev - camElev);
 }
@@ -262,12 +264,17 @@ export function drawKnight(ctx, topFloorRef, knight, camElev, H) {
   ctx.globalAlpha = 1;
 }
 
-export function render(ctx, W, H, gameState) {
+export function render(ctx, W, H, gameState, combatUiState) {
   drawSky(ctx, W, H, gameState.clouds);
   drawTower(ctx, W, H, gameState.camElev, gameState.floors);
   drawMovingBlock(ctx, W, H, gameState.camElev, gameState.screen, gameState.floors, gameState.moving, gameState.knight.animating);
   if (gameState.screen === 'build' || gameState.screen === 'falling') {
     const topFloorRef = gameState.floors[gameState.floors.length - 1];
     drawKnight(ctx, topFloorRef, gameState.knight, gameState.camElev, H);
+  }
+  if (gameState.screen === 'boss' && combatUiState) {
+    bossFightRender.updateCombatants(gameState.lastDt || 0, combatUiState.warriorEngine, combatUiState.bossEngine);
+    bossFightRender.drawBattleBackground(ctx, W, H, combatUiState.backgroundImage);
+    bossFightRender.drawCombatants(ctx, W, H, combatUiState.warriorEngine, combatUiState.bossEngine);
   }
 }

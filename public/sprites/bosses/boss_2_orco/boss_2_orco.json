@@ -1,0 +1,33 @@
+{
+  "displayWidth": 550,
+  "displayHeight": 750,
+  "frameWidth": 400,
+  "frameHeight": 600,
+  "animations": {
+    "idle": {
+      "file": "idle.png",
+      "layout": "row",
+      "frameCount": 4,
+      "fps": 7
+    },
+    "ataque": {
+      "file": "ataque.png",
+      "layout": "row",
+      "frameCount": 7,
+      "fps": 7
+    },
+    "herido": {
+      "file": "herido.png",
+      "layout": "row",
+      "frameCount": 6,
+      "fps": 7
+    },
+    "morir": {
+      "file": "morir.png",
+      "layout": "row",
+      "frameCount": 11,
+      "fps": 7,
+      "loop": false
+    }
+  }
+}

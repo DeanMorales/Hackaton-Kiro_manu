@@ -1,0 +1,438 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Implementar `SpriteAnimationEngine.load(jsonPath, baseFolder)`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041542646
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041555250
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041678955
+      }
+    ],
+    "1.2 Implementar el cálculo del rectángulo fuente (`getFrameRect()`) para `layout: \"grid\"` y `layout: \"row\"`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041542764
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041683468
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041898030
+      }
+    ],
+    "1.4 Implementar `update(dt)` y `play(name, opts)`: avance de fotograma, modo continuo vs. `once`/`loop:false`, y resolución de la Promise de `play()`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041542928
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041943453
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042138231
+      }
+    ],
+    "1.7 Implementar `draw(ctx, x, y)` y `currentAnimationName`, verificando que ningún método del motor tenga ramas condicionales específicas de personaje": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041543044
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042293844
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042294767
+      }
+    ],
+    "1.8 Implementar manejo de errores: fallo de carga (JSON o imagen) deja una instancia con `update()`/`draw()` no-op seguros; `play()` con un nombre de animación inexistente se ignora con advertencia en consola": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041543148
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042306228
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042537083
+      }
+    ],
+    "2.1 Definir `BOSS_ROSTER` con las 5 entradas reales (`boss_1_titan_guerrero` .. `boss_5_brujo`), cada una con `id`, `jsonPath`, `displayName`, `background` y `attackAnimations` (`['ataque_1','ataque_2']` solo para `boss_1_titan_guerrero`, `['ataque']` para el resto), usando las rutas exactas ya presentes en `public/sprites/bosses/` y `public/background/`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041543227
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042557260
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042673104
+      }
+    ],
+    "2.2 Implementar `selectBoss(bossesResolved)`: orden fijo para `bossesResolved` en `[0,4]`, selección aleatoria con repetición para `bossesResolved >= 5`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041543297
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042674423
+      }
+    ],
+    "2.5 Implementar `isAlternatingAttackBoss(bossEntry)` (`attackAnimations.length > 1`)": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041543375
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042675523
+      }
+    ],
+    "3.1 Definir `COMBAT_LAYOUT` y `drawBattleBackground(ctx, W, H, backgroundImage)` (fondo estirado a pantalla completa)": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041543446
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042558138
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042676893
+      }
+    ],
+    "3.2 Implementar `drawCombatants(ctx, W, H, warriorEngine, bossEngine)` (guerrero a la izquierda, boss a la derecha, línea base compartida)": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041543527
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042678140
+      }
+    ],
+    "3.4 Implementar `updateCombatants(dt, warriorEngine, bossEngine)` (avanza ambos motores independientemente de si hay una `Combat_Reaction` en curso)": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041543594
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042679063
+      }
+    ],
+    "4. Checkpoint — capa de render": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041543665
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042836744
+      }
+    ],
+    "5.1 Añadir el parámetro `combatUiState` a `render(ctx, W, H, gameState, combatUiState)` y, cuando `gameState.screen === 'boss'` y `combatUiState` existe, invocar `bossFightRender.updateCombatants`, `drawBattleBackground` y `drawCombatants` en ese orden, sin modificar `drawSky`/`drawTower`/`drawMovingBlock`/`drawKnight`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041543783
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042842626
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785043036884
+      }
+    ],
+    "6.1 Crear `public/audio/guerrero/{bloqueo,herido,morir}/.gitkeep`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041543866
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042850672
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785043027495
+      }
+    ],
+    "6.2 Crear `public/audio/bosses/boss_1_titan_guerrero/{idle,ataque_1,ataque_2,herido,morir}/.gitkeep`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041543936
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785043029122
+      }
+    ],
+    "6.3 Crear `public/audio/bosses/{boss_2_orco,boss_3_tigre,boss_4_golem,boss_5_brujo}/{idle,ataque,herido,morir}/.gitkeep`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041544009
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785043030144
+      }
+    ],
+    "7.1 Implementar `setCardsInteractionLocked(isLocked)`: deshabilita/habilita los botones `.opt-btn` de toda carta que no tenga ya la clase `locked` permanente": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041544078
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042860160
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785043031606
+      }
+    ],
+    "8.1 Simplificar `#bossScreen` a `hp-label`/`hp-bar` (`playerHpBar`, `bossHpBar`)/`fightBanner`/`cardsRow` como hijos directos, eliminando `.arena`, `.combatant`, ambos `.fighter` y sus `.facet-*`, y `.vs-badge`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041544179
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042866737
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785043033818
+      }
+    ],
+    "8.2 Eliminar del `<style>` todas las reglas CSS listadas en design.md sección 6 (`.arena`, `.combatant`, `.fighter`, `.facet`, `.knight-*`, `.boss-*` excepto `#bossName`, `.vs-badge`, y la regla `@media (max-width:520px) .fighter{...}`) y añadir la regla `#bossScreen { background: none; }`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041544252
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785043035470
+      }
+    ],
+    "9. Checkpoint — soporte independiente completo": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041544318
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785043047924
+      },
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785043208207
+      }
+    ],
+    "10.1 Precargar `warriorEngine` y las 5 `bossEngines` (una por `BOSS_ROSTER` entry) con `SpriteAnimationEngine.load(...)` en la inicialización del módulo, antes de que cualquier combate pueda iniciarse": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041544384
+      }
+    ],
+    "10.3 Reemplazar la rama `shouldStartBoss` de `loop()`: usar `selectBoss(gameState.doorsPassed)` para obtener `bossEntry`, construir `combatUiState` (`bossEntry`, `warriorEngine`, `bossEngine` correspondiente, `failedAnswerCount: 0`, `attackAlternateIndex: 0`, `reactionInProgress: false`), llamar `play('idle')` en ambos motores, e invocar `ui.showBossScreen` con el `bossLabel` construido como `` `${bossEntry.displayName} — Nivel ${lvl}` `` — **ignorando por completo `fight.bossLabel`**": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041544459
+      }
+    ],
+    "10.5 Guardar el `dt` calculado en `loop()` en `gameState.lastDt` y pasarlo a `render.render(...)` junto con `combatUiState`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041544551
+      }
+    ],
+    "10.6 Añadir el guard `combatUiState.reactionInProgress` en `onCardClick(idx)`, evaluado antes de `card.locked`, de forma que ninguna carta —volteada o no— pueda iniciar `ui.renderCardBack`/su flujo de apertura mientras una `Combat_Reaction` está en curso": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041544626
+      }
+    ],
+    "10.8 Implementar `playFailureReaction()`: selecciona la animación de ataque del boss (con alternancia `ataque_1`/`ataque_2` vía `attackAlternateIndex` para el Alternating_Attack_Boss), la reproduce con `once:true`, y luego reproduce `bloqueo` (si `failedAnswerCount === 0`) o `herido` en el Warrior_Sprite, incrementando `failedAnswerCount`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041544695
+      }
+    ],
+    "10.10 Implementar `resumeIdleBoth()`: reproduce `idle` en `warriorEngine` y `bossEngine`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041544765
+      }
+    ],
+    "10.12 Implementar `playWinSequence()`: marca `reactionInProgress = true` y `setCardsInteractionLocked(true)`, reproduce `ataque` (guerrero) → `herido` (boss), muestra el banner de victoria, reproduce `morir` (boss), e invoca `endFight(true)`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041544842
+      }
+    ],
+    "10.14 Implementar `playLoseSequence()`: marca `reactionInProgress = true` y `setCardsInteractionLocked(true)`, invoca `playFailureReaction()`, muestra el banner de derrota, reproduce `morir` (guerrero), e invoca `endFight(false)`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041544946
+      }
+    ],
+    "10.16 Implementar `playCorrectNonResolvingSequence(cardEl)`: marca `reactionInProgress`/bloqueo de cartas, reproduce `ataque` (guerrero) → `herido` (boss), quita `flipped` de `cardEl`, llama `resumeIdleBoth()`, y desbloquea cartas (`reactionInProgress = false`, `setCardsInteractionLocked(false)`)": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041545031
+      }
+    ],
+    "10.17 Implementar `playIncorrectNonResolvingSequence()`: marca `reactionInProgress`/bloqueo de cartas, invoca `playFailureReaction()`, llama `resumeIdleBoth()`, y desbloquea cartas": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041545097
+      }
+    ],
+    "10.19 Reescribir `onAnswer(cardIdx, chosenIdx)`: eliminar todos los `setTimeout` de la rama de resultado; mantener el marcado visual inmediato y `sfx.correct()`/`sfx.wrong()`/`sfx.win()`/`sfx.lose()` y `ui.renderPips(...)` sin cambios de temporización; despachar a `playWinSequence()`, `playLoseSequence()`, `playCorrectNonResolvingSequence(cardEl)` o `playIncorrectNonResolvingSequence()` según `result.outcome`/`result.correct`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041545164
+      }
+    ],
+    "10.21 Modificar `endFight(won)` para limpiar `combatUiState = null` junto con `fight = null`, preservando el resto del comportamiento existente (registro de score, `showGameOverScreen`, transición de `screen`)": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041545244
+      }
+    ],
+    "11. Checkpoint final": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785041545320
+      }
+    ],
+    "2. Implementar `Boss_Rotation` (`src/data/bossRoster.js`, nuevo)": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042675587
+      }
+    ],
+    "3. Implementar `Boss_Fight_Renderer` (`src/render/bossFightRender.js`, nuevo)": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785042679121
+      }
+    ],
+    "6. Crear la estructura de carpetas de audio placeholder (Requirement 13)": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785043030212
+      }
+    ],
+    "7. Añadir `setCardsInteractionLocked` a `src/ui/screens.js`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785043031704
+      }
+    ],
+    "8. Eliminar el markup/CSS obsoleto del combate DOM en `index.html`": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785043035546
+      }
+    ],
+    "5. Extender `src/render/draw.js` para dibujar el combate": [
+      {
+        "executionId": "28df786b-dc0c-419a-9c5d-1bb89e1dea06",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785043036995
+      }
+    ]
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "displayWidth": 260,
+  "displayHeight": 360,
+  "frameWidth": 260,
+  "frameHeight": 360,
+  "animations": {
+    "idle": {
+      "file": "idle.png",
+      "layout": "grid",
+      "columns": 8,
+      "rows": 5,
+      "frameCount": 40,
+      "fps": 7
+    },
+    "ataque": {
+      "file": "ataque.png",
+      "layout": "row",
+      "frameCount": 8,
+      "fps": 7
+    },
+    "bloqueo": {
+      "file": "bloqueo.png",
+      "layout": "row",
+      "frameCount": 8,
+      "fps": 7
+    },
+    "herido": {
+      "file": "herido.png",
+      "layout": "row",
+      "frameCount": 8,
+      "fps": 7
+    },
+    "morir": {
+      "file": "morir.png",
+      "layout": "row",
+      "frameCount": 8,
+      "fps": 7,
+      "loop": false
+    }
+  }
+}
