@@ -1068,28 +1068,78 @@ function drawTorch(tx, ty, seed){
 }
 
 function drawTower(){
-  const palette = [['#9aa3b3','#6b7488'], ['#8a93a3','#5b6577']];
   state.floors.forEach((f, i)=>{
     const yTop = elevToScreen(f.top);
     const yBot = elevToScreen(f.bottom);
     if(yBot < -60 || yTop > H+60) return;
-    drawFacetedBlock(f.x, yTop, f.width, yBot-yTop, f.seed*1000, palette[i%2], f.isDoor);
+    // i=0 es la plataforma base (sin color de gradiente); i>=1 son pisos colocados.
+    const palette = i === 0
+      ? ['#3a4554','#2a3340']       // base de la torre: gris-azul oscuro fijo
+      : floorPalette(i);            // gradiente AWS según el índice del piso
+    drawFacetedBlock(f.x, yTop, f.width, yBot-yTop, f.seed*1000, palette, f.isDoor);
   });
 }
 
-// tower-progression-scaling: Requirement 4.1, 4.3, 4.4, 4.5, 4.6, 4.7
-const PROGRESS_PALETTES = [
-  ['#9aa3b3', '#6b7488'], // 0 duelos: gris neutro
-  ['#5fb37a', '#2f8f52'], // 1 duelo: verde
-  ['#4aa3ff', '#2b6fcb'], // 2 duelos: azul
-  ['#f2a641', '#b9932f'], // 3 duelos: naranja/dorado
-  ['#b287ff', '#7a4fd1'], // 4+ duelos: púrpura
+// ── Gradiente de color para los bloques apilados ──────────────────────────────
+// Piso 1 = #2E3A46  →  Piso 40 = #FFFFFF (nivel 8, tras 8 duelos × 5 pisos).
+// Se extiende linealmente si el jugador supera el piso 40.
+const AWS_GRADIENT = [
+  '#2E3A46','#26387D','#1D35B5','#1533EC','#0E48C8',
+  '#075DA5','#007281','#19578A','#313B92','#4A209B',
+  '#864867','#C37134','#FF9900','#FFBB55','#FFDDAA','#FFFFFF',
 ];
+const AWS_GRADIENT_MAX_FLOOR = 40; // piso en el que se alcanza #FFFFFF
 
-function getBlockColorPalette(nivelProgreso) {
-  const safeLevel = Number.isFinite(nivelProgreso) ? Math.trunc(nivelProgreso) : 0;
-  const clamped = Math.max(0, Math.min(safeLevel, PROGRESS_PALETTES.length - 1));
-  return PROGRESS_PALETTES[clamped];
+// Parsea un color hex a [r, g, b] (0-255).
+function hexToRgb(hex){
+  const n = parseInt(hex.replace('#',''), 16);
+  return [(n>>16)&0xFF, (n>>8)&0xFF, n&0xFF];
+}
+
+// Interpola linealmente entre dos colores [r,g,b] con t ∈ [0,1].
+function lerpRgb(a, b, t){
+  return [
+    Math.round(a[0] + (b[0]-a[0])*t),
+    Math.round(a[1] + (b[1]-a[1])*t),
+    Math.round(a[2] + (b[2]-a[2])*t),
+  ];
+}
+
+// Convierte [r, g, b] a hex string '#rrggbb'.
+function rgbToHex([r,g,b]){
+  return '#' + [r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
+/**
+ * Devuelve el color hex para un piso dado (1-indexed).
+ * – Piso 1  → AWS_GRADIENT[0]  (#2E3A46)
+ * – Piso 40 → AWS_GRADIENT[15] (#FFFFFF)
+ * – Por encima del piso 40 se mantiene en #FFFFFF.
+ */
+function getFloorColor(floorIndex){
+  // floorIndex: 1 = primer piso colocado (floors[1])
+  const stops = AWS_GRADIENT.length; // 16
+  const maxFloor = AWS_GRADIENT_MAX_FLOOR; // 40
+  const t = Math.min(1, Math.max(0, (floorIndex - 1) / (maxFloor - 1)));
+  // Posición dentro del array de paradas (0 … stops-1)
+  const pos = t * (stops - 1);
+  const lo  = Math.floor(pos);
+  const hi  = Math.min(stops - 1, lo + 1);
+  const frac = pos - lo;
+  const colorA = hexToRgb(AWS_GRADIENT[lo]);
+  const colorB = hexToRgb(AWS_GRADIENT[hi]);
+  return rgbToHex(lerpRgb(colorA, colorB, frac));
+}
+
+/**
+ * Genera una paleta [colorClaro, colorOscuro] para drawFacetedBlock a partir
+ * del color base del piso, oscureciendo ligeramente el segundo stop.
+ */
+function floorPalette(floorIndex){
+  const base = getFloorColor(floorIndex);
+  const [r,g,b] = hexToRgb(base);
+  const dark = rgbToHex([Math.round(r*0.65), Math.round(g*0.65), Math.round(b*0.65)]);
+  return [base, dark];
 }
 
 function drawMovingBlock(){
@@ -1098,7 +1148,9 @@ function drawMovingBlock(){
   const m = state.moving;
   const yTop = elevToScreen(tf.top + m.height);
   const nextIsDoor = (state.floors.length) % DOOR_INTERVAL === 0;
-  const palette = nextIsDoor ? ['#e8c96b','#b9932f'] : getBlockColorPalette(state.doorsPassed);
+  // El bloque en movimiento muestra el color que tendrá una vez apilado.
+  // state.floors.length es el índice 1-based del próximo piso a colocar.
+  const palette = nextIsDoor ? ['#e8c96b','#b9932f'] : floorPalette(state.floors.length);
   drawFacetedBlock(m.x, yTop, m.width, m.height, 42, palette, false);
   if(nextIsDoor){
     ctx.fillStyle='rgba(242,166,65,.9)';

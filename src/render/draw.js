@@ -127,38 +127,79 @@ export function drawTorch(ctx, tx, ty, seed) {
   ctx.fill();
 }
 
-const PROGRESS_PALETTES = [
-  ['#9aa3b3', '#6b7488'], // 0 duelos: gris neutro
-  ['#5fb37a', '#2f8f52'], // 1 duelo: verde
-  ['#4aa3ff', '#2b6fcb'], // 2 duelos: azul
-  ['#f2a641', '#b9932f'], // 3 duelos: naranja/dorado
-  ['#b287ff', '#7a4fd1'], // 4+ duelos: púrpura
+// ── Gradiente de color para los bloques apilados ──────────────────────────────
+// Piso 1 = #2E3A46  →  Piso 40 = #FFFFFF (nivel 8, tras 8 duelos × 5 pisos).
+// Se extiende linealmente si el jugador supera el piso 40.
+const AWS_GRADIENT = [
+  '#2E3A46','#26387D','#1D35B5','#1533EC','#0E48C8',
+  '#075DA5','#007281','#19578A','#313B92','#4A209B',
+  '#864867','#C37134','#FF9900','#FFBB55','#FFDDAA','#FFFFFF',
 ];
+const AWS_GRADIENT_MAX_FLOOR = 40;
 
-export function getBlockColorPalette(nivelProgreso) {
-  const safeLevel = Number.isFinite(nivelProgreso) ? Math.trunc(nivelProgreso) : 0;
-  const clamped = Math.max(0, Math.min(safeLevel, PROGRESS_PALETTES.length - 1));
-  return PROGRESS_PALETTES[clamped];
+function hexToRgb(hex) {
+  const n = parseInt(hex.replace('#', ''), 16);
+  return [(n >> 16) & 0xFF, (n >> 8) & 0xFF, n & 0xFF];
+}
+
+function lerpRgb(a, b, t) {
+  return [
+    Math.round(a[0] + (b[0] - a[0]) * t),
+    Math.round(a[1] + (b[1] - a[1]) * t),
+    Math.round(a[2] + (b[2] - a[2]) * t),
+  ];
+}
+
+function rgbToHex([r, g, b]) {
+  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Devuelve el color hex para un piso dado (1-indexed).
+ * Piso 1 → AWS_GRADIENT[0] (#2E3A46), Piso 40 → AWS_GRADIENT[15] (#FFFFFF).
+ */
+export function getFloorColor(floorIndex) {
+  const stops = AWS_GRADIENT.length;
+  const t = Math.min(1, Math.max(0, (floorIndex - 1) / (AWS_GRADIENT_MAX_FLOOR - 1)));
+  const pos = t * (stops - 1);
+  const lo = Math.floor(pos);
+  const hi = Math.min(stops - 1, lo + 1);
+  const frac = pos - lo;
+  return rgbToHex(lerpRgb(hexToRgb(AWS_GRADIENT[lo]), hexToRgb(AWS_GRADIENT[hi]), frac));
+}
+
+/**
+ * Genera una paleta [colorClaro, colorOscuro] para drawFacetedBlock.
+ */
+export function floorPalette(floorIndex) {
+  const base = getFloorColor(floorIndex);
+  const [r, g, b] = hexToRgb(base);
+  const dark = rgbToHex([Math.round(r * 0.65), Math.round(g * 0.65), Math.round(b * 0.65)]);
+  return [base, dark];
 }
 
 export function drawTower(ctx, W, H, camElev, floors) {
-  const palette = [['#9aa3b3','#6b7488'], ['#8a93a3','#5b6577']];
   floors.forEach((f, i) => {
     const yTop = elevToScreen(camElev, f.top, H);
     const yBot = elevToScreen(camElev, f.bottom, H);
     if (yBot < -60 || yTop > H + 60) return;
-    drawFacetedBlock(ctx, f.x, yTop, f.width, yBot - yTop, f.seed * 1000, palette[i % 2], f.isDoor);
+    // i=0 es la plataforma base; i>=1 son pisos colocados con gradiente AWS.
+    const palette = i === 0
+      ? ['#3a4554', '#2a3340']
+      : floorPalette(i);
+    drawFacetedBlock(ctx, f.x, yTop, f.width, yBot - yTop, f.seed * 1000, palette, f.isDoor);
   });
 }
 
-export function drawMovingBlock(ctx, W, H, camElev, screen, floors, moving, knightAnimating, nivelProgreso = 0) {
+export function drawMovingBlock(ctx, W, H, camElev, screen, floors, moving, knightAnimating) {
   if (screen !== 'build' || !moving || knightAnimating) return;
   const tf = floors[floors.length - 1];
   const m = moving;
   const yTop = elevToScreen(camElev, tf.top + m.height, H);
-  const DOOR_INTERVAL = 5; // constante del engine
+  const DOOR_INTERVAL = 5;
   const nextIsDoor = floors.length % DOOR_INTERVAL === 0;
-  const palette = nextIsDoor ? ['#e8c96b','#b9932f'] : getBlockColorPalette(nivelProgreso);
+  // El bloque muestra el color que tendrá una vez apilado: floors.length es su índice 1-based.
+  const palette = nextIsDoor ? ['#e8c96b', '#b9932f'] : floorPalette(floors.length);
   drawFacetedBlock(ctx, m.x, yTop, m.width, m.height, 42, palette, false);
   if (nextIsDoor) {
     ctx.fillStyle = 'rgba(242,166,65,.9)';
@@ -224,7 +265,7 @@ export function drawKnight(ctx, topFloorRef, knight, camElev, H) {
 export function render(ctx, W, H, gameState) {
   drawSky(ctx, W, H, gameState.clouds);
   drawTower(ctx, W, H, gameState.camElev, gameState.floors);
-  drawMovingBlock(ctx, W, H, gameState.camElev, gameState.screen, gameState.floors, gameState.moving, gameState.knight.animating, gameState.doorsPassed);
+  drawMovingBlock(ctx, W, H, gameState.camElev, gameState.screen, gameState.floors, gameState.moving, gameState.knight.animating);
   if (gameState.screen === 'build' || gameState.screen === 'falling') {
     const topFloorRef = gameState.floors[gameState.floors.length - 1];
     drawKnight(ctx, topFloorRef, gameState.knight, gameState.camElev, H);
