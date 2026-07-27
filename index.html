@@ -477,6 +477,21 @@
       <input type="range" id="combatSfxVolumeSlider" min="0" max="100" step="1" />
       <button id="combatSfxMuteToggleBtn" class="btn-secondary" aria-pressed="false">Silenciar efectos de combate</button>
 
+      <div class="audio-control-group">
+        <label for="celebrationBoostSlider">
+          Boost de celebración: <span id="celebrationBoostValue">1.5×</span>
+        </label>
+        <input
+          id="celebrationBoostSlider"
+          type="range"
+          min="1.0"
+          max="3.0"
+          step="0.1"
+          value="1.5"
+          aria-label="Multiplicador de volumen de celebración"
+        />
+      </div>
+
       <button id="closeAudioSettingsBtn" class="btn-primary">Cerrar</button>
     </div>
   </div>

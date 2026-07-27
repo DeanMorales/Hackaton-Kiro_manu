@@ -1,0 +1,179 @@
+{
+  "pbtResults": {
+    "1. Write bug condition exploration test": {
+      "status": "passed",
+      "failingExample": "Bug 1 — Counterexample 1: playMilestoneAudio(15) con volume=0.06, muted=false → audioEl.volume = 0.06 (sin boost) en lugar de 0.09 (Math.min(1, 0.06 * 1.5)). AssertionError: expected 0.06 to be close to 0.09, received difference is 0.03. Bug 1 — Counterexample 2: typeof milestoneSfx.setBoost === 'undefined' (API de boost ausente). AssertionError: expected 'undefined' to be 'function'. Bug 2 — Counterexample: setTimeout no encontrado en la rama if (won) de endFight — showMilestoneCelebration se llama sincrónicamente. AssertionError: expected -1 not to be -1 (setTimeout ausente en la rama if won).",
+      "lastRunTimestamp": 1785112180744
+    },
+    "2. Write preservation property tests (BEFORE implementing fix)": {
+      "status": "passed",
+      "lastRunTimestamp": 1785112303801
+    },
+    "3.6 Verify preservation tests still pass": {
+      "status": "passed",
+      "lastRunTimestamp": 1785112895250
+    }
+  },
+  "executionHistory": {
+    "1. Write bug condition exploration test": [
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785111923109
+      },
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785111928573
+      },
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785112212267
+      }
+    ],
+    "2. Write preservation property tests (BEFORE implementing fix)": [
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785111923160
+      },
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785112215170
+      },
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785112333648
+      }
+    ],
+    "3.1 Añadir estado de boost en `src/audio/milestoneSfx.js`": [
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785111923192
+      },
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785112338733
+      },
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785112483080
+      }
+    ],
+    "3.2 Añadir delay de celebración en `src/main.js`": [
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785111923236
+      },
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785112488261
+      },
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785112773086
+      }
+    ],
+    "3.3 Extender `src/ui/screens.js` con control de boost de celebración": [
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785111923295
+      },
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785112505764
+      },
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785112773895
+      }
+    ],
+    "3.4 Añadir control slider en `index.html`": [
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785111923340
+      },
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785112506744
+      },
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785112774736
+      }
+    ],
+    "3.5 Verify bug condition exploration test now passes": [
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785111923390
+      },
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785112780264
+      },
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785112861069
+      }
+    ],
+    "3.6 Verify preservation tests still pass": [
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785111923428
+      },
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785112864970
+      },
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785112910819
+      }
+    ],
+    "4. Checkpoint — Ensure all tests pass": [
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785111923504
+      },
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785112914464
+      },
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785112987904
+      }
+    ],
+    "3. Fix — Boost de volumen en `milestoneSfx` y delay de confeti en `endFight`": [
+      {
+        "executionId": "21d16608-745a-4715-bab8-a9fcb2c4502b",
+        "chatSessionId": "sess_010767f9-58a5-4dc5-8e38-062e7bc1e48e",
+        "timestamp": 1785112910865
+      }
+    ]
+  }
+}

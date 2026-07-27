@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Confetti</title>
+<meta name="category" content="Creative">
+<style>
+  body { margin: 0; background-color: #18181b; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script type="53757dc10f8e16b20ed40ed6-text/javascript">
+    const c = document.getElementById("c");
+    const ctx = c.getContext("2d");
+    let cH, cW;
+    const bgColor = "#18181b";
+    let circles = [];
+
+    const colorPicker = (function() {
+      const colors = ["#C084FC", "#22D3EE", "#A78BFA", "#F472B6"];
+      let index = 0;
+      function next() {
+        index = index < colors.length - 1 ? index + 1 : 0;
+        return colors[index];
+      }
+      return { next };
+    })();
+
+    class Circle {
+        constructor({ x, y, r, c, v }) {
+            this.x = x;
+            this.y = y;
+            this.r = r;
+            this.c = c;
+            this.v = v;
+            this.alpha = 1;
+            this.decay = Math.random() * 0.02 + 0.015;
+        }
+
+        draw() {
+            ctx.globalAlpha = this.alpha;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false);
+            ctx.fillStyle = this.c;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        update() {
+            this.x += this.v.x;
+            this.y += this.v.y;
+            this.alpha -= this.decay;
+            if (this.alpha <= this.decay) {
+                 const index = circles.indexOf(this);
+                 if (index > -1) circles.splice(index, 1);
+            }
+        }
+    }
+
+    function animateParticules(x, y) {
+        const circleCount = Math.floor(Math.random() * 20) + 30;
+        for (let i = 0; i < circleCount; i++) {
+            const angle = Math.random() * 2 * Math.PI;
+            const velocity = Math.random() * 6 + 2;
+            circles.push(new Circle({
+                x,
+                y,
+                r: Math.random() * 4 + 2,
+                c: colorPicker.next(),
+                v: {
+                    x: Math.cos(angle) * velocity,
+                    y: Math.sin(angle) * velocity
+                }
+            }));
+        }
+    }
+
+    const mainLoop = () => {
+        update();
+        draw();
+        requestAnimationFrame(mainLoop);
+    };
+
+    const update = () => {
+        circles.forEach(c => c.update());
+    };
+
+    const draw = () => {
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, cW, cH);
+        circles.forEach(c => c.draw());
+    };
+
+    const resizeCanvas = () => {
+        cW = c.width = window.innerWidth * 2; // Use higher resolution for crispness
+        cH = c.height = window.innerHeight * 2;
+        c.style.width = window.innerWidth + 'px';
+        c.style.height = window.innerHeight + 'px';
+        ctx.scale(2, 2);
+    };
+
+    function randomClick() {
+        const randomX = Math.random() * cW / 2;
+        const randomY = Math.random() * cH / 2;
+        animateParticules(randomX, randomY);
+        setTimeout(randomClick, Math.random() * 1500 + 500);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    
+    if (typeof window.isThumbnail !== 'undefined' && window.isThumbnail) {
+        circles = [];
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, cW, cH);
+        animateParticules(cW / 4, cH / 4);
+        animateParticules(cW / 4 * 3, cH / 4 * 3);
+        for (let i = 0; i < 20; i++) {
+            update();
+        }
+        draw();
+    } else {
+        mainLoop();
+        randomClick();
+    }
+</script>
+<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="53757dc10f8e16b20ed40ed6-|49" defer></script></body>
+</html>

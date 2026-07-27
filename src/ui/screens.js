@@ -637,17 +637,21 @@ export function showIncompatibilityMessage(reason) {
 
 /**
  * Muestra el panel de configuración de audio, reflejando el volumen y el estado de mute vigentes
- * tanto de la música como de los efectos de combate.
+ * tanto de la música como de los efectos de combate, y el boost de celebración.
  * @param {number} volumePercent - Volumen efectivo actual de música (0-100) a reflejar en el slider.
  * @param {boolean} isMuted - Estado de silencio actual de música a reflejar en el botón de mute.
  * @param {number} combatSfxVolumePercent - Volumen efectivo actual de efectos de combate (0-100).
  * @param {boolean} combatSfxIsMuted - Estado de silencio actual de efectos de combate.
+ * @param {number} celebrationBoostValue - Multiplicador de volumen de celebración (1.0–3.0).
  */
-export function showAudioSettingsPanel(volumePercent, isMuted, combatSfxVolumePercent, combatSfxIsMuted) {
+export function showAudioSettingsPanel(volumePercent, isMuted, combatSfxVolumePercent, combatSfxIsMuted, celebrationBoostValue) {
   document.getElementById('volumeSlider').value = volumePercent;
   setMuteButtonState(isMuted);
   document.getElementById('combatSfxVolumeSlider').value = combatSfxVolumePercent;
   setCombatSfxMuteButtonState(combatSfxIsMuted);
+  const boostSlider = document.getElementById('celebrationBoostSlider');
+  if (boostSlider) boostSlider.value = celebrationBoostValue;
+  setCelebrationBoostDisplay(celebrationBoostValue);
   document.getElementById('audioSettingsPanel').classList.remove('hidden');
 }
 
@@ -656,6 +660,15 @@ export function showAudioSettingsPanel(volumePercent, isMuted, combatSfxVolumePe
  */
 export function hideAudioSettingsPanel() {
   document.getElementById('audioSettingsPanel').classList.add('hidden');
+}
+
+/**
+ * Actualiza el texto del label del slider de boost de celebración.
+ * @param {number} value - Multiplicador de volumen de celebración (1.0–3.0).
+ */
+export function setCelebrationBoostDisplay(value) {
+  const el = document.getElementById('celebrationBoostValue');
+  if (el) el.textContent = Number(value).toFixed(1) + '×';
 }
 
 /**
@@ -690,11 +703,12 @@ export function setCombatSfxMuteButtonState(isMuted) {
 /**
  * Conecta los listeners del panel de configuración de audio con sus callbacks.
  * @param {Object} handlers - Objeto con { onToggleSettings, onVolumeChange, onToggleMute,
- *   onCombatSfxVolumeChange, onToggleCombatSfxMute, onCloseSettings }.
+ *   onCombatSfxVolumeChange, onToggleCombatSfxMute, onCloseSettings, onCelebrationBoostChange }.
  */
 export function bindAudioSettingsHandlers({
   onToggleSettings, onVolumeChange, onToggleMute,
-  onCombatSfxVolumeChange, onToggleCombatSfxMute, onCloseSettings
+  onCombatSfxVolumeChange, onToggleCombatSfxMute, onCloseSettings,
+  onCelebrationBoostChange
 }) {
   document.getElementById('settingsBtn').addEventListener('click', onToggleSettings);
   document.getElementById('volumeSlider').addEventListener('input', (e) => onVolumeChange(Number(e.target.value)));
@@ -702,6 +716,12 @@ export function bindAudioSettingsHandlers({
   document.getElementById('combatSfxVolumeSlider').addEventListener('input', (e) => onCombatSfxVolumeChange(Number(e.target.value)));
   document.getElementById('combatSfxMuteToggleBtn').addEventListener('click', onToggleCombatSfxMute);
   document.getElementById('closeAudioSettingsBtn').addEventListener('click', onCloseSettings);
+  const celebrationBoostSlider = document.getElementById('celebrationBoostSlider');
+  if (celebrationBoostSlider && onCelebrationBoostChange) {
+    celebrationBoostSlider.addEventListener('input', (e) =>
+      onCelebrationBoostChange(Number(e.target.value))
+    );
+  }
 }
 
 /* ===== UTILIDADES INTERNAS ===== */
