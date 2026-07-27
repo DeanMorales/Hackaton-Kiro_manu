@@ -1641,13 +1641,14 @@ export function pickQuestion(serviceId, avoidText, targetDifficulty){
 }
 
 // Mapeador_De_Dificultad: traduce Nivel_De_Jefe -> Nivel_De_Dificultad_Objetivo.
-// Mapeo: 1->1, 2->2, >=3->3. Monótono no decreciente, acotado en {1,2,3}.
+// Mapeo: 1-2 -> 1 (Fácil), 3-5 -> 2 (Media), >=6 -> 3 (Difícil).
+// Monótono no decreciente, acotado en {1,2,3}.
 // Valores < 1 se tratan como 1; se usa Math.floor para valores fraccionarios.
 export function difficultyForBossLevel(level){
   const lvl = Math.floor(level);
-  if(lvl <= 1) return 1;
-  if(lvl === 2) return 2;
-  return 3;
+  if(lvl <= 2) return 1;   // Jefes 1 y 2 → Fácil
+  if(lvl <= 5) return 2;   // Jefes 3–5  → Media
+  return 3;                // Jefe 6+     → Difícil
 }
 
 // Etiqueta legible del Nivel_De_Dificultad para mostrar en la UI.

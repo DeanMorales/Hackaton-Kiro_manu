@@ -36,14 +36,21 @@ describe('difficultyForBossLevel - propiedades del mapeo de dificultad', () => {
   });
 
   // Feature: dificultad-progresiva-preguntas, Property 3: Mapeo conforme a los puntos especificados
-  // Validates: Requirements 2.2, 2.3, 2.4
-  it('Property 3: 1->1, 2->2 y niveles >=3 -> 3', () => {
+  // Nuevo mapeo: jefes 1-2 → 1 (Fácil), jefes 3-5 → 2 (Media), jefe 6+ → 3 (Difícil)
+  it('Property 3: jefes 1-2 → 1, jefes 3-5 → 2, jefes >=6 → 3', () => {
+    // Fácil: jefes 1 y 2
     expect(difficultyForBossLevel(1)).toBe(1);
-    expect(difficultyForBossLevel(2)).toBe(2);
+    expect(difficultyForBossLevel(2)).toBe(1);
 
+    // Media: jefes 3, 4 y 5
+    expect(difficultyForBossLevel(3)).toBe(2);
+    expect(difficultyForBossLevel(4)).toBe(2);
+    expect(difficultyForBossLevel(5)).toBe(2);
+
+    // Difícil: jefe 6 en adelante
     fc.assert(
       fc.property(
-        fc.integer({ min: 3, max: 1_000_000 }),
+        fc.integer({ min: 6, max: 1_000_000 }),
         (level) => {
           expect(difficultyForBossLevel(level)).toBe(3);
         }
