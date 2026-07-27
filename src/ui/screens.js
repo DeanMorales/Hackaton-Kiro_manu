@@ -97,6 +97,15 @@ export function updateHud(floorNum, doorIn) {
 }
 
 /**
+ * Actualiza el HUD con la mejor puntuación registrada (todas las partidas, todos los nombres).
+ * @param {number} bestScore - La puntuación más alta registrada en el leaderboard local.
+ */
+export function updateBestScoreHud(bestScore) {
+  const el = document.getElementById('bestScoreValue');
+  if (el) el.textContent = String(bestScore);
+}
+
+/**
  * Muestra la pantalla de inicio.
  */
 export function showStartScreen() {

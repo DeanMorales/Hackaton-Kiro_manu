@@ -122,6 +122,16 @@ export class ScoreManager {
   }
 
   /**
+   * Retrieves the single highest score across the entire leaderboard (all players,
+   * all names), regardless of which player name recorded it.
+   *
+   * @returns {number} The highest score, or 0 if the leaderboard is empty.
+   */
+  getBestScore() {
+    return this.leaderboard.length > 0 ? this.leaderboard[0].score : 0;
+  }
+
+  /**
    * Clears the leaderboard (empties memory cache and calls store.clear()).
    *
    * @returns {Promise<void>}

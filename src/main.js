@@ -114,6 +114,7 @@ function onDrop() {
           scoreResult.rank
         );
       }
+      ui.updateBestScoreHud(scoreManager.getBestScore());
       
       // Detalle personalizado con el nombre activo (causa 'fall': caída de la torre).
       const overResult = formatGameOverDetail(gameState.playerName, result.floorNum, 'fall');
@@ -316,6 +317,7 @@ function endFight(won) {
           scoreResult.rank
         );
       }
+      ui.updateBestScoreHud(scoreManager.getBestScore());
       
       // Detalle personalizado con el nombre activo (causa 'boss': derrota ante el guardián).
       const overResult = formatGameOverDetail(gameState.playerName, gameState.floors.length - 1, 'boss');
@@ -483,6 +485,7 @@ milestoneSfx.init(() => ({ volume: music.getEffectiveVolumePercent() / 100, mute
 (async () => {
   try {
     await scoreManager.initialize();
+    ui.updateBestScoreHud(scoreManager.getBestScore());
     
     // Bind leaderboard overlay close controls
     bindLeaderboardControls(() => hideLeaderboard());

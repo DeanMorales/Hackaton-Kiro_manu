@@ -15,10 +15,13 @@ export const BASE_SPEED = 1.6;                       // Velocidad_Base original 
 // --- endless-tower-difficulty-cap: constantes de Fase_Estable ---
 export const STABLE_PHASE_DUEL_THRESHOLD = 5;    // Requirement 1.1, 1.6: Duelos Ganados para entrar en Fase_Estable
 export const SPEED_CAP = BASE_SPEED * Math.pow(SPEED_INCREMENT_FACTOR, STABLE_PHASE_DUEL_THRESHOLD); // Tope_Velocidad
-export const RELIEF_PLATFORM_INTERVAL = 5;       // Requirement 2.1: cada N pisos dentro de la Fase_Estable
+export const RELIEF_PLATFORM_FIRST_FLOOR = 35;   // Ajuste de balance: piso absoluto en el que aparece la primera Plataforma_Respiro
+export const RELIEF_PLATFORM_REPEAT_INTERVAL = 30; // Ajuste de balance: a partir de RELIEF_PLATFORM_FIRST_FLOOR, se repite cada N pisos (35, 65, 95, 125, ... infinitamente)
 export const RELIEF_PLATFORM_WIDTH_MULTIPLIER = 2; // Requirement 2.2
+export const RELIEF_PLATFORM_SPEED_BOOST_FACTOR = 1.005; // Ajuste de balance: +0.5% de velocidad compuesto en cada aparición de Plataforma_Respiro, acotado a SPEED_CAP
 export const PERFECT_STREAK_BONUS_INTERVAL = 3;   // Requirement 3.4: cada N Duelos Perfectos consecutivos
 export const PERFECT_STREAK_BONUS_WIDTH = 40;     // Requirement 3.4: px otorgados por cada bono
+export const PERFECT_STREAK_BONUS_ENABLED = false; // Ajuste de balance: deshabilitado temporalmente sin eliminar la mecánica (cambiar a true para reactivar)
 
 // Requirement 1.1 / 1.3 / 1.4: ancho fijo de la Plataforma Base
 export function computeBasePlatformWidth() {
@@ -40,6 +43,12 @@ export function applySpeedBoostWithCap(currentSpeed, doorsPassedBeforeThisWin) {
   return doorsPassedBeforeThisWin + 1 >= STABLE_PHASE_DUEL_THRESHOLD ? SPEED_CAP : next;
 }
 
+// Ajuste de balance: aplica el +0.5% compuesto de velocidad al aparecer una Plataforma_Respiro,
+// acotado al mismo Tope_Velocidad (SPEED_CAP) que ya limita el incremento por Duelo Ganado.
+export function applyReliefPlatformSpeedBoost(currentSpeed) {
+  return Math.min(SPEED_CAP, currentSpeed * RELIEF_PLATFORM_SPEED_BOOST_FACTOR);
+}
+
 // --- funciones puras extraídas para PBT (Requirement 1.2) ---
 
 export function computeOverlap(prevFloor, movingBlock) {
@@ -53,12 +62,27 @@ export function decidesFall(overlap) {
 }
 
 export function computeNewFloor(prevFloor, movingBlock, isDoor, seed) {
-  const left = Math.max(movingBlock.x, prevFloor.x);
-  const right = Math.min(movingBlock.x + movingBlock.width, prevFloor.x + prevFloor.width);
-  const overlap = right - left;
+  let x;
+  let width;
+
+  if (movingBlock.width > prevFloor.width) {
+    // Requirement 2.1/2.2: Bloque en Movimiento premiado (Plataforma_Respiro / Bono_Racha_Perfecta)
+    // que aterrizó con éxito (la caída ya fue descartada en dropBlock vía computeOverlap/decidesFall,
+    // sin modificar). El piso resultante conserva el ancho y la posición completos del bloque,
+    // en vez de recortarse a la intersección con prevFloor.
+    x = movingBlock.x;
+    width = movingBlock.width;
+  } else {
+    // Caso normal/legacy (Requirement 3.1): sin cambios respecto al comportamiento actual.
+    const left = Math.max(movingBlock.x, prevFloor.x);
+    const right = Math.min(movingBlock.x + movingBlock.width, prevFloor.x + prevFloor.width);
+    x = left;
+    width = right - left;
+  }
+
   return {
     bottom: prevFloor.top, top: prevFloor.top + movingBlock.height,
-    x: left, width: overlap, height: movingBlock.height, isDoor, seed,
+    x, width, height: movingBlock.height, isDoor, seed,
   };
 }
 
@@ -92,7 +116,6 @@ export function createTowerState(width, height) {
     moveSpeed: BASE_SPEED, // Requirement 1.5 / 3.4: velocidad persistente en el estado
     perfectStreak: 0,        // Requirement 3.1/3.2/3.3
     streakWidthBonus: 0,     // Requirement 3.4/3.6/3.7/3.8
-    stableFloorsBuilt: 0,    // Requirement 2.1/2.5, cuenta pisos construidos DESDE que doorsPassed alcanzó 5
     camElev: baseFloor.top,
     camElevTarget: baseFloor.top,
     anchorScreenY: height * 0.62,
@@ -122,10 +145,13 @@ export function topFloor(state) {
   return state.floors[state.floors.length - 1];
 }
 
-// Requirement 2.1/2.2/2.4: determina si el próximo piso construido es una Plataforma_Respiro
-export function isReliefPlatformFloor(stableFloorsBuiltBeforeThisFloor) {
-  const floorsBuiltCountingThisOne = stableFloorsBuiltBeforeThisFloor + 1;
-  return floorsBuiltCountingThisOne % RELIEF_PLATFORM_INTERVAL === 0; // Requirement 2.1
+// Ajuste de balance: determina si el piso absoluto `floorNum` (1-indexed, el mismo
+// valor que dropBlock reporta como floorNum una vez colocado) es una Plataforma_Respiro.
+// Aparece en el piso 35, y luego cada 30 pisos indefinidamente (65, 95, 125, ...),
+// sin depender de la Fase_Estable, de duelos ganados, ni de ningún contador mutable.
+export function isReliefPlatformFloor(floorNum) {
+  return floorNum >= RELIEF_PLATFORM_FIRST_FLOOR &&
+    (floorNum - RELIEF_PLATFORM_FIRST_FLOOR) % RELIEF_PLATFORM_REPEAT_INTERVAL === 0;
 }
 
 export function newMovingBlock(state, afterFloor, canvasWidth) {
@@ -140,10 +166,14 @@ export function newMovingBlock(state, afterFloor, canvasWidth) {
 
   let w = Math.max(MIN_WIDTH, Math.min(maxWidthWithStreakBonus, maxWidthWithStreakBonus - Math.random() * 10));
 
-  // Requirement 2.1/2.2/4.2: Plataforma_Respiro duplica el ancho ya incrementado por el bono de racha,
-  // acotado al ancho de la Plataforma Base (630px)
-  if (inStablePhase && isReliefPlatformFloor(state.stableFloorsBuilt)) {
-    w = Math.min(BASE_PLATFORM_WIDTH, w * RELIEF_PLATFORM_WIDTH_MULTIPLIER);
+  // Ajuste de balance: Plataforma_Respiro determinada por el número de piso absoluto que se
+  // está generando (state.floors.length en este momento ya equivale al floorNum que tendrá
+  // este piso una vez colocado — ver dropBlock). Aparece en el piso 35, 65, 95, ... indefinidamente,
+  // con ancho fijo igual al largo de la base del castillo (BASE_PLATFORM_WIDTH) y un +0.5%
+  // compuesto de velocidad (acotado a SPEED_CAP) que se mantiene hasta la siguiente aparición.
+  if (isReliefPlatformFloor(state.floors.length)) {
+    w = BASE_PLATFORM_WIDTH;
+    state.moveSpeed = applyReliefPlatformSpeedBoost(state.moveSpeed);
   }
 
   const minX = Math.max(0, afterFloor.x - 90);
@@ -182,7 +212,6 @@ export function resetGame(state, width, height) {
   state.moveSpeed = BASE_SPEED; // Requirement 3.4: reiniciar velocidad al reconstruir
   state.perfectStreak = 0;
   state.streakWidthBonus = 0;
-  state.stableFloorsBuilt = 0;
   state.camElevTarget = baseFloor.top;
   state.camElev = baseFloor.top;
   state.anchorScreenY = height * 0.62;
@@ -227,10 +256,6 @@ export function dropBlock(state, width) {
   const newFloor = computeNewFloor(prev, moving, willBeDoor, Math.random());
   state.floors.push(newFloor);
 
-  if (state.doorsPassed >= STABLE_PHASE_DUEL_THRESHOLD) {
-    state.stableFloorsBuilt += 1; // Requirement 2.1: solo cuenta pisos construidos dentro de la Fase_Estable
-  }
-
   // knight climbs to the new floor
   state.knight.animating = true;
   state.knight.fromElev = state.knight.elev;
@@ -268,7 +293,7 @@ export function registerDuelWinForStreak(state, perfect) {
   }
   state.perfectStreak += 1; // Requirement 3.1
   const inStablePhase = state.doorsPassed >= STABLE_PHASE_DUEL_THRESHOLD; // ya incrementado por applyDuelWinSpeedBoost/main.js antes de esta llamada
-  if (inStablePhase && state.perfectStreak % PERFECT_STREAK_BONUS_INTERVAL === 0) {
+  if (PERFECT_STREAK_BONUS_ENABLED && inStablePhase && state.perfectStreak % PERFECT_STREAK_BONUS_INTERVAL === 0) {
     state.streakWidthBonus += PERFECT_STREAK_BONUS_WIDTH; // Requirement 3.4, 3.6
   }
   return state.perfectStreak;

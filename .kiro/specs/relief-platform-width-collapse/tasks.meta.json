@@ -1,0 +1,18 @@
+{
+  "pbtResults": {
+    "1. Escribir el test de exploración de la condición de bug (ANTES del fix)": {
+      "status": "passed",
+      "failingExample": "Property-based counterexample: computeNewFloor({x:0,width:46,top:0}, {x:0,width:47,height:20}, false, 0) returned width:46 (expected 47), x:0 (expected 0). Concrete example 1 (Plataforma_Respiro): computeNewFloor({x:400,width:200,top:64}, {x:380,width:400,height:40}, false, 0) returned width:200 (expected 400). Concrete example 2 (Bono_Racha_Perfecta): computeNewFloor({x:500,width:210,top:64}, {x:470,width:300,height:40}, false, 0) returned width:210 (expected 300). All three confirm computeNewFloor clips the moving block's width to the intersection with prevFloor instead of preserving the moving block's full width.",
+      "lastRunTimestamp": 1785140958717
+    },
+    "4.2 Verificar que el test de exploración de la tarea 1 ahora pasa": {
+      "status": "passed",
+      "lastRunTimestamp": 1785141266372
+    },
+    "4.3 Verificar que los tests de preservación de la tarea 2 siguen pasando": {
+      "status": "passed",
+      "lastRunTimestamp": 1785141267296
+    }
+  },
+  "executionHistory": {}
+}
