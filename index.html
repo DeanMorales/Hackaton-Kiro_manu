@@ -53,7 +53,7 @@
   /* ---------- HUD ---------- */
   #hud{
     position:absolute; top:14px; left:0; right:0; display:flex; justify-content:center; gap:10px;
-    pointer-events:none; z-index:5; flex-wrap:wrap; padding:0 10px;
+    pointer-events:none; z-index:25; flex-wrap:wrap; padding:0 10px;
   }
   .hud-pill{
     background:linear-gradient(180deg, rgba(29,37,66,.92), rgba(20,26,48,.92));
@@ -175,7 +175,7 @@
   .cards-row{
     position:absolute; left:50%; bottom:min(3vh, 24px); transform:translateX(-50%);
     display:flex; gap:14px; flex-wrap:wrap; justify-content:center;
-    max-width:960px; width:100%; padding:0 12px; z-index:5;
+    max-width:1200px; width:100%; padding:0 12px; z-index:5;
   }
   .card{
     width:150px; height:190px; perspective:1200px; cursor:pointer;
@@ -414,6 +414,7 @@
   <canvas id="gameCanvas"></canvas>
 
   <div id="hud">
+    <div class="hud-pill facet-cut-sm">🏆 <span id="bestScoreValue">0</span></div>
     <div class="hud-pill facet-cut-sm">Piso <span id="floorNum">0</span></div>
     <div class="hud-pill facet-cut-sm">Puerta en <span id="doorIn">5</span></div>
     <button id="settingsBtn" class="hud-pill facet-cut-sm" aria-label="Configuración de audio" style="pointer-events:auto; cursor:pointer;">⚙️</button>

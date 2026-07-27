@@ -432,4 +432,17 @@ describe('ScoreManager', () => {
     // This is a meta-test to ensure the suite ran
     expect(true).toBe(true);
   });
+
+  // ===== Test: getBestScore() =====
+  it('should return 0 for getBestScore() on an empty leaderboard', () => {
+    expect(manager.getBestScore()).toBe(0);
+  });
+
+  it('should return the highest score recorded, regardless of insertion order', () => {
+    manager.recordScore(10);
+    manager.recordScore(50);
+    manager.recordScore(30);
+
+    expect(manager.getBestScore()).toBe(50);
+  });
 });

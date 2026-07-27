@@ -6,6 +6,9 @@ import {
   resetGame,
   update,
   dropBlock,
+  computeNewFloor,
+  computeOverlap,
+  decidesFall,
   applyDuelWinSpeedBoost,
   applySpeedBoost,
   applySpeedBoostWithCap,
@@ -21,8 +24,12 @@ import {
   STABLE_PHASE_DUEL_THRESHOLD,
   PERFECT_STREAK_BONUS_WIDTH,
   PERFECT_STREAK_BONUS_INTERVAL,
-  RELIEF_PLATFORM_INTERVAL,
+  PERFECT_STREAK_BONUS_ENABLED,
+  RELIEF_PLATFORM_FIRST_FLOOR,
+  RELIEF_PLATFORM_REPEAT_INTERVAL,
   RELIEF_PLATFORM_WIDTH_MULTIPLIER,
+  RELIEF_PLATFORM_SPEED_BOOST_FACTOR,
+  applyReliefPlatformSpeedBoost,
   BASE_PLATFORM_WIDTH,
   MIN_WIDTH,
 } from './tower.js';
@@ -154,14 +161,13 @@ describe('createTowerState/resetGame — integración con environmentRoster', ()
 
 // Feature: endless-tower-difficulty-cap, Property 3: Reiniciar la partida restablece velocidad, racha y contadores de Fase_Estable a sus valores base
 describe('resetGame — reinicio completo de velocidad/racha/contadores de Fase_Estable', () => {
-  it('Property 3: para cualquier estado previo arbitrario, resetGame restablece moveSpeed, doorsPassed, perfectStreak, streakWidthBonus y stableFloorsBuilt a sus valores base', () => {
+  it('Property 3: para cualquier estado previo arbitrario, resetGame restablece moveSpeed, doorsPassed, perfectStreak y streakWidthBonus a sus valores base', () => {
     const widthArb = fc.integer({ min: 300, max: 1200 });
     const heightArb = fc.integer({ min: 300, max: 1200 });
     const moveSpeedArb = fc.float({ min: Math.fround(0.1), max: Math.fround(1000), noNaN: true });
     const doorsPassedArb = fc.nat({ max: 200 });
     const perfectStreakArb = fc.nat({ max: 200 });
     const streakWidthBonusArb = fc.nat({ max: 2000 });
-    const stableFloorsBuiltArb = fc.nat({ max: 200 });
 
     fc.assert(
       fc.property(
@@ -171,8 +177,7 @@ describe('resetGame — reinicio completo de velocidad/racha/contadores de Fase_
         doorsPassedArb,
         perfectStreakArb,
         streakWidthBonusArb,
-        stableFloorsBuiltArb,
-        (width, height, moveSpeed, doorsPassed, perfectStreak, streakWidthBonus, stableFloorsBuilt) => {
+        (width, height, moveSpeed, doorsPassed, perfectStreak, streakWidthBonus) => {
           const state = createTowerState(width, height);
 
           // Simula un estado arbitrario alcanzado tras una secuencia válida de
@@ -183,7 +188,6 @@ describe('resetGame — reinicio completo de velocidad/racha/contadores de Fase_
           state.doorsPassed = doorsPassed;
           state.perfectStreak = perfectStreak;
           state.streakWidthBonus = streakWidthBonus;
-          state.stableFloorsBuilt = stableFloorsBuilt;
 
           resetGame(state, width, height);
 
@@ -191,7 +195,6 @@ describe('resetGame — reinicio completo de velocidad/racha/contadores de Fase_
           expect(state.doorsPassed).toBe(0);
           expect(state.perfectStreak).toBe(0);
           expect(state.streakWidthBonus).toBe(0);
-          expect(state.stableFloorsBuilt).toBe(0);
         }
       ),
       { numRuns: 100 }
@@ -323,8 +326,13 @@ describe('registerDuelWinForStreak/resetPerfectStreak — actualización de la R
 });
 
 // Feature: endless-tower-difficulty-cap, Property 7: El Bono_Racha_Perfecta se otorga exactamente cada 3 Duelos Perfectos consecutivos dentro de la Fase_Estable, es acumulativo y nunca se revierte
-describe('registerDuelWinForStreak — otorgamiento acumulativo e irreversible del Bono_Racha_Perfecta', () => {
-  it('Property 7: para cualquier secuencia dentro de la Fase_Estable, streakWidthBonus final es exactamente b0 + PERFECT_STREAK_BONUS_WIDTH por cada racha completa de PERFECT_STREAK_BONUS_INTERVAL Duelos Perfectos consecutivos en TODA la secuencia (irreversible ante reinicios), y es no decreciente en todo momento', () => {
+// NOTA (ajuste de balance): el Bono_Racha_Perfecta está deshabilitado por defecto (PERFECT_STREAK_BONUS_ENABLED = false)
+// sin eliminar su lógica; mientras el flag permanezca en false, streakWidthBonus SHALL permanecer inalterado
+// para cualquier secuencia de Duelos Perfectos, incluso dentro de la Fase_Estable.
+describe('registerDuelWinForStreak — Bono_Racha_Perfecta deshabilitado por defecto (PERFECT_STREAK_BONUS_ENABLED = false)', () => {
+  it('Property 7 (adaptada): con el Bono_Racha_Perfecta deshabilitado, streakWidthBonus nunca cambia para ninguna secuencia de Duelos Perfectos dentro de la Fase_Estable', () => {
+    expect(PERFECT_STREAK_BONUS_ENABLED).toBe(false);
+
     const doorsPassedArb = fc.integer({ min: STABLE_PHASE_DUEL_THRESHOLD, max: STABLE_PHASE_DUEL_THRESHOLD + 50 });
     const b0Arb = fc.nat({ max: 500 });
     const perfectSeqArb = fc.array(fc.boolean(), { minLength: 1, maxLength: 30 });
@@ -336,40 +344,16 @@ describe('registerDuelWinForStreak — otorgamiento acumulativo e irreversible d
         perfectSeqArb,
         (doorsPassed, b0, perfectSeq) => {
           const state = createTowerState(800, 600);
-          // Fase_Estable activa durante toda la secuencia: registerDuelWinForStreak
-          // no muta doorsPassed, por lo que este valor permanece fijo.
           state.doorsPassed = doorsPassed;
           state.streakWidthBonus = b0;
 
-          let previousBonus = state.streakWidthBonus;
           for (const perfect of perfectSeq) {
             registerDuelWinForStreak(state, perfect);
-            // Invariante: streakWidthBonus nunca disminuye, ni siquiera en los
-            // pasos donde perfectStreak se reinicia a 0.
-            expect(state.streakWidthBonus).toBeGreaterThanOrEqual(previousBonus);
-            previousBonus = state.streakWidthBonus;
           }
 
-          // Oráculo independiente: recorre toda la secuencia acumulando el bono
-          // otorgado en CADA racha de PERFECT_STREAK_BONUS_INTERVAL Duelos Perfectos
-          // consecutivos, sin revertirlo en los reinicios (el bono es irreversible
-          // y acumulativo a lo largo de TODA la secuencia, no solo de su racha final).
-          let runningStreak = 0;
-          let totalBonusEarned = 0;
-          for (const perfect of perfectSeq) {
-            if (perfect) {
-              runningStreak += 1;
-              if (runningStreak % PERFECT_STREAK_BONUS_INTERVAL === 0) {
-                totalBonusEarned += PERFECT_STREAK_BONUS_WIDTH;
-              }
-            } else {
-              runningStreak = 0;
-            }
-          }
-
-          const expectedBonus = b0 + totalBonusEarned;
-
-          expect(state.streakWidthBonus).toBe(expectedBonus);
+          // Con PERFECT_STREAK_BONUS_ENABLED === false, streakWidthBonus permanece
+          // exactamente en su valor inicial, sin importar la secuencia de Duelos.
+          expect(state.streakWidthBonus).toBe(b0);
         }
       ),
       { numRuns: 100 }
@@ -412,33 +396,37 @@ describe('registerDuelWinForStreak — ausencia de Bono_Racha_Perfecta antes de 
 
 // Feature: endless-tower-difficulty-cap, Property 4: Las Plataformas_Respiro solo ocurren en la Fase_Estable, exactamente cada 5 pisos construidos desde su inicio
 describe('isReliefPlatformFloor — elegibilidad determinística de Plataforma_Respiro', () => {
-  it('Property 4: para cualquier stableFloorsBuiltBeforeThisFloor >= 0, isReliefPlatformFloor devuelve true si y solo si (stableFloorsBuiltBeforeThisFloor + 1) % RELIEF_PLATFORM_INTERVAL === 0', () => {
-    const stableFloorsBuiltArb = fc.integer({ min: 0, max: 500 });
+  it('Property 4: para cualquier floorNum >= 0, isReliefPlatformFloor devuelve true si y solo si floorNum >= RELIEF_PLATFORM_FIRST_FLOOR y (floorNum - RELIEF_PLATFORM_FIRST_FLOOR) % RELIEF_PLATFORM_REPEAT_INTERVAL === 0', () => {
+    const floorNumArb = fc.integer({ min: 0, max: 2000 });
 
     fc.assert(
       fc.property(
-        stableFloorsBuiltArb,
-        (stableFloorsBuiltBeforeThisFloor) => {
-          const expected = (stableFloorsBuiltBeforeThisFloor + 1) % RELIEF_PLATFORM_INTERVAL === 0;
+        floorNumArb,
+        (floorNum) => {
+          const expected = floorNum >= RELIEF_PLATFORM_FIRST_FLOOR &&
+            (floorNum - RELIEF_PLATFORM_FIRST_FLOOR) % RELIEF_PLATFORM_REPEAT_INTERVAL === 0;
 
-          expect(isReliefPlatformFloor(stableFloorsBuiltBeforeThisFloor)).toBe(expected);
+          expect(isReliefPlatformFloor(floorNum)).toBe(expected);
         }
       ),
       { numRuns: 100 }
     );
   });
 
-  it('casos concretos: 5º, 10º piso construido en la Fase_Estable son Plataforma_Respiro, otros no', () => {
-    expect(isReliefPlatformFloor(4)).toBe(true); // 5º piso
-    expect(isReliefPlatformFloor(9)).toBe(true); // 10º piso
-    expect(isReliefPlatformFloor(3)).toBe(false);
+  it('casos concretos: los pisos absolutos 35, 65 y 95 son Plataforma_Respiro, otros no', () => {
+    expect(isReliefPlatformFloor(35)).toBe(true);
+    expect(isReliefPlatformFloor(65)).toBe(true);
+    expect(isReliefPlatformFloor(95)).toBe(true);
+    expect(isReliefPlatformFloor(34)).toBe(false);
+    expect(isReliefPlatformFloor(36)).toBe(false);
     expect(isReliefPlatformFloor(0)).toBe(false);
+    expect(isReliefPlatformFloor(64)).toBe(false);
   });
 });
 
-// Feature: endless-tower-difficulty-cap, Property 5: El ancho de una Plataforma_Respiro es exactamente el doble del ancho que tendría sin ese mecanismo, acotado a 630px
+// Feature: endless-tower-difficulty-cap, Property 5: El ancho de una Plataforma_Respiro es siempre exactamente BASE_PLATFORM_WIDTH (630px), el largo de la base del castillo, sin importar el ancho previo
 describe('newMovingBlock — ancho exacto de una Plataforma_Respiro', () => {
-  it('Property 5: para cualquier ancho base, bono de racha y valor de Math.random estable, el ancho con Plataforma_Respiro es exactamente Math.min(BASE_PLATFORM_WIDTH, widthSinRelief * RELIEF_PLATFORM_WIDTH_MULTIPLIER)', () => {
+  it('Property 5: para cualquier ancho base, bono de racha y valor de Math.random estable, el ancho con Plataforma_Respiro es siempre exactamente BASE_PLATFORM_WIDTH', () => {
     const afterFloorWidthArb = fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH });
     const streakWidthBonusArb = fc.nat({ max: 300 });
     const randomStubArb = fc.float({ min: 0, max: Math.fround(0.999), noNaN: true });
@@ -456,20 +444,48 @@ describe('newMovingBlock — ancho exacto de una Plataforma_Respiro', () => {
 
           const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(randomStub);
           try {
-            // Piso NO elegible como Plataforma_Respiro (stableFloorsBuilt = 0 -> (0+1)%5 !== 0)
-            state.stableFloorsBuilt = 0;
-            const widthWithoutRelief = newMovingBlock(state, afterFloor, 2000).width;
-
-            // Piso elegible como Plataforma_Respiro (stableFloorsBuilt = 4 -> (4+1)%5 === 0)
-            state.stableFloorsBuilt = 4;
+            // Piso elegible como Plataforma_Respiro (floorNum = RELIEF_PLATFORM_FIRST_FLOOR)
+            state.floors = new Array(RELIEF_PLATFORM_FIRST_FLOOR);
             const widthWithRelief = newMovingBlock(state, afterFloor, 2000).width;
 
-            expect(widthWithRelief).toBe(
-              Math.min(BASE_PLATFORM_WIDTH, widthWithoutRelief * RELIEF_PLATFORM_WIDTH_MULTIPLIER)
-            );
+            expect(widthWithRelief).toBe(BASE_PLATFORM_WIDTH);
           } finally {
             randomSpy.mockRestore();
           }
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('Nueva propiedad: cada aparición de Plataforma_Respiro incrementa moveSpeed en +0.5% compuesto, acotado a SPEED_CAP; en pisos no elegibles moveSpeed queda inalterado', () => {
+    const afterFloorWidthArb = fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH });
+    // Cubre tanto valores bien por debajo del tope como en/por encima del tope.
+    const moveSpeedArb = fc.float({ min: Math.fround(0.1), max: Math.fround(SPEED_CAP * 1.5), noNaN: true });
+
+    fc.assert(
+      fc.property(
+        afterFloorWidthArb,
+        moveSpeedArb,
+        (afterFloorWidth, moveSpeed) => {
+          const afterFloor = { x: 0, width: afterFloorWidth };
+
+          // Caso elegible: state.moveSpeed se actualiza según applyReliefPlatformSpeedBoost.
+          const stateRelief = createTowerState(800, 600);
+          stateRelief.moveSpeed = moveSpeed;
+          stateRelief.floors = new Array(RELIEF_PLATFORM_FIRST_FLOOR);
+          newMovingBlock(stateRelief, afterFloor, 2000);
+
+          expect(stateRelief.moveSpeed).toBe(applyReliefPlatformSpeedBoost(moveSpeed));
+          expect(stateRelief.moveSpeed).toBe(Math.min(SPEED_CAP, moveSpeed * RELIEF_PLATFORM_SPEED_BOOST_FACTOR));
+
+          // Caso NO elegible: state.moveSpeed permanece completamente inalterado.
+          const stateNoRelief = createTowerState(800, 600);
+          stateNoRelief.moveSpeed = moveSpeed;
+          stateNoRelief.floors = new Array(1); // floorNum = 1, no elegible
+          newMovingBlock(stateNoRelief, afterFloor, 2000);
+
+          expect(stateNoRelief.moveSpeed).toBe(moveSpeed);
         }
       ),
       { numRuns: 100 }
@@ -494,7 +510,7 @@ describe('newMovingBlock — casos concretos de Plataforma_Respiro combinada con
 
     const state = createTowerState(800, 600);
     state.doorsPassed = STABLE_PHASE_DUEL_THRESHOLD; // Fase_Estable activa
-    state.stableFloorsBuilt = 0; // isReliefPlatformFloor(0) === false (no elegible)
+    state.floors = new Array(1); // floorNum del bloque generado = 1, no coincide con 35/65/95/... (no elegible)
     state.streakWidthBonus = 0; // sin bono de racha
 
     const afterFloor = { x: 0, width: 400 };
@@ -502,50 +518,49 @@ describe('newMovingBlock — casos concretos de Plataforma_Respiro combinada con
 
     const block = newMovingBlock(state, afterFloor, 2000);
 
-    expect(isReliefPlatformFloor(state.stableFloorsBuilt)).toBe(false);
+    expect(isReliefPlatformFloor(state.floors.length)).toBe(false);
     expect(block.width).toBe(expectedWidth);
     expect(block.width).toBe(400);
   });
 
-  it('piso elegible como Plataforma_Respiro sin bono de racha duplica el ancho normal, acotado a 630px', () => {
+  it('piso elegible como Plataforma_Respiro sin bono de racha produce ancho fijo BASE_PLATFORM_WIDTH (630px)', () => {
     randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
 
     const state = createTowerState(800, 600);
     state.doorsPassed = STABLE_PHASE_DUEL_THRESHOLD; // Fase_Estable activa
-    state.stableFloorsBuilt = 4; // isReliefPlatformFloor(4) === true (5º piso de la Fase_Estable)
+    state.floors = new Array(RELIEF_PLATFORM_FIRST_FLOOR); // floorNum del bloque generado = RELIEF_PLATFORM_FIRST_FLOOR (elegible)
     state.streakWidthBonus = 0; // sin bono de racha
 
     const afterFloor = { x: 0, width: 400 };
-    const expectedWidth = Math.min(BASE_PLATFORM_WIDTH, 400 * RELIEF_PLATFORM_WIDTH_MULTIPLIER); // min(630, 800) = 630
+    const expectedWidth = BASE_PLATFORM_WIDTH; // ancho fijo, no depende de afterFloor.width
 
     const block = newMovingBlock(state, afterFloor, 2000);
 
-    expect(isReliefPlatformFloor(state.stableFloorsBuilt)).toBe(true);
+    expect(isReliefPlatformFloor(state.floors.length)).toBe(true);
     expect(block.width).toBe(expectedWidth);
     expect(block.width).toBe(630);
   });
 
-  it('piso elegible como Plataforma_Respiro CON streakWidthBonus > 0 vigente duplica el ancho YA incrementado por el bono, acotado a 630px', () => {
+  it('piso elegible como Plataforma_Respiro CON streakWidthBonus > 0 vigente produce igualmente ancho fijo BASE_PLATFORM_WIDTH (630px), sin importar el bono', () => {
     randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
 
     const state = createTowerState(800, 600);
     state.doorsPassed = STABLE_PHASE_DUEL_THRESHOLD; // Fase_Estable activa
-    state.stableFloorsBuilt = 4; // isReliefPlatformFloor(4) === true
-    state.streakWidthBonus = 50; // Bono_Racha_Perfecta vigente
+    state.floors = new Array(RELIEF_PLATFORM_FIRST_FLOOR); // floorNum del bloque generado = RELIEF_PLATFORM_FIRST_FLOOR (elegible)
+    state.streakWidthBonus = 50; // Bono_Racha_Perfecta vigente, sin efecto sobre el ancho fijo
 
-    // afterFloor.width deliberadamente pequeño para que el resultado NO se sature
-    // en 630px, demostrando mejor la composición bono + duplicado.
+    // afterFloor.width deliberadamente pequeño: el ancho sigue siendo BASE_PLATFORM_WIDTH,
+    // ya no se deriva de afterFloor.width/streakWidthBonus cuando el piso es elegible.
     const afterFloor = { x: 0, width: 200 };
     const canvasWidth = 2000;
 
-    const widthWithBonus = Math.min(afterFloor.width + state.streakWidthBonus, canvasWidth); // 250
-    const expectedWidth = Math.min(BASE_PLATFORM_WIDTH, widthWithBonus * RELIEF_PLATFORM_WIDTH_MULTIPLIER); // min(630, 500) = 500
+    const expectedWidth = BASE_PLATFORM_WIDTH; // ancho fijo, independiente del bono
 
     const block = newMovingBlock(state, afterFloor, canvasWidth);
 
-    expect(isReliefPlatformFloor(state.stableFloorsBuilt)).toBe(true);
+    expect(isReliefPlatformFloor(state.floors.length)).toBe(true);
     expect(block.width).toBe(expectedWidth);
-    expect(block.width).toBe(500);
+    expect(block.width).toBe(630);
   });
 });
 
@@ -560,7 +575,6 @@ describe('Tope_Velocidad vs mecanismos de ancho — independencia total', () => 
     state.moveSpeed = moveSpeedInit;
     state.doorsPassed = 0;
     state.streakWidthBonus = 0;
-    state.stableFloorsBuilt = 0;
     const afterFloor = { x: 0, width: afterFloorWidth };
     const widths = [];
 
@@ -572,14 +586,20 @@ describe('Tope_Velocidad vs mecanismos de ancho — independencia total', () => 
         registerDuelWinForStreak(state, true);
         state.doorsPassed += 1;
       } else {
-        // 'reliefCheck': construye el siguiente MovingBlock (equivalente al
-        // paso de dropBlock que genera el bloque para el próximo piso) y
-        // avanza stableFloorsBuilt como lo haría dropBlock tras colocar el piso.
+        // 'reliefCheck': avanza state.floors (equivalente al piso que dropBlock
+        // habría colocado) y luego construye el siguiente MovingBlock, igual que
+        // haría dropBlock tras colocar el piso.
+        state.floors.push({});
+        // Esta propiedad cubre específicamente la independencia ancho/velocidad en
+        // pisos NO elegibles para Plataforma_Respiro: newMovingBlock ahora muta
+        // deliberadamente state.moveSpeed cuando el piso SÍ es elegible (ver la
+        // nueva propiedad de velocidad más arriba), lo cual es un comportamiento
+        // nuevo e intencional que queda fuera del alcance de esta propiedad.
+        while (isReliefPlatformFloor(state.floors.length)) {
+          state.floors.push({});
+        }
         const block = newMovingBlock(state, afterFloor, canvasWidth);
         widths.push(block.width);
-        if (state.doorsPassed >= STABLE_PHASE_DUEL_THRESHOLD) {
-          state.stableFloorsBuilt += 1;
-        }
       }
     }
 
@@ -590,12 +610,11 @@ describe('Tope_Velocidad vs mecanismos de ancho — independencia total', () => 
   // estado de ancho ('streakWidthBonusInit'/'stableFloorsBuiltInit') es el único
   // parámetro que varía entre las dos simulaciones paralelas de la segunda mitad
   // de esta propiedad.
-  function runSequenceForSpeed(ops, streakWidthBonusInit, stableFloorsBuiltInit, afterFloorWidth, canvasWidth) {
+  function runSequenceForSpeed(ops, streakWidthBonusInit, afterFloorWidth, canvasWidth) {
     const state = createTowerState(800, 600);
     state.moveSpeed = BASE_SPEED;
     state.doorsPassed = 0;
     state.streakWidthBonus = streakWidthBonusInit;
-    state.stableFloorsBuilt = stableFloorsBuiltInit;
     const afterFloor = { x: 0, width: afterFloorWidth };
     const speeds = [];
 
@@ -606,10 +625,15 @@ describe('Tope_Velocidad vs mecanismos de ancho — independencia total', () => 
         registerDuelWinForStreak(state, true);
         state.doorsPassed += 1;
       } else {
-        newMovingBlock(state, afterFloor, canvasWidth);
-        if (state.doorsPassed >= STABLE_PHASE_DUEL_THRESHOLD) {
-          state.stableFloorsBuilt += 1;
+        state.floors.push({});
+        // Ver comentario equivalente en runSequenceForWidth: se evita aterrizar en
+        // un piso elegible para Plataforma_Respiro, ya que eso mutaría moveSpeed
+        // como efecto secundario intencional y nuevo, ajeno a esta propiedad de
+        // independencia respecto de streakWidthBonus/stableFloorsBuilt/ancho de piso.
+        while (isReliefPlatformFloor(state.floors.length)) {
+          state.floors.push({});
         }
+        newMovingBlock(state, afterFloor, canvasWidth);
       }
     }
 
@@ -623,7 +647,6 @@ describe('Tope_Velocidad vs mecanismos de ancho — independencia total', () => 
     const afterFloorWidthArb = fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH });
     const canvasWidthArb = fc.integer({ min: 300, max: 2000 });
     const otherStreakWidthBonusArb = fc.nat({ max: 500 });
-    const otherStableFloorsBuiltArb = fc.nat({ max: 200 });
 
     fc.assert(
       fc.property(
@@ -633,8 +656,7 @@ describe('Tope_Velocidad vs mecanismos de ancho — independencia total', () => 
         afterFloorWidthArb,
         canvasWidthArb,
         otherStreakWidthBonusArb,
-        otherStableFloorsBuiltArb,
-        (ops, otherMoveSpeed, randomStub, afterFloorWidth, canvasWidth, otherStreakWidthBonus, otherStableFloorsBuilt) => {
+        (ops, otherMoveSpeed, randomStub, afterFloorWidth, canvasWidth, otherStreakWidthBonus) => {
           // --- Mitad 1: el ancho no depende de moveSpeed ---
           // Se fija Math.random al mismo valor en ambas simulaciones para que
           // cualquier diferencia entre los arrays de anchos solo pueda originarse
@@ -655,13 +677,307 @@ describe('Tope_Velocidad vs mecanismos de ancho — independencia total', () => 
           // Aquí no es necesario estabilizar Math.random: applySpeedBoostWithCap
           // y registerDuelWinForStreak son puramente deterministas respecto de
           // moveSpeed/doorsPassed, y newMovingBlock nunca escribe en moveSpeed.
-          const speedsA = runSequenceForSpeed(ops, 0, 0, afterFloorWidth, canvasWidth);
-          const speedsB = runSequenceForSpeed(ops, otherStreakWidthBonus, otherStableFloorsBuilt, afterFloorWidth, canvasWidth);
+          const speedsA = runSequenceForSpeed(ops, 0, afterFloorWidth, canvasWidth);
+          const speedsB = runSequenceForSpeed(ops, otherStreakWidthBonus, afterFloorWidth, canvasWidth);
 
           expect(speedsB).toEqual(speedsA);
         }
       ),
       { numRuns: 100 }
     );
+  });
+});
+
+// Feature: relief-platform-width-collapse (bugfix), Property 1: Bug Condition
+// El piso resultante SHALL conservar el ancho completo del Bloque en Movimiento premiado
+// (movingBlock.width > prevFloor.width) cuando el aterrizaje es válido, en vez de
+// recortarlo a la intersección con prevFloor.
+// **Validates: Requirements 2.1, 2.2**
+// NOTA: este test se escribe ANTES del fix. Sobre el código actual (sin corregir),
+// computeNewFloor SIEMPRE usa la intersección (left/right/overlap), por lo que se
+// espera que este test FALLE — la falla confirma que el bug existe.
+describe('computeNewFloor — Property 1 (Bug Condition): conserva el ancho completo del Bloque en Movimiento premiado', () => {
+  it('Property 1: para prevFloor/movingBlock con movingBlock.width > prevFloor.width y aterrizaje válido, result.width === movingBlock.width y result.x === movingBlock.x', () => {
+    const prevFloorArb = fc.record({
+      x: fc.integer({ min: 0, max: 1000 }),
+      width: fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH }),
+      top: fc.integer({ min: 0, max: 5000 }),
+    });
+    const movingBlockArb = fc.record({
+      x: fc.integer({ min: 0, max: 1000 }),
+      width: fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH }),
+      height: fc.integer({ min: 20, max: 80 }),
+    });
+    const isDoorArb = fc.boolean();
+    const seedArb = fc.float({ min: 0, max: Math.fround(1), noNaN: true });
+
+    fc.assert(
+      fc.property(
+        prevFloorArb,
+        movingBlockArb,
+        isDoorArb,
+        seedArb,
+        (prevFloor, movingBlock, isDoor, seed) => {
+          // Filtro por Bug_Condition: bloque premiado (más ancho que prevFloor)
+          // Y aterrizaje válido según las funciones de caída existentes, sin modificar.
+          fc.pre(movingBlock.width > prevFloor.width);
+          fc.pre(decidesFall(computeOverlap(prevFloor, movingBlock)) === false);
+
+          const result = computeNewFloor(prevFloor, movingBlock, isDoor, seed);
+
+          // Comportamiento ESPERADO (post-fix): el piso conserva ancho/posición completos
+          // del Bloque en Movimiento, sin recortarse a la intersección con prevFloor.
+          expect(result.width).toBe(movingBlock.width);
+          expect(result.x).toBe(movingBlock.x);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('Ejemplo concreto — Plataforma_Respiro con solapamiento total: prevFloor={x:400,width:200}, movingBlock={x:380,width:400}', () => {
+    const prevFloor = { x: 400, width: 200, top: 64 };
+    const movingBlock = { x: 380, width: 400, height: 40 };
+
+    // Confirma que el aterrizaje es válido (no cae) antes de evaluar el resultado.
+    expect(decidesFall(computeOverlap(prevFloor, movingBlock))).toBe(false);
+
+    const result = computeNewFloor(prevFloor, movingBlock, false, 0);
+
+    // Comportamiento ESPERADO (post-fix): width === 400, x === 380.
+    expect(result.width).toBe(400);
+    expect(result.x).toBe(380);
+  });
+
+  it('Ejemplo concreto — Bono_Racha_Perfecta con solapamiento parcial: prevFloor={x:500,width:210}, movingBlock={x:470,width:300}', () => {
+    const prevFloor = { x: 500, width: 210, top: 64 };
+    const movingBlock = { x: 470, width: 300, height: 40 };
+
+    expect(decidesFall(computeOverlap(prevFloor, movingBlock))).toBe(false);
+
+    const result = computeNewFloor(prevFloor, movingBlock, false, 0);
+
+    // Comportamiento ESPERADO (post-fix): width === 300, x === 470.
+    expect(result.width).toBe(300);
+    expect(result.x).toBe(470);
+  });
+});
+
+// Feature: relief-platform-width-collapse, Property 2: Preservation — caso normal
+// (movingBlock.width <= prevFloor.width) sigue usando la fórmula de intersección exacta de hoy.
+// **Validates: Requirements 3.1, 3.2**
+// NOTA: este test se escribe ANTES del fix, sobre el código SIN corregir. Se espera que PASE,
+// capturando el comportamiento base a preservar tras el fix.
+describe('computeNewFloor — Property 2 (Preservation): caso normal (movingBlock.width <= prevFloor.width)', () => {
+  it('Property 2: para movingBlock.width <= prevFloor.width, x/width coinciden con la fórmula de intersección de referencia reimplementada de forma independiente', () => {
+    const prevFloorArb = fc.record({
+      x: fc.integer({ min: 0, max: 1000 }),
+      width: fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH }),
+      top: fc.integer({ min: 0, max: 5000 }),
+    });
+    const movingBlockArb = fc.record({
+      x: fc.integer({ min: 0, max: 1000 }),
+      width: fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH }),
+      height: fc.integer({ min: 20, max: 80 }),
+    });
+    const isDoorArb = fc.boolean();
+    const seedArb = fc.float({ min: 0, max: Math.fround(1), noNaN: true });
+
+    fc.assert(
+      fc.property(
+        prevFloorArb,
+        movingBlockArb,
+        isDoorArb,
+        seedArb,
+        (prevFloor, movingBlock, isDoor, seed) => {
+          // Filtro por el caso normal/legacy: el Bloque en Movimiento nunca es
+          // más ancho que prevFloor.
+          fc.pre(movingBlock.width <= prevFloor.width);
+
+          const result = computeNewFloor(prevFloor, movingBlock, isDoor, seed);
+
+          // Oráculo de referencia: fórmula de intersección actual, reimplementada
+          // de forma independiente (sin importar ningún detalle interno de tower.js).
+          const expectedX = Math.max(movingBlock.x, prevFloor.x);
+          const expectedWidth = Math.min(movingBlock.x + movingBlock.width, prevFloor.x + prevFloor.width) - expectedX;
+
+          expect(result.x).toBe(expectedX);
+          expect(result.width).toBe(expectedWidth);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// Feature: relief-platform-width-collapse, Property 3: Preservation — computeOverlap/decidesFall
+// y la detección de caída permanecen byte-por-byte idénticas para todo bloque, con o sin
+// movingBlock.width > prevFloor.width.
+// **Validates: Requirements 2.3, 3.2, 3.3**
+// NOTA: este test se escribe ANTES del fix, sobre el código SIN corregir. Se espera que PASE,
+// funcionando como snapshot del comportamiento de detección de caída a re-verificar tras el fix.
+describe('computeOverlap/decidesFall — Property 3 (Preservation): snapshot de la detección de caída', () => {
+  it('Property 3: para prevFloor/movingBlock completamente arbitrarios, computeOverlap y decidesFall coinciden con su fórmula de referencia reimplementada de forma independiente', () => {
+    const prevFloorArb = fc.record({
+      x: fc.integer({ min: 0, max: 1000 }),
+      width: fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH }),
+      top: fc.integer({ min: 0, max: 5000 }),
+    });
+    const movingBlockArb = fc.record({
+      x: fc.integer({ min: 0, max: 1000 }),
+      width: fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH }),
+      height: fc.integer({ min: 20, max: 80 }),
+    });
+
+    fc.assert(
+      fc.property(
+        prevFloorArb,
+        movingBlockArb,
+        (prevFloor, movingBlock) => {
+          // Sin fc.pre: cubre tanto movingBlock.width <= prevFloor.width como
+          // movingBlock.width > prevFloor.width, y tanto aterrizajes válidos
+          // como caídas.
+          const overlap = computeOverlap(prevFloor, movingBlock);
+          const fell = decidesFall(overlap);
+
+          // Oráculo de referencia: fórmulas actuales de computeOverlap/decidesFall,
+          // reimplementadas de forma independiente.
+          const expectedOverlap =
+            Math.min(movingBlock.x + movingBlock.width, prevFloor.x + prevFloor.width) -
+            Math.max(movingBlock.x, prevFloor.x);
+          const expectedFell = expectedOverlap < 16;
+
+          expect(overlap).toBe(expectedOverlap);
+          expect(fell).toBe(expectedFell);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// Feature: relief-platform-width-collapse, Property 4: Preservation — los campos no
+// relacionados con width/x (bottom, top, height, isDoor, seed) permanecen sin cambios,
+// sin importar la rama (Property 1 o Property 2) en la que caiga el aterrizaje.
+// **Validates: Requirement 3.5**
+// NOTA: este test se escribe ANTES del fix, sobre el código SIN corregir. Se espera que PASE,
+// capturando el comportamiento base de estos campos a preservar tras el fix.
+describe('computeNewFloor — Property 4 (Preservation): campos no relacionados con width/x sin cambios', () => {
+  it('Property 4: para aterrizaje válido, con ancho relativo arbitrario, bottom/top/height/isDoor/seed coinciden exactamente con los valores esperados', () => {
+    const prevFloorArb = fc.record({
+      x: fc.integer({ min: 0, max: 1000 }),
+      width: fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH }),
+      top: fc.integer({ min: 0, max: 5000 }),
+    });
+    const movingBlockArb = fc.record({
+      x: fc.integer({ min: 0, max: 1000 }),
+      width: fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH }),
+      height: fc.integer({ min: 20, max: 80 }),
+    });
+    const isDoorArb = fc.boolean();
+    const seedArb = fc.float({ min: 0, max: Math.fround(1), noNaN: true });
+
+    fc.assert(
+      fc.property(
+        prevFloorArb,
+        movingBlockArb,
+        isDoorArb,
+        seedArb,
+        (prevFloor, movingBlock, isDoor, seed) => {
+          // Solo se exige que el aterrizaje sea válido (no caiga); el ancho
+          // relativo de movingBlock respecto a prevFloor queda sin restringir,
+          // cubriendo ambas ramas (Property 1 y Property 2).
+          fc.pre(decidesFall(computeOverlap(prevFloor, movingBlock)) === false);
+
+          const result = computeNewFloor(prevFloor, movingBlock, isDoor, seed);
+
+          expect(result.bottom).toBe(prevFloor.top);
+          expect(result.top).toBe(prevFloor.top + movingBlock.height);
+          expect(result.height).toBe(movingBlock.height);
+          expect(result.isDoor).toBe(isDoor);
+          expect(result.seed).toBe(seed);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// Feature: relief-platform-width-collapse, Tarea 4.4: pruebas unitarias concretas
+// adicionales del fix (ejemplos fijos, sin fast-check), complementando las
+// Properties 1-4 ya cubiertas arriba con casos concretos y la integración vía dropBlock.
+describe('computeNewFloor/dropBlock — casos concretos adicionales del fix (Tarea 4.4)', () => {
+  it('computeNewFloor: movingBlock más ancho que prevFloor con aterrizaje válido produce width/x del movingBlock (ejemplo concreto de Plataforma_Respiro)', () => {
+    const prevFloor = { x: 300, width: 150, top: 64 };
+    const movingBlock = { x: 280, width: 350, height: 40 };
+
+    // Confirma primero que el aterrizaje es válido (no cae).
+    expect(decidesFall(computeOverlap(prevFloor, movingBlock))).toBe(false);
+
+    const result = computeNewFloor(prevFloor, movingBlock, false, 0);
+
+    expect(result.width).toBe(350);
+    expect(result.x).toBe(280);
+  });
+
+  it('computeNewFloor: movingBlock.width <= prevFloor.width produce el mismo resultado que la fórmula de intersección de referencia (ejemplo concreto, valores fijos)', () => {
+    const prevFloor = { x: 200, width: 400, top: 64 };
+    const movingBlock = { x: 250, width: 300, height: 40 };
+
+    const result = computeNewFloor(prevFloor, movingBlock, false, 0);
+
+    // Fórmula de referencia: x = max(250, 200) = 250; width = min(550, 600) - 250 = 300
+    expect(result.x).toBe(250);
+    expect(result.width).toBe(300);
+  });
+
+  it('dropBlock: state.moving premiado (width > prevFloor.width) con solapamiento insuficiente (overlap < 16) sigue devolviendo { type: "fell" }, sin construir ningún piso', () => {
+    const state = createTowerState(800, 600);
+    state.screen = 'build';
+
+    const narrowPrevFloor = { x: 300, width: 100, top: 64, bottom: 0, height: 64, isDoor: false, seed: 0 };
+    state.floors = [narrowPrevFloor];
+
+    // movingBlock premiado (width 500 > 100), apenas tocando el borde de prevFloor:
+    // rango [390, 890] vs prevFloor [300, 400] -> overlap = 400 - 390 = 10 (< 16)
+    state.moving = { x: 390, width: 500, height: 40, dir: 1, speed: 1, minX: 0, maxX: 1000 };
+
+    const overlap = computeOverlap(narrowPrevFloor, state.moving);
+    expect(overlap).toBeLessThan(16);
+
+    const result = dropBlock(state, 800);
+
+    expect(result).toEqual({ type: 'fell', floorNum: 0 });
+    expect(state.floors).toHaveLength(1);
+    expect(state.floors[0]).toBe(narrowPrevFloor);
+  });
+
+  it('dropBlock: state.moving premiado con solapamiento suficiente empuja un piso con width === movingBlock.width y genera un newMovingBlock válido', () => {
+    const state = createTowerState(800, 600);
+    state.screen = 'build';
+
+    const narrowPrevFloor = { x: 300, width: 100, top: 64, bottom: 0, height: 64, isDoor: false, seed: 0 };
+    state.floors = [narrowPrevFloor];
+
+    // movingBlock premiado (width 500 > 100), con solapamiento sustancial:
+    // rango [280, 780] vs prevFloor [300, 400] -> overlap = 400 - 300 = 100 (>= 16)
+    state.moving = { x: 280, width: 500, height: 40, dir: 1, speed: 1, minX: 0, maxX: 1000 };
+
+    const overlap = computeOverlap(narrowPrevFloor, state.moving);
+    expect(overlap).toBeGreaterThanOrEqual(16);
+
+    const result = dropBlock(state, 800);
+
+    expect(result.type).toBe('placed');
+    expect(state.floors).toHaveLength(2);
+
+    const newFloor = state.floors[state.floors.length - 1];
+    expect(newFloor.width).toBe(500);
+    expect(newFloor.x).toBe(280);
+
+    // El siguiente MovingBlock generado debe ser válido.
+    expect(state.moving.minX).toBeLessThanOrEqual(state.moving.maxX);
+    expect(state.moving.width).toBeGreaterThanOrEqual(MIN_WIDTH);
+    expect(state.moving.width).toBeLessThanOrEqual(BASE_PLATFORM_WIDTH);
   });
 });
