@@ -421,6 +421,7 @@ function loop(ts) {
     playWarriorAnim('idle');
     playBossAnim('idle');
     ui.showBossScreen(`${bossEntry.displayName} — Nivel ${lvl}`, fight.cardCount);
+    ui.updateDifficultyIndicator(fight.difficulty);   // R5.1, R5.2
     ui.renderPips('playerHpBar', fight.playerPips, fight.playerPipsMax);
     ui.renderPips('bossHpBar', fight.bossPips, fight.bossPipsMax);
     ui.renderCards(fight.cards, onCardClick);

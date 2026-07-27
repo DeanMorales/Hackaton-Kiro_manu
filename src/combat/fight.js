@@ -1,5 +1,5 @@
 /* ===== COMBAT: duelo contra el guardián ===== */
-import { AWS_SERVICES, BOSS_NAMES, shuffle, pickQuestion } from '../data/services.js';
+import { AWS_SERVICES, BOSS_NAMES, shuffle, pickQuestion, difficultyForBossLevel } from '../data/services.js';
 
 /**
  * Número máximo de cartas que puede tener un combate, sin importar el nivel.
@@ -27,17 +27,19 @@ export const MAX_CARD_COUNT = 7;
  */
 export function startBossFight(level){
   const cardCount = Math.min(level, MAX_CARD_COUNT);
+  const difficulty = difficultyForBossLevel(level);         // R2.1, R4.1
   // Vida del jefe = un punto de vida por carta: se requiere un acierto por carta
   // para derrotarlo y la barra dibuja tantas casillas como cartas tenga el combate.
   const bossPipsInit = cardCount;
   // Tolerancia de fallos del jugador: se calcula de forma independiente de la vida
   // del jefe para conservar EXACTAMENTE el mismo valor previo a la corrección.
   const playerDefeatThreshold = cardCount - Math.ceil(cardCount / 2) + 1;
-  const services = shuffle(AWS_SERVICES).slice(0, cardCount);
-  const cards = services.map(s => ({ service: s, question: pickQuestion(s.id, null), locked: false }));
+  const services = shuffle(AWS_SERVICES).slice(0, cardCount); // R1.6 uniforme, sin pesos
+  const cards = services.map(s => ({ service: s, question: pickQuestion(s.id, null, difficulty), locked: false }));
   const bossLabel = BOSS_NAMES[Math.min(level, BOSS_NAMES.length) - 1] + ` — Nivel ${level}`;
   return {
     cardCount,
+    difficulty,                                             // R4.3 constante durante el combate
     playerPips: playerDefeatThreshold,
     bossPips: bossPipsInit,
     // Máximos iniciales de vida: sirven para dibujar las barras de pips con el
@@ -99,7 +101,7 @@ export function answerCard(fight, idx, chosenIdx) {
 
   // Al acertar sin resolver el combate, refrescar la pregunta para volver a responder la carta.
   if (correct && !fight.resolved) {
-    card.question = pickQuestion(card.service.id, card.question.text);
+    card.question = pickQuestion(card.service.id, card.question.text, fight.difficulty); // R4.2
   }
 
   return { correct, resolved: fight.resolved, outcome };

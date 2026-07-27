@@ -131,6 +131,10 @@
   }
   .combatant-hp-player{ left:24%; transform:translateX(-50%); }
   .combatant-hp-boss{ left:76%; transform:translateX(-50%); }
+  .difficulty-tag{ font-size:.72rem; letter-spacing:.04em; opacity:.85; margin-top:2px; }
+  .difficulty-tag[data-level="1"]{ color:#57b46b; }
+  .difficulty-tag[data-level="2"]{ color:#f0c04a; }
+  .difficulty-tag[data-level="3"]{ color:#ff6b61; }
   .hp-label{
     font-family:var(--font-display); font-size:13px; font-weight:700; color:var(--ink-dim);
     margin-bottom:6px; text-align:center; letter-spacing:.02em;
@@ -445,6 +449,7 @@
     </div>
     <div class="combatant-hp combatant-hp-boss">
       <div class="hp-label" id="bossName">Guardián</div>
+      <div class="difficulty-tag" id="bossDifficulty" aria-live="polite"></div>
       <div class="hp-bar boss" id="bossHpBar"></div>
     </div>
     <div class="banner hidden" id="fightBanner"></div>

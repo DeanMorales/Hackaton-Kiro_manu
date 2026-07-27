@@ -1,6 +1,7 @@
 /* ===== UI: overlays y HUD del DOM ===== */
 import { sfx } from '../audio/sfx.js';
 import * as modalState from './modalState.js';
+import { difficultyLabel } from '../data/services.js';
 
 /* ===== UI: estado de la Modal_Pregunta (capa DOM) ===== */
 
@@ -798,4 +799,15 @@ export function setCardsInteractionLocked(isLocked) {
       buttons.forEach(b => b.disabled = false);
     }
   });
+}
+
+// R5.1, R5.3: Actualiza el indicador de dificultad en #bossDifficulty.
+// Si el nodo no existe o hay un error de DOM, retorna silenciosamente (degradación elegante).
+export function updateDifficultyIndicator(difficulty){
+  try{
+    const el = document.getElementById('bossDifficulty');
+    if(!el) return;
+    el.textContent = 'Dificultad: ' + difficultyLabel(difficulty);
+    el.dataset.level = String(difficulty);
+  }catch(e){ /* R5.3: continuar el combate sin indicación */ }
 }
