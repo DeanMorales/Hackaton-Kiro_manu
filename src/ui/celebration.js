@@ -83,11 +83,14 @@ function burst(x, y, colorPicker) {
   for (let i = 0; i < count; i++) {
     const angle = Math.random() * 2 * Math.PI;
     const velocity = Math.random() * 6 + 2;
+    const c = colorPicker.next();
     particles.push({
       x,
       y,
       r: Math.random() * 4 + 2,
-      c: colorPicker.next(),
+      c,
+      color: c,
+      speed: velocity,
       vx: Math.cos(angle) * velocity,
       vy: Math.sin(angle) * velocity,
       alpha: 1,
