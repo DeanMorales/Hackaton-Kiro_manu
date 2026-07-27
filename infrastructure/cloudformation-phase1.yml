@@ -1,0 +1,182 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Torre de las Nubes — Duelo AWS
+  Phase 1: IAM Role, Lambda, API Gateway (NO DynamoDB — imported in phase 2)
+
+Parameters:
+  LambdaS3Bucket:
+    Type: String
+    Description: Nombre del bucket S3 que contiene el ZIP del codigo Lambda
+  LambdaS3Key:
+    Type: String
+    Default: torre-nubes-scores-api.zip
+  AllowedOrigin:
+    Type: String
+    Default: '*'
+  TableName:
+    Type: String
+    Default: torre-nubes-scores
+
+Resources:
+
+  # ─── IAM Role for Lambda ───────────────────────────────────────────────────
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: torre-nubes-scores-lambda-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DynamoDBScoresPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:BatchWriteItem
+                  - dynamodb:Query
+                Resource:
+                  - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${TableName}'
+                  - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${TableName}/index/gameId-score-index'
+
+  # ─── Lambda Function ───────────────────────────────────────────────────────
+
+  ScoresLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: torre-nubes-scores-api
+      Runtime: nodejs22.x
+      Architectures:
+        - arm64
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Handler: handler.handler
+      Code:
+        S3Bucket: !Ref LambdaS3Bucket
+        S3Key: !Ref LambdaS3Key
+      Timeout: 10
+      MemorySize: 256
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TableName
+          ALLOWED_ORIGIN: !Ref AllowedOrigin
+
+  LambdaApiGatewayPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt ScoresLambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ScoresApi}/*'
+
+  # ─── API Gateway REST API ──────────────────────────────────────────────────
+
+  ScoresApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: torre-nubes-scores-api
+      Description: REST API para el leaderboard de Torre de las Nubes
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  ScoresResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ScoresApi
+      ParentId: !GetAtt ScoresApi.RootResourceId
+      PathPart: scores
+
+  ScoresGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ScoresApi
+      ResourceId: !Ref ScoresResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub
+          - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations'
+          - LambdaArn: !GetAtt ScoresLambda.Arn
+
+  ScoresPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ScoresApi
+      ResourceId: !Ref ScoresResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub
+          - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations'
+          - LambdaArn: !GetAtt ScoresLambda.Arn
+
+  ScoresDeleteMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ScoresApi
+      ResourceId: !Ref ScoresResource
+      HttpMethod: DELETE
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub
+          - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations'
+          - LambdaArn: !GetAtt ScoresLambda.Arn
+
+  ScoresOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ScoresApi
+      ResourceId: !Ref ScoresResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub
+          - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations'
+          - LambdaArn: !GetAtt ScoresLambda.Arn
+
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - ScoresGetMethod
+      - ScoresPostMethod
+      - ScoresDeleteMethod
+      - ScoresOptionsMethod
+    Properties:
+      RestApiId: !Ref ScoresApi
+
+  ApiProdStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref ScoresApi
+      DeploymentId: !Ref ApiDeployment
+      StageName: prod
+      Description: Production stage
+
+Outputs:
+  ApiUrl:
+    Description: URL base del API Gateway (prod stage) - usar como VITE_SCORES_API_URL
+    Value: !Sub 'https://${ScoresApi}.execute-api.${AWS::Region}.amazonaws.com/prod'
+    Export:
+      Name: TorreNubesApiUrl
+
+  LambdaArn:
+    Description: ARN de la funcion Lambda
+    Value: !GetAtt ScoresLambda.Arn

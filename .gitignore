@@ -1,5 +1,9 @@
 # Dependencias
 node_modules/
+lambda/node_modules/
+
+# Artifacts de despliegue
+infrastructure/*.zip
 
 # Build outputs
 dist/
