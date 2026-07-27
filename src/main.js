@@ -3,6 +3,8 @@
 import { sfx } from './audio/sfx.js';
 import { music } from './audio/music.js';
 import { combatSfx } from './audio/combatSfx.js';
+import { showMilestoneCelebration } from './ui/celebration.js';
+import { milestoneSfx } from './audio/milestoneSfx.js';
 import * as engine from './engine/tower.js';
 import * as combat from './combat/fight.js';
 import * as render from './render/draw.js';
@@ -123,6 +125,13 @@ function onDrop() {
     sfx.jump();
     if (result.isDoor) sfx.door();
     ui.updateHud(result.floorNum, result.doorIn);
+    // Celebración en fase de construcción solo para pisos múltiplos de 15 que NO sean puerta.
+    // Los pisos-puerta (múltiplos de 5, incluyendo todos los múltiplos de 15) ya reciben
+    // celebración desde endFight() con el delay de 1000 ms tras cerrar el boss screen.
+    if (result.floorNum > 0 && result.floorNum % 15 === 0 && !result.isDoor) {
+      showMilestoneCelebration(result.floorNum);
+      milestoneSfx.playMilestoneAudio(result.floorNum);
+    }
   }
 }
 
@@ -281,6 +290,14 @@ function endFight(won) {
     gameState.screen = 'build';
     gameState.pendingBossLevel = 0;
     music.enterBuildScreen();
+    const floorNumber = gameState.floors.length - 1;
+    // Solo celebrar en pisos múltiplos de 15 (cada 3 puertas)
+    if (floorNumber > 0 && floorNumber % 15 === 0) {
+      setTimeout(() => {
+        showMilestoneCelebration(floorNumber);
+        milestoneSfx.playMilestoneAudio(floorNumber);
+      }, 400);
+    }
   } else {
     gameState.screen = 'falling';
     engine.triggerFall(gameState, performance.now());
@@ -330,7 +347,8 @@ function onToggleAudioSettings() {
   } else {
     ui.showAudioSettingsPanel(
       music.getEffectiveVolumePercent(), music.isMuted(),
-      combatSfx.getEffectiveVolumePercent(), combatSfx.isMuted()
+      combatSfx.getEffectiveVolumePercent(), combatSfx.isMuted(),
+      milestoneSfx.getBoost()
     );
   }
 }
@@ -357,6 +375,11 @@ function onToggleCombatSfxMute() {
 
 function onCloseAudioSettings() {
   ui.hideAudioSettingsPanel();
+}
+
+function onCelebrationBoostChange(value) {
+  milestoneSfx.setBoost(value);
+  ui.setCelebrationBoostDisplay(value);
 }
 
 // engine.update() señala `shouldStartBoss` una única vez, exactamente en el frame
@@ -423,10 +446,12 @@ ui.bindAudioSettingsHandlers({
   onToggleMute,
   onCombatSfxVolumeChange,
   onToggleCombatSfxMute,
-  onCloseSettings: onCloseAudioSettings
+  onCloseSettings: onCloseAudioSettings,
+  onCelebrationBoostChange,
 });
 music.init();
 combatSfx.init();
+milestoneSfx.init(() => ({ volume: music.getEffectiveVolumePercent() / 100, muted: music.isMuted() }));
 
 // Precarga de los Sprite_Animation_Engine (Warrior_Sprite + los 5 Boss_Sprite),
 // en paralelo con el resto de la inicialización del módulo. `loop()` ya se

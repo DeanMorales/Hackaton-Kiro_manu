@@ -31,6 +31,14 @@ function buildDom() {
         <input type="range" id="combatSfxVolumeSlider" min="0" max="100" step="1" />
         <button id="combatSfxMuteToggleBtn" class="btn-secondary" aria-pressed="false">Silenciar efectos de combate</button>
 
+        <div class="audio-control-group">
+          <label for="celebrationBoostSlider">
+            Boost de celebración: <span id="celebrationBoostValue">1.5×</span>
+          </label>
+          <input id="celebrationBoostSlider" type="range" min="1.0" max="3.0" step="0.1" value="1.5"
+            aria-label="Multiplicador de volumen de celebración" />
+        </div>
+
         <button id="closeAudioSettingsBtn" class="btn-primary">Cerrar</button>
       </div>
     </div>
@@ -75,7 +83,7 @@ describe('Audio_Settings_Panel — segundo par de controles de efectos de combat
 
   describe('showAudioSettingsPanel refleja ambos pares de controles de forma independiente', () => {
     it('refleja los valores de música y de efectos de combate por separado', () => {
-      showAudioSettingsPanel(50, false, 30, true);
+      showAudioSettingsPanel(50, false, 30, true, 1.5);
 
       const volumeSlider = document.getElementById('volumeSlider');
       const muteToggleBtn = document.getElementById('muteToggleBtn');
@@ -101,6 +109,7 @@ describe('Audio_Settings_Panel — segundo par de controles de efectos de combat
         onCombatSfxVolumeChange,
         onToggleCombatSfxMute: vi.fn(),
         onCloseSettings: vi.fn(),
+        onCelebrationBoostChange: vi.fn(),
       });
 
       const combatSfxVolumeSlider = document.getElementById('combatSfxVolumeSlider');
@@ -122,6 +131,7 @@ describe('Audio_Settings_Panel — segundo par de controles de efectos de combat
         onCombatSfxVolumeChange: vi.fn(),
         onToggleCombatSfxMute,
         onCloseSettings: vi.fn(),
+        onCelebrationBoostChange: vi.fn(),
       });
 
       const combatSfxMuteToggleBtn = document.getElementById('combatSfxMuteToggleBtn');
@@ -143,6 +153,7 @@ describe('Audio_Settings_Panel — segundo par de controles de efectos de combat
         onCombatSfxVolumeChange,
         onToggleCombatSfxMute,
         onCloseSettings: vi.fn(),
+        onCelebrationBoostChange: vi.fn(),
       });
 
       const combatSfxVolumeSlider = document.getElementById('combatSfxVolumeSlider');

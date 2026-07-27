@@ -1,0 +1,321 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Crear el módulo con las constantes de rutas y la función pura exportada `selectMilestoneSound(floorNumber)`": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109330192
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109336620
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109388923
+      }
+    ],
+    "1.4 Añadir precarga de los dos archivos MP3 y el objeto exportado `milestoneSfx`": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109330276
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109704607
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109800460
+      }
+    ],
+    "2.1 Crear el módulo con las constantes y la función pura exportada `generateParticles(screenWidth)`": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109330318
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109337441
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109389886
+      }
+    ],
+    "2.3 Implementar y exportar `buildFloorMessageElement(floorNumber)`": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109330354
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109398435
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109485691
+      }
+    ],
+    "3. Checkpoint — Ejecutar `npm test` y asegurarse de que todos los tests pasan": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109330393
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785110004456
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785110337413
+      }
+    ],
+    "4.1 Implementar la función interna `prefersReducedMotion()` y el overlay de confeti": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109330441
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109705436
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109801507
+      }
+    ],
+    "4.2 Implementar el loop RAF `animateConfetti(canvas, particles, startTime)` con limpieza automática": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109330493
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109808600
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109936193
+      }
+    ],
+    "4.3 Implementar `createFloorMessage(floorNumber)` y `removeFloorMessage()` con setTimeout": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109330524
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109809443
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109937072
+      }
+    ],
+    "4.4 Implementar y exportar `showMilestoneCelebration(floorNumber)`": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109330560
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109941607
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109995980
+      }
+    ],
+    "5.1 Añadir los imports y la llamada a `milestoneSfx.init(...)` en la inicialización": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109330593
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785110002374
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785110339600
+      }
+    ],
+    "5.2 Modificar `endFight(won)` para activar la celebración tras victoria": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109330657
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785110342929
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785110392504
+      }
+    ],
+    "6. Checkpoint final — Ejecutar `npm test` y verificar cobertura completa": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109330689
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785110448828
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785110511155
+      }
+    ],
+    "2. Crear `src/ui/celebration.js` — funciones puras": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109485719
+      }
+    ],
+    "1.2 Escribir property tests para `selectMilestoneSound` — Propiedades 4, 5 y 6": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109505571
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109698744
+      }
+    ],
+    "1.3 Escribir property test para `computeEffectiveVolume` — Propiedad 7": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109506354
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109699525
+      }
+    ],
+    "2.2 Escribir property tests para `generateParticles` — Propiedades 1 y 2": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109507205
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109700342
+      }
+    ],
+    "2.4 Escribir property test para `buildFloorMessageElement` — Propiedad 3": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109508050
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109701201
+      }
+    ],
+    "1. Crear `src/audio/milestoneSfx.js` — capa pura y precarga": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109800509
+      }
+    ],
+    "1.5 Escribir unit tests para `milestoneSfx` (precarga y manejo de errores)": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109810556
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109938230
+      }
+    ],
+    "4. Implementar la función principal `showMilestoneCelebration` y el motor de confeti": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785109996025
+      }
+    ],
+    "4.5 Escribir unit tests para `showMilestoneCelebration` (DOM + timers)": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785110003458
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785110338536
+      }
+    ],
+    "5. Integrar ambos módulos en `src/main.js`": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785110392534
+      }
+    ],
+    "5.3 Escribir unit tests de integración para `endFight`": [
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785110395669
+      },
+      {
+        "executionId": "24418afc-4594-42b4-adf6-f367f60b7780",
+        "chatSessionId": "sess_64d41287-fd87-4e8f-8b95-592486b2ad3a",
+        "timestamp": 1785110445450
+      }
+    ]
+  }
+}

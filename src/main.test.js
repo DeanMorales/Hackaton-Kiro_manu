@@ -117,3 +117,108 @@ describe('Tarea 4.6: integración de combatSfx en main.js mediante wrappers', ()
     expect(countOccurrences(MAIN_SOURCE, 'combatUiState.bossEngine.play(')).toBe(1);
   });
 });
+
+/* ===== Tests de integración para endFight (tarea 5.3) ===== */
+
+// Feature: milestone-celebration-feedback
+// Validates: Requirements 5.1, 5.2
+describe('Tarea 5.3: integración de endFight en main.js', () => {
+  it('endFight(false) — la rama else NO contiene showMilestoneCelebration ni milestoneSfx.playMilestoneAudio (Requirements 5.1, 5.2)', () => {
+    const body = extractFunctionBody(MAIN_SOURCE, 'endFight');
+    // Extraer solo la rama else: texto desde "} else {" hasta el cierre del bloque else
+    const elseMarker = '} else {';
+    const elseStart = body.indexOf(elseMarker);
+    expect(elseStart).not.toBe(-1); // la rama else debe existir
+    const elseBranch = body.slice(elseStart + elseMarker.length);
+    expect(elseBranch).not.toContain('showMilestoneCelebration');
+    expect(elseBranch).not.toContain('milestoneSfx.playMilestoneAudio');
+  });
+
+  it('endFight(true) — la rama if (won) contiene showMilestoneCelebration(floorNumber), milestoneSfx.playMilestoneAudio(floorNumber) y gameState.floors.length - 1 (Requirements 5.1, 5.2)', () => {
+    const body = extractFunctionBody(MAIN_SOURCE, 'endFight');
+    // Extraer solo la rama if (won): texto desde "if (won) {" hasta "} else {"
+    const ifMarker = 'if (won) {';
+    const elseMarker = '} else {';
+    const ifStart = body.indexOf(ifMarker);
+    const elseStart = body.indexOf(elseMarker);
+    expect(ifStart).not.toBe(-1);  // la rama if debe existir
+    expect(elseStart).not.toBe(-1); // la rama else debe existir
+    const ifBranch = body.slice(ifStart + ifMarker.length, elseStart);
+    expect(ifBranch).toContain('showMilestoneCelebration(floorNumber)');
+    expect(ifBranch).toContain('milestoneSfx.playMilestoneAudio(floorNumber)');
+    expect(ifBranch).toContain('gameState.floors.length - 1');
+  });
+});
+
+/* ===== Bug Condition Exploration Tests — milestone-celebration-volume-boost ===== */
+
+/**
+ * Bug Condition — Bug 2: showMilestoneCelebration llamada sincrónicamente
+ *
+ * Validates: Requirements 1.3, 1.4
+ *
+ * CRÍTICO: Este test DEBE FALLAR en el código sin corregir.
+ * El fallo confirma que el bug existe.
+ * NO corregir el código ni el test cuando falle.
+ *
+ * Contraejemplo esperado:
+ *   En código sin corregir, showMilestoneCelebration se llama en el mismo tick
+ *   síncrono que hideBossScreen(), SIN estar envuelta en setTimeout(..., 400).
+ *   El test espera que esté dentro de un setTimeout con delay de 400 ms.
+ */
+describe('Bug Condition — Bug 2: showMilestoneCelebration debe llamarse con delay de 400 ms dentro de setTimeout (solo en pisos múltiplos de 15)', () => {
+  it('inspección estática: en la rama if (won) de endFight, showMilestoneCelebration debe estar dentro de un bloque setTimeout(..., 400); en código sin corregir la llamada es síncrona → el test falla', () => {
+    const body = extractFunctionBody(MAIN_SOURCE, 'endFight');
+
+    const ifMarker = 'if (won) {';
+    const elseMarker = '} else {';
+    const ifStart = body.indexOf(ifMarker);
+    const elseStart = body.indexOf(elseMarker);
+    expect(ifStart).not.toBe(-1);
+    expect(elseStart).not.toBe(-1);
+    const ifBranch = body.slice(ifStart + ifMarker.length, elseStart);
+
+    // Verificar que showMilestoneCelebration está DENTRO de un setTimeout con delay 400
+    // En código sin corregir: la llamada está fuera de setTimeout → el test falla
+    // Estrategia: buscar setTimeout en la rama y verificar que showMilestoneCelebration
+    // aparece DESPUÉS del inicio de setTimeout y ANTES del cierre del paréntesis correspondiente.
+    const setTimeoutIndex = ifBranch.indexOf('setTimeout(');
+    expect(setTimeoutIndex).not.toBe(-1); // setTimeout debe existir en la rama if (won)
+
+    // El texto de showMilestoneCelebration debe aparecer DESPUÉS del inicio de setTimeout
+    const celebrationIndex = ifBranch.indexOf('showMilestoneCelebration');
+    expect(celebrationIndex).toBeGreaterThan(setTimeoutIndex);
+
+    // El delay de 1000 ms debe estar presente en la llamada a setTimeout de la rama if (won)
+    // (no solo en otro setTimeout del else)
+    const setTimeoutBlock = ifBranch.slice(setTimeoutIndex);
+    // Buscar la primera ocurrencia del patrón setTimeout(... 400)
+    expect(setTimeoutBlock).toMatch(/setTimeout\s*\(/);
+    expect(setTimeoutBlock).toContain('400');
+  });
+
+  it('inspección estática: gameState.screen = "build" debe estar FUERA del setTimeout (síncrono) en endFight', () => {
+    const body = extractFunctionBody(MAIN_SOURCE, 'endFight');
+
+    const ifMarker = 'if (won) {';
+    const elseMarker = '} else {';
+    const ifStart = body.indexOf(ifMarker);
+    const elseStart = body.indexOf(elseMarker);
+    const ifBranch = body.slice(ifStart + ifMarker.length, elseStart);
+
+    // gameState.screen = 'build' debe asignarse ANTES del setTimeout
+    // (transición de estado síncrona — Preservation Property 4)
+    const setTimeoutIndex = ifBranch.indexOf('setTimeout(');
+    const screenAssignIndex = ifBranch.indexOf("gameState.screen = 'build'");
+
+    // Si setTimeout no existe aún (código sin corregir), screenAssign existe sin setTimeout.
+    // Si setTimeout existe, screenAssign debe aparecer ANTES.
+    if (setTimeoutIndex !== -1) {
+      expect(screenAssignIndex).toBeLessThan(setTimeoutIndex);
+    } else {
+      // No hay setTimeout en código sin corregir — este sub-test pasa para no
+      // producir falso positivo; Bug 2 es detectado por el test anterior.
+      expect(screenAssignIndex).not.toBe(-1);
+    }
+  });
+});
