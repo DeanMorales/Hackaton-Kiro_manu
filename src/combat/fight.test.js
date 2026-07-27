@@ -239,7 +239,7 @@ describe('answerCard — no-op ante carta bloqueada o combate resuelto', () => {
           expect(fight.cards.map(c => c.locked)).toEqual(snapshot.locked);
 
           // El resultado devuelto es neutro según el diseño (combate no resuelto).
-          expect(result).toEqual({ correct: false, resolved: false, outcome: null });
+          expect(result).toEqual({ correct: false, resolved: false, outcome: null, perfect: null });
         }
       ),
       { numRuns: 100 }
@@ -443,7 +443,7 @@ describe('answerCard — victoria estable', () => {
             const res = answerCard(fight, idx, chosenIdx);
 
             // Post-resolución, answerCard es no-op: retorna outcome null y resolved true.
-            expect(res).toEqual({ correct: false, resolved: true, outcome: null });
+            expect(res).toEqual({ correct: false, resolved: true, outcome: null, perfect: null });
 
             // La victoria se mantiene estable: resolved sigue true y los pips no cambian.
             expect(fight.resolved).toBe(true);
@@ -505,7 +505,7 @@ describe('answerCard — derrota estable', () => {
             const res = answerCard(fight, idx, chosenIdx);
 
             // Post-resolución, answerCard es no-op: retorna outcome null y resolved true.
-            expect(res).toEqual({ correct: false, resolved: true, outcome: null });
+            expect(res).toEqual({ correct: false, resolved: true, outcome: null, perfect: null });
 
             // La derrota se mantiene estable: resolved sigue true y los pips no cambian.
             expect(fight.resolved).toBe(true);

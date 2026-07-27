@@ -46,6 +46,8 @@ export function startBossFight(level){
     playerPipsMax: playerDefeatThreshold,
     bossPipsMax: bossPipsInit,
     resolved: false,
+    // endless-tower-difficulty-cap: Requirement 3.1/3.2 — rastrea si el Duelo tuvo al menos un fallo
+    failedAnyCard: false,
     cards,
     bossLabel,
   };
@@ -69,13 +71,13 @@ export function startBossFight(level){
  * @returns {{correct: boolean, resolved: boolean, outcome: 'win'|'lose'|null}}
  */
 export function answerCard(fight, idx, chosenIdx) {
-  if (fight.resolved) return { correct: false, resolved: true, outcome: null };
+  if (fight.resolved) return { correct: false, resolved: true, outcome: null, perfect: null };
 
   // Salvaguarda de índice inválido: si la carta no existe, no-op defensivo (sin mutar).
   const card = fight.cards[idx];
-  if (card === undefined) return { correct: false, resolved: fight.resolved, outcome: null };
+  if (card === undefined) return { correct: false, resolved: fight.resolved, outcome: null, perfect: null };
 
-  if (card.locked) return { correct: false, resolved: false, outcome: null };
+  if (card.locked) return { correct: false, resolved: false, outcome: null, perfect: null };
 
   const correct = chosenIdx === card.question.correct;
 
@@ -86,6 +88,8 @@ export function answerCard(fight, idx, chosenIdx) {
     // Fallar bloquea la carta de forma permanente y daña al jugador.
     card.locked = true;
     fight.playerPips = Math.max(0, fight.playerPips - 1);
+    // endless-tower-difficulty-cap: Requirement 3.2 — un solo fallo basta para que el Duelo no sea perfecto
+    fight.failedAnyCard = true;
   }
 
   let outcome = null;
@@ -102,5 +106,8 @@ export function answerCard(fight, idx, chosenIdx) {
     card.question = pickQuestion(card.service.id, card.question.text);
   }
 
-  return { correct, resolved: fight.resolved, outcome };
+  // endless-tower-difficulty-cap: Requirement 3.1/3.2 — `perfect` solo aplica a un Duelo Ganado:
+  // es `true`/`false` según si hubo algún fallo durante el combate, y `null` cuando el Duelo
+  // se pierde o aún no se resuelve (el concepto de "perfecto" no aplica en esos casos).
+  return { correct, resolved: fight.resolved, outcome, perfect: outcome === 'win' ? !fight.failedAnyCard : null };
 }

@@ -222,3 +222,53 @@ describe('Bug Condition — Bug 2: showMilestoneCelebration debe llamarse con de
     }
   });
 });
+
+/* ===== Tarea 10.4: pruebas de la integración de Racha_Perfecta en main.js ===== */
+
+// Feature: endless-tower-difficulty-cap, Tarea 10.4: pruebas unitarias de la integración de Racha_Perfecta en main.js
+// Validates: Requirements 3.1, 3.2, 3.3
+describe('Tarea 10.4: integración de Racha_Perfecta (registerDuelWinForStreak/resetPerfectStreak) en main.js', () => {
+  it("onAnswer — la rama outcome === 'win' invoca engine.registerDuelWinForStreak(gameState, result.perfect) (Requirements 3.1, 3.2)", () => {
+    const body = extractFunctionBody(MAIN_SOURCE, 'onAnswer');
+
+    const winMarker = "if (result.outcome === 'win') {";
+    const loseMarker = "} else if (result.outcome === 'lose') {";
+    const winStart = body.indexOf(winMarker);
+    const loseStart = body.indexOf(loseMarker);
+    expect(winStart).not.toBe(-1); // la rama 'win' debe existir
+    expect(loseStart).not.toBe(-1); // la rama 'lose' debe existir
+
+    const winBranch = body.slice(winStart + winMarker.length, loseStart);
+    // Un único punto de llamada cubre tanto perfect: true como perfect: false,
+    // ya que se pasa la expresión real result.perfect (evaluada en runtime por answerCard).
+    expect(winBranch).toContain('engine.registerDuelWinForStreak(gameState, result.perfect)');
+  });
+
+  it("onAnswer — la rama outcome === 'lose' invoca engine.resetPerfectStreak(gameState) (Requirement 3.3)", () => {
+    const body = extractFunctionBody(MAIN_SOURCE, 'onAnswer');
+
+    const loseMarker = "} else if (result.outcome === 'lose') {";
+    const correctMarker = '} else if (result.correct) {';
+    const loseStart = body.indexOf(loseMarker);
+    const correctStart = body.indexOf(correctMarker);
+    expect(loseStart).not.toBe(-1); // la rama 'lose' debe existir
+    expect(correctStart).not.toBe(-1); // la rama 'correct' debe existir
+
+    const loseBranch = body.slice(loseStart + loseMarker.length, correctStart);
+    expect(loseBranch).toContain('engine.resetPerfectStreak(gameState)');
+  });
+
+  it("onDrop — la rama result.type === 'fell' invoca engine.resetPerfectStreak(gameState) (Requirement 3.3)", () => {
+    const body = extractFunctionBody(MAIN_SOURCE, 'onDrop');
+
+    const fellMarker = "if (result.type === 'fell') {";
+    const placedMarker = "} else if (result.type === 'placed') {";
+    const fellStart = body.indexOf(fellMarker);
+    const placedStart = body.indexOf(placedMarker);
+    expect(fellStart).not.toBe(-1); // la rama 'fell' debe existir
+    expect(placedStart).not.toBe(-1); // la rama 'placed' debe existir
+
+    const fellBranch = body.slice(fellStart + fellMarker.length, placedStart);
+    expect(fellBranch).toContain('engine.resetPerfectStreak(gameState)');
+  });
+});

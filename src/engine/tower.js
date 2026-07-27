@@ -12,6 +12,14 @@ export const BASE_PLATFORM_WIDTH = BASE_WIDTH * 3; // 630px, Requirement 1.1
 export const SPEED_INCREMENT_FACTOR = 1.30;          // Requirement 2/3
 export const BASE_SPEED = 1.6;                       // Velocidad_Base original (sin *floors.length)
 
+// --- endless-tower-difficulty-cap: constantes de Fase_Estable ---
+export const STABLE_PHASE_DUEL_THRESHOLD = 5;    // Requirement 1.1, 1.6: Duelos Ganados para entrar en Fase_Estable
+export const SPEED_CAP = BASE_SPEED * Math.pow(SPEED_INCREMENT_FACTOR, STABLE_PHASE_DUEL_THRESHOLD); // Tope_Velocidad
+export const RELIEF_PLATFORM_INTERVAL = 5;       // Requirement 2.1: cada N pisos dentro de la Fase_Estable
+export const RELIEF_PLATFORM_WIDTH_MULTIPLIER = 2; // Requirement 2.2
+export const PERFECT_STREAK_BONUS_INTERVAL = 3;   // Requirement 3.4: cada N Duelos Perfectos consecutivos
+export const PERFECT_STREAK_BONUS_WIDTH = 40;     // Requirement 3.4: px otorgados por cada bono
+
 // Requirement 1.1 / 1.3 / 1.4: ancho fijo de la Plataforma Base
 export function computeBasePlatformWidth() {
   return BASE_PLATFORM_WIDTH; // 630, constante pura sin inputs
@@ -20,6 +28,16 @@ export function computeBasePlatformWidth() {
 // Requirement 2.1 / 2.2 / 3.1 / 3.2 / 3.3: incremento compuesto de velocidad
 export function applySpeedBoost(currentSpeed) {
   return currentSpeed * SPEED_INCREMENT_FACTOR;
+}
+
+// Requirement 1.1/1.2/1.3: aplica el incremento de velocidad solo si aún no se alcanzó
+// el Tope_Velocidad (definido a partir de STABLE_PHASE_DUEL_THRESHOLD Duelos Ganados)
+export function applySpeedBoostWithCap(currentSpeed, doorsPassedBeforeThisWin) {
+  if (doorsPassedBeforeThisWin >= STABLE_PHASE_DUEL_THRESHOLD) {
+    return SPEED_CAP; // Requirement 1.2/1.3: ya en Fase_Estable, se mantiene el tope exacto
+  }
+  const next = applySpeedBoost(currentSpeed); // reutiliza la función pura existente (currentSpeed * 1.30)
+  return doorsPassedBeforeThisWin + 1 >= STABLE_PHASE_DUEL_THRESHOLD ? SPEED_CAP : next;
 }
 
 // --- funciones puras extraídas para PBT (Requirement 1.2) ---
@@ -72,6 +90,9 @@ export function createTowerState(width, height) {
     floors: [baseFloor],
     moving: null,
     moveSpeed: BASE_SPEED, // Requirement 1.5 / 3.4: velocidad persistente en el estado
+    perfectStreak: 0,        // Requirement 3.1/3.2/3.3
+    streakWidthBonus: 0,     // Requirement 3.4/3.6/3.7/3.8
+    stableFloorsBuilt: 0,    // Requirement 2.1/2.5, cuenta pisos construidos DESDE que doorsPassed alcanzó 5
     camElev: baseFloor.top,
     camElevTarget: baseFloor.top,
     anchorScreenY: height * 0.62,
@@ -101,9 +122,29 @@ export function topFloor(state) {
   return state.floors[state.floors.length - 1];
 }
 
+// Requirement 2.1/2.2/2.4: determina si el próximo piso construido es una Plataforma_Respiro
+export function isReliefPlatformFloor(stableFloorsBuiltBeforeThisFloor) {
+  const floorsBuiltCountingThisOne = stableFloorsBuiltBeforeThisFloor + 1;
+  return floorsBuiltCountingThisOne % RELIEF_PLATFORM_INTERVAL === 0; // Requirement 2.1
+}
+
 export function newMovingBlock(state, afterFloor, canvasWidth) {
   const h = 34 + Math.random() * 20; // 34-54
-  const w = Math.max(MIN_WIDTH, Math.min(afterFloor.width, afterFloor.width - Math.random() * 10));
+  const inStablePhase = state.doorsPassed >= STABLE_PHASE_DUEL_THRESHOLD;
+
+  // Requirement 3.4/3.6: ancho máximo base + bonos de racha acumulados
+  const maxWidthWithStreakBonus = Math.min(
+    afterFloor.width + (inStablePhase ? state.streakWidthBonus : 0),
+    canvasWidth ?? Infinity
+  );
+
+  let w = Math.max(MIN_WIDTH, Math.min(maxWidthWithStreakBonus, maxWidthWithStreakBonus - Math.random() * 10));
+
+  // Requirement 2.1/2.2/4.2: Plataforma_Respiro duplica el ancho ya incrementado por el bono de racha,
+  // acotado al ancho de la Plataforma Base (630px)
+  if (inStablePhase && isReliefPlatformFloor(state.stableFloorsBuilt)) {
+    w = Math.min(BASE_PLATFORM_WIDTH, w * RELIEF_PLATFORM_WIDTH_MULTIPLIER);
+  }
 
   const minX = Math.max(0, afterFloor.x - 90);
   const maxX = Math.min(canvasWidth ?? (afterFloor.x + afterFloor.width + 90), afterFloor.x + afterFloor.width + 90) - w;
@@ -119,7 +160,7 @@ export function newMovingBlock(state, afterFloor, canvasWidth) {
     width: w,
     height: h,
     dir,
-    speed: state.moveSpeed, // Requirement 2.4: velocidad persistida en el estado
+    speed: state.moveSpeed, // sin cambios (ya lee el Tope_Velocidad cuando corresponde)
     minX,
     maxX,
   };
@@ -139,6 +180,9 @@ export function resetGame(state, width, height) {
   state.screen = 'start';
   state.floors = [baseFloor];
   state.moveSpeed = BASE_SPEED; // Requirement 3.4: reiniciar velocidad al reconstruir
+  state.perfectStreak = 0;
+  state.streakWidthBonus = 0;
+  state.stableFloorsBuilt = 0;
   state.camElevTarget = baseFloor.top;
   state.camElev = baseFloor.top;
   state.anchorScreenY = height * 0.62;
@@ -183,6 +227,10 @@ export function dropBlock(state, width) {
   const newFloor = computeNewFloor(prev, moving, willBeDoor, Math.random());
   state.floors.push(newFloor);
 
+  if (state.doorsPassed >= STABLE_PHASE_DUEL_THRESHOLD) {
+    state.stableFloorsBuilt += 1; // Requirement 2.1: solo cuenta pisos construidos dentro de la Fase_Estable
+  }
+
   // knight climbs to the new floor
   state.knight.animating = true;
   state.knight.fromElev = state.knight.elev;
@@ -206,8 +254,29 @@ export function dropBlock(state, width) {
 
 // Requirement 2.1 / 2.2 / 2.3: aplicar incremento de velocidad tras ganar un duelo
 export function applyDuelWinSpeedBoost(state) {
-  state.moveSpeed = applySpeedBoost(state.moveSpeed);
+  state.moveSpeed = applySpeedBoostWithCap(state.moveSpeed, state.doorsPassed);
   return state.moveSpeed;
+}
+
+// Requirement 3.1, 3.2, 3.3: actualiza la Racha_Perfecta según el resultado de un Duelo Ganado
+// perfect: boolean — true si el Duelo Ganado no tuvo ningún fallo; se invoca únicamente
+// cuando outcome === 'win' (un Duelo perdido/caída se maneja aparte, ver resetPerfectStreak)
+export function registerDuelWinForStreak(state, perfect) {
+  if (!perfect) {
+    state.perfectStreak = 0; // Requirement 3.2
+    return state.perfectStreak;
+  }
+  state.perfectStreak += 1; // Requirement 3.1
+  const inStablePhase = state.doorsPassed >= STABLE_PHASE_DUEL_THRESHOLD; // ya incrementado por applyDuelWinSpeedBoost/main.js antes de esta llamada
+  if (inStablePhase && state.perfectStreak % PERFECT_STREAK_BONUS_INTERVAL === 0) {
+    state.streakWidthBonus += PERFECT_STREAK_BONUS_WIDTH; // Requirement 3.4, 3.6
+  }
+  return state.perfectStreak;
+}
+
+// Requirement 3.3: pierde el Duelo o cae de la Torre -> Racha_Perfecta a 0 (sin revertir streakWidthBonus, Requirement 3.7)
+export function resetPerfectStreak(state) {
+  state.perfectStreak = 0;
 }
 
 export function triggerFall(state, now) {
