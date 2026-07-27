@@ -1,0 +1,9 @@
+[
+  {
+    "ResourceType": "AWS::DynamoDB::Table",
+    "LogicalResourceId": "ScoresTable",
+    "ResourceIdentifier": {
+      "TableName": "torre-nubes-scores"
+    }
+  }
+]

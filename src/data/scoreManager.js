@@ -1,4 +1,5 @@
 import { LocalStorageScoreStore } from './scoreStore.js';
+import { DynamoDBScoreStore } from './dynamoDBScoreStore.js';
 
 /**
  * ScoreManager
@@ -155,14 +156,8 @@ export class ScoreManager {
   }
 }
 
-/**
- * Singleton instance of LocalStorageScoreStore
- * Export this for use throughout the application
- */
-export const scoreStore = new LocalStorageScoreStore();
-
-/**
- * Singleton instance of ScoreManager
- * Export this for use throughout the application
- */
+const _apiUrl = import.meta.env.VITE_SCORES_API_URL;
+export const scoreStore = (_apiUrl && _apiUrl.length > 0)
+  ? new DynamoDBScoreStore(_apiUrl)
+  : new LocalStorageScoreStore();
 export const scoreManager = new ScoreManager(scoreStore);
