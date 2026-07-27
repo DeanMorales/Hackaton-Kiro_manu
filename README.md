@@ -8,6 +8,9 @@ Juego de navegador tipo "stack tower": construye una torre piso a piso mientras 
 
 Para contribuir al proyecto, lee primero [CONTRIBUTING.md](./CONTRIBUTING.md) que contiene las guías de colaboración y flujo de trabajo con Git.
 
+## 📋 Índice
+
+
 ## 📋 Prerrequisitos
 
 - **Node.js** versión 18.x o superior
@@ -98,6 +101,12 @@ Hackaton-Kiro_manu/
 - **Vitest + fast-check**: Testing (opcional, para desarrollo)
 - **Canvas 2D**: Renderizado del mundo del juego
 - **Web Audio API**: Síntesis de efectos de sonido en tiempo real
+
+## 🎥 Evidencia del proyecto (capturas y video)
+
+### Capturas de pantalla
+
+### Video
 
 ## 🌐 Compatibilidad
 
