@@ -1,0 +1,54 @@
+{
+  "pbtResults": {
+    "3.3 Escribir property test para el reinicio completo de velocidad/racha/contadores de Fase_Estable": {
+      "status": "passed",
+      "lastRunTimestamp": 1785121539094
+    },
+    "4.2 Escribir property test para el alcance exacto y la estabilidad del Tope_Velocidad": {
+      "status": "passed",
+      "lastRunTimestamp": 1785122104312
+    },
+    "6.3 Escribir property test para la actualización de la Racha_Perfecta": {
+      "status": "passed",
+      "lastRunTimestamp": 1785123334621
+    },
+    "6.4 Escribir property test para el otorgamiento acumulativo e irreversible del Bono_Racha_Perfecta": {
+      "status": "passed",
+      "lastRunTimestamp": 1785123618567
+    },
+    "6.5 Escribir property test para la ausencia de bono antes de la Fase_Estable": {
+      "status": "passed",
+      "lastRunTimestamp": 1785123714464
+    },
+    "12. Escribir la property test de independencia entre velocidad y ancho": {
+      "status": "passed",
+      "lastRunTimestamp": 1785124924065
+    }
+  },
+  "executionHistory": {
+    "1.1 Añadir `failedAnyCard: false` al objeto retornado por `startBossFight(level)`": [
+      {
+        "executionId": "b46a90ee-9ad5-4cbb-afe2-5129a50f5568",
+        "chatSessionId": "sess_9c412501-0601-4953-bf54-cb600a2b36c7",
+        "timestamp": 1785125046791
+      },
+      {
+        "executionId": "b46a90ee-9ad5-4cbb-afe2-5129a50f5568",
+        "chatSessionId": "sess_9c412501-0601-4953-bf54-cb600a2b36c7",
+        "timestamp": 1785125088529
+      }
+    ],
+    "1. Exponer si un Duelo Ganado fue perfecto en `src/combat/fight.js`": [
+      {
+        "executionId": "afd3e53b-591f-4c89-a776-bbd43a90705a",
+        "chatSessionId": "sess_7805ff25-1912-41db-9cae-91df522dae3d",
+        "timestamp": 1785125097514
+      },
+      {
+        "executionId": "afd3e53b-591f-4c89-a776-bbd43a90705a",
+        "chatSessionId": "sess_7805ff25-1912-41db-9cae-91df522dae3d",
+        "timestamp": 1785125210657
+      }
+    ]
+  }
+}

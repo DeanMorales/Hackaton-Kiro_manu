@@ -101,6 +101,7 @@ function onDrop() {
 
   if (result.type === 'fell') {
     engine.triggerFall(gameState, performance.now());
+    engine.resetPerfectStreak(gameState); // endless-tower-difficulty-cap: Requirement 3.3
     music.enterFallingScreen();
     sfx.fall();
     setTimeout(() => {
@@ -179,9 +180,11 @@ function onAnswer(cardIdx, chosenIdx) {
 
   if (result.outcome === 'win') {
     engine.applyDuelWinSpeedBoost(gameState); // Requirement 2.1, 2.2, 2.3
+    engine.registerDuelWinForStreak(gameState, result.perfect); // endless-tower-difficulty-cap: Requirement 1.1, 3.1, 3.2, 3.4 — usa gameState.doorsPassed AÚN NO incrementado (endFight lo incrementa después)
     sfx.win();
     playWinSequence();
   } else if (result.outcome === 'lose') {
+    engine.resetPerfectStreak(gameState); // endless-tower-difficulty-cap: Requirement 3.3
     sfx.lose();
     playLoseSequence();
   } else if (result.correct) {
