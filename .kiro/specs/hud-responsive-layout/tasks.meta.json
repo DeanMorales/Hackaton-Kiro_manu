@@ -1,0 +1,161 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Add the reduced `.hud-pill` rule inside the existing `@media (max-width:520px)` block": [
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785183647904
+      },
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785183706524
+      }
+    ],
+    "1. Add the mobile `.hud-pill` CSS rule in `index.html`": [
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785183706585
+      }
+    ],
+    "2. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785183710805
+      },
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785183714956
+      },
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785183773480
+      }
+    ],
+    "5. Final checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785183710854
+      },
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785184137757
+      },
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785184237173
+      }
+    ],
+    "6. Manual QA note (informational, not automatable)": [
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785183710900
+      },
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785184237516
+      },
+      {
+        "executionId": "ee47fac6-8881-4868-bfe4-66910f67a096",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785187017922
+      }
+    ],
+    "3.1 Write DOM test: `#settingsBtn` remains interactive after the style change": [
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785183778468
+      },
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785184117777
+      }
+    ],
+    "3.2 Write DOM test: HUD_Value_Span IDs and content intact, including a multi-digit score": [
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785183779502
+      },
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785184119528
+      }
+    ],
+    "4.1 Write static test: reduced `.hud-pill` rule present inside the mobile breakpoint": [
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785183780502
+      },
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785184132471
+      }
+    ],
+    "4.2 Write static test: desktop `.hud-pill` rule remains intact": [
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785183781728
+      },
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785184120759
+      }
+    ],
+    "4.3 Write static test: `#hud` rule unchanged": [
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785183782400
+      },
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785184122224
+      }
+    ],
+    "4.4 Write static test: `#settingsBtn` remains a `<button>` with `pointer-events:auto`": [
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785183783735
+      },
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785184123722
+      }
+    ],
+    "3. Add DOM/unit tests for HUD interaction and content integrity": [
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785184117922
+      }
+    ],
+    "4. Add static CSS verification tests": [
+      {
+        "executionId": "5671d043-4a2d-4b76-a362-20da816c8db2",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785184120810
+      }
+    ]
+  }
+}

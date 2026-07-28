@@ -1,0 +1,156 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Replace the fixed-size `.card` rule inside `@media (max-width:520px)`": [
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182090867
+      },
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182165629
+      }
+    ],
+    "1. Update the mobile `.card` CSS rule in `index.html`": [
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182165693
+      }
+    ],
+    "2. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182175905
+      },
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182180627
+      },
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182242279
+      }
+    ],
+    "5. Final checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182175961
+      },
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182458335
+      },
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182529565
+      }
+    ],
+    "6. Manual QA note (informational, not automatable)": [
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182176027
+      },
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182531043
+      }
+    ],
+    "3.1 Write DOM test: `renderCards` produces no wrappers for varying Card_Count": [
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182273256
+      },
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182448521
+      }
+    ],
+    "3.2 Write DOM test: order and `dataset.idx` preserved for Card_Count > 4": [
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182274106
+      },
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182449675
+      }
+    ],
+    "3.3 Write DOM test: Card_Click_Handler works for indices >= 4": [
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182275310
+      },
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182450727
+      }
+    ],
+    "3.4 Write DOM test: `dataset.idx` unchanged after opening/closing Modal_Pregunta for a card with index >= 4": [
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182276326
+      },
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182451764
+      }
+    ],
+    "4.1 Write static test: new mobile 4-per-row rule is present": [
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182277362
+      },
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182452817
+      }
+    ],
+    "4.2 Write static test: desktop `.card` rule remains intact": [
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182278052
+      },
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182453531
+      }
+    ],
+    "3. Add DOM/unit tests for card rendering and interaction under the new layout": [
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182448588
+      }
+    ],
+    "4. Add static CSS verification tests": [
+      {
+        "executionId": "9f454199-812b-468f-a9e1-594055c70c95",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785182452887
+      }
+    ]
+  }
+}

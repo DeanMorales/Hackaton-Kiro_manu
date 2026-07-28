@@ -1,9 +1,10 @@
 /* ===== RENDER: dibujo del mundo de juego en canvas ===== */
 
 import * as bossFightRender from './bossFightRender.js';
+import { DEFAULT_VERTICAL_ANCHOR_RATIO, computeVerticalAnchorRatio } from './anchorRatio.js';
 
-export function elevToScreen(camElev, elev, H) {
-  return H * 0.62 - (elev - camElev);
+export function elevToScreen(camElev, elev, H, ratio = DEFAULT_VERTICAL_ANCHOR_RATIO) {
+  return H * ratio - (elev - camElev);
 }
 
 export function drawSky(ctx, W, H, clouds, activeBiome, activeTimeOfDay) {
@@ -214,9 +215,9 @@ export function floorPalette(floorIndex) {
  * desde el borde inferior de baseFloor hasta el borde inferior del canvas,
  * ocupando todo el ancho visible.
  */
-export function drawGround(ctx, W, H, camElev, baseFloor, activeBiome) {
+export function drawGround(ctx, W, H, camElev, baseFloor, activeBiome, ratio = DEFAULT_VERTICAL_ANCHOR_RATIO) {
   if (!baseFloor) return;
-  const groundY = elevToScreen(camElev, baseFloor.bottom, H);
+  const groundY = elevToScreen(camElev, baseFloor.bottom, H, ratio);
   const bandTop = Math.min(groundY, H);
   if (bandTop >= H) return;
 
@@ -304,10 +305,10 @@ function drawVegetationCue(ctx, x, y, cue, seed) {
   }
 }
 
-export function drawTower(ctx, W, H, camElev, floors) {
+export function drawTower(ctx, W, H, camElev, floors, ratio = DEFAULT_VERTICAL_ANCHOR_RATIO) {
   floors.forEach((f, i) => {
-    const yTop = elevToScreen(camElev, f.top, H);
-    const yBot = elevToScreen(camElev, f.bottom, H);
+    const yTop = elevToScreen(camElev, f.top, H, ratio);
+    const yBot = elevToScreen(camElev, f.bottom, H, ratio);
     if (yBot < -60 || yTop > H + 60) return;
     // i=0 es la plataforma base; i>=1 son pisos colocados con gradiente AWS.
     const palette = i === 0
@@ -317,11 +318,11 @@ export function drawTower(ctx, W, H, camElev, floors) {
   });
 }
 
-export function drawMovingBlock(ctx, W, H, camElev, screen, floors, moving, knightAnimating) {
+export function drawMovingBlock(ctx, W, H, camElev, screen, floors, moving, knightAnimating, ratio = DEFAULT_VERTICAL_ANCHOR_RATIO) {
   if (screen !== 'build' || !moving || knightAnimating) return;
   const tf = floors[floors.length - 1];
   const m = moving;
-  const yTop = elevToScreen(camElev, tf.top + m.height, H);
+  const yTop = elevToScreen(camElev, tf.top + m.height, H, ratio);
   const DOOR_INTERVAL = 5;
   const nextIsDoor = floors.length % DOOR_INTERVAL === 0;
   // El bloque muestra el color que tendrá una vez apilado: floors.length es su índice 1-based.
@@ -335,7 +336,7 @@ export function drawMovingBlock(ctx, W, H, camElev, screen, floors, moving, knig
   }
 }
 
-export function drawKnight(ctx, topFloorRef, knight, camElev, H) {
+export function drawKnight(ctx, topFloorRef, knight, camElev, H, ratio = DEFAULT_VERTICAL_ANCHOR_RATIO) {
   if (!topFloorRef) return;
   let cx = topFloorRef.x + topFloorRef.width / 2;
   let feetY;
@@ -343,12 +344,12 @@ export function drawKnight(ctx, topFloorRef, knight, camElev, H) {
 
   if (knight.falling) {
     const t = Math.min(1, (performance.now() - knight.fallStart) / knight.fallDur);
-    feetY = elevToScreen(camElev, knight.elev, H) + t * t * 260;
+    feetY = elevToScreen(camElev, knight.elev, H, ratio) + t * t * 260;
     cx += t * 70;
     wobble = t * Math.PI * 1.4;
     ctx.globalAlpha = 1 - t * 0.7;
   } else {
-    feetY = elevToScreen(camElev, knight.elev, H);
+    feetY = elevToScreen(camElev, knight.elev, H, ratio);
   }
 
   ctx.save();
@@ -389,13 +390,14 @@ export function drawKnight(ctx, topFloorRef, knight, camElev, H) {
 }
 
 export function render(ctx, W, H, gameState, combatUiState) {
+  const ratio = computeVerticalAnchorRatio(W, H);
   drawSky(ctx, W, H, gameState.clouds, gameState.activeBiome, gameState.activeTimeOfDay);
-  drawGround(ctx, W, H, gameState.camElev, gameState.floors[0], gameState.activeBiome);
-  drawTower(ctx, W, H, gameState.camElev, gameState.floors);
-  drawMovingBlock(ctx, W, H, gameState.camElev, gameState.screen, gameState.floors, gameState.moving, gameState.knight.animating);
+  drawGround(ctx, W, H, gameState.camElev, gameState.floors[0], gameState.activeBiome, ratio);
+  drawTower(ctx, W, H, gameState.camElev, gameState.floors, ratio);
+  drawMovingBlock(ctx, W, H, gameState.camElev, gameState.screen, gameState.floors, gameState.moving, gameState.knight.animating, ratio);
   if (gameState.screen === 'build' || gameState.screen === 'falling') {
     const topFloorRef = gameState.floors[gameState.floors.length - 1];
-    drawKnight(ctx, topFloorRef, gameState.knight, gameState.camElev, H);
+    drawKnight(ctx, topFloorRef, gameState.knight, gameState.camElev, H, ratio);
   }
   if (gameState.screen === 'boss' && combatUiState) {
     bossFightRender.updateCombatants(gameState.lastDt || 0, combatUiState.warriorEngine, combatUiState.bossEngine);

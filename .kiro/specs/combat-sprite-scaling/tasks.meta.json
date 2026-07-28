@@ -1,0 +1,315 @@
+{
+  "pbtResults": {
+    "5.3 Escribir property test de orden horizontal guerrero/boss en `src/render/bossFightRender.test.js`": {
+      "status": "passed",
+      "lastRunTimestamp": 1785178926811
+    }
+  },
+  "executionHistory": {
+    "1.1 Agregar constantes `Reference_Canvas_Width`/`Minimum_Scale_Factor` e implementar `computeSpriteScaleFactor(W)`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785177437027
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785177450573
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785177518312
+      }
+    ],
+    "2.1 Implementar `scaleDimensions({ width, height }, factor)` y `scaleOffset(offsetPx, factor)`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785177437122
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785177596931
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785177926350
+      }
+    ],
+    "3.1 Implementar `computeDrawOrigin({ groundY, canvasWidth, xRatio, scaledWidth, scaledHeight, horizontalOffsetPx, verticalOffsetPx, scaleFactor })`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785177437185
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785177928054
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178177426
+      }
+    ],
+    "4. Checkpoint - Ensure all tests pass, ask the user if questions arise.": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785177437262
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178182986
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178313121
+      }
+    ],
+    "5.1 Reescribir `drawCombatants(ctx, W, H, warriorEngine, bossEngine)`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785177437305
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178313726
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178413769
+      }
+    ],
+    "7. Checkpoint final - Ensure all tests pass, ask the user if questions arise.": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785177437354
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178448344
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178542763
+      }
+    ],
+    "1. Implementar el cálculo del Sprite_Scale_Factor": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785177518409
+      }
+    ],
+    "2. Implementar el escalado de dimensiones y offsets": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785177926427
+      }
+    ],
+    "3. Implementar el cálculo del origen de dibujo escalado": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178177521
+      }
+    ],
+    "5. Reescribir `drawCombatants()` usando contexto de canvas escalado": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178413849
+      }
+    ],
+    "1.2 Escribir property tests para `computeSpriteScaleFactor` en `src/render/bossFightRender.test.js`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178574045
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178997673
+      }
+    ],
+    "2.2 Escribir property test para `scaleDimensions` en `src/render/bossFightRender.test.js`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178581647
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178999520
+      }
+    ],
+    "2.3 Escribir property test para `scaleOffset` en `src/render/bossFightRender.test.js`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178582833
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178999706
+      }
+    ],
+    "3.2 Escribir property test para el alineamiento con la línea de suelo en `src/render/bossFightRender.test.js`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178583871
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785179001478
+      }
+    ],
+    "3.3 Escribir property test para el centrado horizontal en `src/render/bossFightRender.test.js`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178584956
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785179003527
+      }
+    ],
+    "3.4 Escribir property test para el piso de legibilidad mínima en `src/render/bossFightRender.test.js`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178585969
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785179003697
+      }
+    ],
+    "5.2 Escribir property test de no-mutación del engine en `src/render/bossFightRender.test.js`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178587155
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785179003734
+      }
+    ],
+    "5.3 Escribir property test de orden horizontal guerrero/boss en `src/render/bossFightRender.test.js`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178588194
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785179005141
+      }
+    ],
+    "5.4 Escribir property test de independencia del ciclo de animación en `src/render/bossFightRender.test.js`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178589261
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785179007520
+      }
+    ],
+    "5.5 Escribir property test de inmutabilidad del estado de combate en `src/render/bossFightRender.test.js`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178590452
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785179007656
+      }
+    ],
+    "5.6 Escribir test unitario de paridad de escritorio en `src/render/bossFightRender.test.js`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178591531
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785179009851
+      }
+    ],
+    "5.7 Escribir test unitario del escenario móvil (`W = 375`) en `src/render/bossFightRender.test.js`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178592558
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785179009970
+      }
+    ],
+    "5.8 Escribir test unitario de la constante `Minimum_Scale_Factor` en `src/render/bossFightRender.test.js`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178593881
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785179012073
+      }
+    ],
+    "6.1 Crear `src/render/spriteEngineScaleInvariant.test.js` que lea el código fuente de `src/render/spriteEngine.js` como texto y verifique con expresiones regulares que no contiene referencias a `canvas.width`, `window.innerWidth`, `Sprite_Scale_Factor`, `scaleFactor`, ni llamadas a `computeSpriteScaleFactor`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785178595376
+      },
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785179012361
+      }
+    ],
+    "6. Agregar prueba estructural sobre `spriteEngine.js`": [
+      {
+        "executionId": "64c591b2-541c-4e11-8a21-1184eed4e68d",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785179012441
+      }
+    ]
+  }
+}

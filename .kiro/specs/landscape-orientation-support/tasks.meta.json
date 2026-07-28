@@ -1,0 +1,300 @@
+{
+  "pbtResults": {
+    "2.1 Escribir property test del invariante de alineación relativa de `elevToScreen`": {
+      "status": "passed",
+      "lastRunTimestamp": 1785189266580
+    },
+    "2.2 Escribir property test de no-interferencia con tamaños fijos en píxeles": {
+      "status": "passed",
+      "lastRunTimestamp": 1785189267333
+    }
+  },
+  "executionHistory": {
+    "3. Checkpoint - Asegurar que todos los tests pasan": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188285141
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188609251
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188616399
+      }
+    ],
+    "5.1 Escribir unit test de no-regresión para `createTowerState`/`resetGame`": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188285237
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188621673
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188722825
+      }
+    ],
+    "6. Checkpoint final - Asegurar que todos los tests pasan": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188285293
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188728092
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188788615
+      }
+    ],
+    "7. Nota de verificación manual (no automatizable)": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188285363
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188789138
+      }
+    ],
+    "1. Crear el módulo `src/render/anchorRatio.js`": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188303585
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188367042
+      }
+    ],
+    "2. Modificar `elevToScreen` y las funciones de dibujo de la torre en `src/render/draw.js`": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188380070
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188594116
+      }
+    ],
+    "4. Modificar `drawCombatants` en `src/render/bossFightRender.js`": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188391358
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188596093
+      }
+    ],
+    "5. Verificar no-regresión de `anchorScreenY` en `src/engine/tower.js`": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188722874
+      }
+    ],
+    "1.1 Escribir property test para detección de Landscape_Mobile_Mode en el cuadrante landscape móvil": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188834195
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785189428343
+      }
+    ],
+    "1.2 Escribir property test para Landscape_Mobile_Mode desactivado cuando W <= H": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188835239
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785189429161
+      }
+    ],
+    "1.3 Escribir property test para Landscape_Mobile_Mode desactivado en landscape con suficiente alto": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188836256
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785189430214
+      }
+    ],
+    "1.4 Escribir property test para el valor exacto del ratio en Landscape_Mobile_Mode": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188837502
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785189431282
+      }
+    ],
+    "1.5 Escribir property test para el valor exacto del ratio fuera de Landscape_Mobile_Mode (no-regresión)": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188838532
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785189432257
+      }
+    ],
+    "1.6 Escribir property test de consistencia entre Tower_Camera y Combat_Ground_Anchor": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188839546
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785189433509
+      }
+    ],
+    "1.7 Escribir unit tests de casos límite para `isLandscapeMobileMode`": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188840561
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785189434516
+      }
+    ],
+    "2.1 Escribir property test del invariante de alineación relativa de `elevToScreen`": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188841816
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785189435540
+      }
+    ],
+    "2.2 Escribir property test de no-interferencia con tamaños fijos en píxeles": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188842843
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785189437245
+      }
+    ],
+    "2.3 Escribir unit tests de no-regresión para las llamadas existentes de 3 argumentos": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188843525
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785189437450
+      }
+    ],
+    "2.4 Escribir unit test de ejemplo concreto de landscape móvil (667×375)": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188844720
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785189438529
+      }
+    ],
+    "2.5 Escribir unit test de no-regresión de escritorio/portrait": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188845722
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785189439702
+      }
+    ],
+    "4.1 Escribir property test de no-interferencia con Sprite_Scale_Factor": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188846834
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785189440372
+      }
+    ],
+    "4.2 Escribir unit test de ejemplo concreto de landscape móvil para `drawCombatants`": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188847635
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785189441377
+      }
+    ],
+    "4.3 Escribir unit test de no-regresión de `COMBAT_LAYOUT.groundYRatio`": [
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785188848636
+      },
+      {
+        "executionId": "13be7a03-4fb7-45f3-a3da-1348573f8bd0",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785189442288
+      }
+    ]
+  }
+}
