@@ -32,6 +32,11 @@ import {
   applyReliefPlatformSpeedBoost,
   BASE_PLATFORM_WIDTH,
   MIN_WIDTH,
+  computeMovementMargin,
+  computeFallThreshold,
+  Reference_Canvas_Width,
+  Fall_Threshold_Fraction,
+  Movement_Margin_Fraction,
 } from './tower.js';
 import * as environmentRoster from '../data/environmentRoster.js';
 import { BIOME_CATALOG, TIME_OF_DAY_CATALOG } from '../data/environmentRoster.js';
@@ -979,5 +984,788 @@ describe('computeNewFloor/dropBlock — casos concretos adicionales del fix (Tar
     expect(state.moving.minX).toBeLessThanOrEqual(state.moving.maxX);
     expect(state.moving.width).toBeGreaterThanOrEqual(MIN_WIDTH);
     expect(state.moving.width).toBeLessThanOrEqual(BASE_PLATFORM_WIDTH);
+  });
+});
+
+// Feature: relief-platform-canvas-clamp (bugfix), Property 1: Bug Condition
+// El ancho de la Plataforma_Respiro excede canvasWidth en canvases angostos.
+// **Validates: Requirements 1.1, 1.2**
+// NOTA: este test se escribe ANTES del fix, sobre el código SIN corregir. Se
+// espera que FALLE — la falla confirma que el bug existe (w se fija a
+// BASE_PLATFORM_WIDTH sin acotar a canvasWidth). NO se debe arreglar el test
+// ni el código cuando falle en este punto del plan.
+describe('newMovingBlock — Property 1 (Bug Condition): ancho de Plataforma_Respiro acotado a canvasWidth en canvases angostos', () => {
+  it('Property 1: para floorNum de Plataforma_Respiro y canvasWidth en [MIN_WIDTH, BASE_PLATFORM_WIDTH - 1], result.width === Math.max(MIN_WIDTH, Math.min(BASE_PLATFORM_WIDTH, canvasWidth)) (comportamiento ESPERADO tras el fix)', () => {
+    const reliefFloorNumArb = fc.nat({ max: 50 }).map(
+      (k) => RELIEF_PLATFORM_FIRST_FLOOR + k * RELIEF_PLATFORM_REPEAT_INTERVAL
+    );
+    const canvasWidthArb = fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH - 1 });
+    const afterFloorXArb = fc.integer({ min: 0, max: 1000 });
+    const afterFloorWidthArb = fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH });
+
+    fc.assert(
+      fc.property(
+        reliefFloorNumArb,
+        canvasWidthArb,
+        afterFloorXArb,
+        afterFloorWidthArb,
+        (floorNum, canvasWidth, afterFloorX, afterFloorWidth) => {
+          expect(isReliefPlatformFloor(floorNum)).toBe(true);
+
+          const state = createTowerState(800, 600);
+          state.floors = new Array(floorNum);
+          const afterFloor = { x: afterFloorX, width: afterFloorWidth };
+
+          const result = newMovingBlock(state, afterFloor, canvasWidth);
+
+          const expectedWidth = Math.max(MIN_WIDTH, Math.min(BASE_PLATFORM_WIDTH, canvasWidth));
+          expect(result.width).toBe(expectedWidth);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('Ejemplo concreto — móvil típico: floorNum=35, canvasWidth=375, esperado width=375', () => {
+    const state = createTowerState(800, 600);
+    state.floors = new Array(35);
+    const afterFloor = { x: 0, width: 400 };
+
+    const result = newMovingBlock(state, afterFloor, 375);
+
+    expect(result.width).toBe(375);
+  });
+
+  it('Ejemplo concreto — extremo angosto: floorNum=65, canvasWidth=300, esperado width=300', () => {
+    const state = createTowerState(800, 600);
+    state.floors = new Array(65);
+    const afterFloor = { x: 0, width: 400 };
+
+    const result = newMovingBlock(state, afterFloor, 300);
+
+    expect(result.width).toBe(300);
+  });
+});
+
+// Feature: relief-platform-canvas-clamp (bugfix), Property 2: Preservation
+// El ancho de la Plataforma_Respiro en escritorio y la rama normal permanecen sin cambios.
+// **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5**
+// NOTA: estos tests se escriben ANTES del fix, sobre el código SIN corregir. Se
+// espera que los tres PASEN, capturando el comportamiento base a preservar tras el fix.
+describe('newMovingBlock — Property 2/3 (Preservation): escritorio, rama normal e incremento de velocidad sin cambios', () => {
+  it('Property 2a: para floorNum de Plataforma_Respiro con canvasWidth >= BASE_PLATFORM_WIDTH (incluyendo undefined), width === BASE_PLATFORM_WIDTH', () => {
+    const reliefFloorNumArb = fc.nat({ max: 50 }).map(
+      (k) => RELIEF_PLATFORM_FIRST_FLOOR + k * RELIEF_PLATFORM_REPEAT_INTERVAL
+    );
+    const canvasWidthArb = fc.oneof(
+      fc.constant(undefined),
+      fc.integer({ min: BASE_PLATFORM_WIDTH, max: BASE_PLATFORM_WIDTH + 2000 })
+    );
+    const afterFloorXArb = fc.integer({ min: 0, max: 1000 });
+    const afterFloorWidthArb = fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH });
+
+    fc.assert(
+      fc.property(
+        reliefFloorNumArb,
+        canvasWidthArb,
+        afterFloorXArb,
+        afterFloorWidthArb,
+        (floorNum, canvasWidth, afterFloorX, afterFloorWidth) => {
+          expect(isReliefPlatformFloor(floorNum)).toBe(true);
+
+          const state = createTowerState(800, 600);
+          state.floors = new Array(floorNum);
+          const afterFloor = { x: afterFloorX, width: afterFloorWidth };
+
+          const result = newMovingBlock(state, afterFloor, canvasWidth);
+
+          expect(result.width).toBe(BASE_PLATFORM_WIDTH);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('Property 2b: para floorNum que NO es Plataforma_Respiro (cualquier canvasWidth, incluyendo undefined), width/minX/maxX/dir coinciden con la fórmula de la rama normal reimplementada como oráculo de referencia', () => {
+    const nonReliefFloorNumArb = fc
+      .integer({ min: 0, max: 2000 })
+      .filter((n) => !isReliefPlatformFloor(n));
+    const canvasWidthArb = fc.oneof(
+      fc.constant(undefined),
+      fc.integer({ min: 50, max: 2000 })
+    );
+    const doorsPassedArb = fc.nat({ max: 60 });
+    const streakWidthBonusArb = fc.nat({ max: 500 });
+    const afterFloorXArb = fc.integer({ min: 0, max: 1000 });
+    const afterFloorWidthArb = fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH });
+    const randomStubArb = fc.float({ min: 0, max: Math.fround(0.999), noNaN: true });
+
+    fc.assert(
+      fc.property(
+        nonReliefFloorNumArb,
+        canvasWidthArb,
+        doorsPassedArb,
+        streakWidthBonusArb,
+        afterFloorXArb,
+        afterFloorWidthArb,
+        randomStubArb,
+        (floorNum, canvasWidth, doorsPassed, streakWidthBonus, afterFloorX, afterFloorWidth, randomStub) => {
+          expect(isReliefPlatformFloor(floorNum)).toBe(false);
+
+          const state = createTowerState(800, 600);
+          state.floors = new Array(floorNum);
+          state.doorsPassed = doorsPassed;
+          state.streakWidthBonus = streakWidthBonus;
+          const afterFloor = { x: afterFloorX, width: afterFloorWidth };
+
+          const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(randomStub);
+          let result;
+          try {
+            result = newMovingBlock(state, afterFloor, canvasWidth);
+          } finally {
+            randomSpy.mockRestore();
+          }
+
+          // Oráculo de referencia: fórmula de la rama normal reimplementada de
+          // forma independiente, usando el mismo randomStub que newMovingBlock
+          // vio en cada una de sus llamadas a Math.random().
+          const inStablePhase = doorsPassed >= STABLE_PHASE_DUEL_THRESHOLD;
+          const maxWidthWithStreakBonus = Math.min(
+            afterFloorWidth + (inStablePhase ? streakWidthBonus : 0),
+            canvasWidth ?? Infinity
+          );
+          const expectedWidth = Math.max(
+            MIN_WIDTH,
+            Math.min(maxWidthWithStreakBonus, maxWidthWithStreakBonus - randomStub * 10)
+          );
+          const expectedMargin = computeMovementMargin(canvasWidth);
+          const expectedMinX = Math.max(0, afterFloorX - expectedMargin);
+          const expectedMaxX =
+            Math.min(canvasWidth ?? (afterFloorX + afterFloorWidth + expectedMargin), afterFloorX + afterFloorWidth + expectedMargin) -
+            expectedWidth;
+          const expectedStartFromRight = randomStub < 0.5;
+          const expectedDir = expectedStartFromRight ? -1 : 1;
+
+          expect(result.width).toBe(expectedWidth);
+          expect(result.minX).toBe(expectedMinX);
+          expect(result.maxX).toBe(expectedMaxX);
+          expect(result.dir).toBe(expectedDir);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('Property 3: para floorNum de Plataforma_Respiro con canvasWidth arbitrario (angosto o no, incluyendo undefined), state.moveSpeed tras la llamada coincide exactamente con applyReliefPlatformSpeedBoost(moveSpeed_antes) invocado directamente', () => {
+    const reliefFloorNumArb = fc.nat({ max: 50 }).map(
+      (k) => RELIEF_PLATFORM_FIRST_FLOOR + k * RELIEF_PLATFORM_REPEAT_INTERVAL
+    );
+    const canvasWidthArb = fc.oneof(
+      fc.constant(undefined),
+      fc.integer({ min: MIN_WIDTH, max: 2000 })
+    );
+    const moveSpeedArb = fc.float({ min: Math.fround(0.1), max: Math.fround(SPEED_CAP * 1.5), noNaN: true });
+    const afterFloorXArb = fc.integer({ min: 0, max: 1000 });
+    const afterFloorWidthArb = fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH });
+
+    fc.assert(
+      fc.property(
+        reliefFloorNumArb,
+        canvasWidthArb,
+        moveSpeedArb,
+        afterFloorXArb,
+        afterFloorWidthArb,
+        (floorNum, canvasWidth, moveSpeed, afterFloorX, afterFloorWidth) => {
+          expect(isReliefPlatformFloor(floorNum)).toBe(true);
+
+          const state = createTowerState(800, 600);
+          state.floors = new Array(floorNum);
+          state.moveSpeed = moveSpeed;
+          const afterFloor = { x: afterFloorX, width: afterFloorWidth };
+
+          newMovingBlock(state, afterFloor, canvasWidth);
+
+          expect(state.moveSpeed).toBe(applyReliefPlatformSpeedBoost(moveSpeed));
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// Feature: landscape-orientation-support, Requirement 4.1 — no-regresión de anchorScreenY
+// NOTA: anchorScreenY es código de solo-escritura en tower.js (no se lee en ningún pipeline
+// de render), por lo que esta feature no lo modifica. Este test unitario confirma que
+// createTowerState/resetGame siguen calculando exactamente height * 0.62, sin ninguna
+// modificación al código de tower.js.
+describe('createTowerState/resetGame — no-regresión de anchorScreenY (height * 0.62)', () => {
+  it.each([100, 375, 520, 600, 667, 1024, 1200])(
+    'createTowerState(W, %i).anchorScreenY === %i * 0.62',
+    (height) => {
+      const state = createTowerState(800, height);
+      expect(state.anchorScreenY).toBe(height * 0.62);
+    }
+  );
+
+  it.each([100, 375, 520, 600, 667, 1024, 1200])(
+    'resetGame mantiene anchorScreenY === %i * 0.62 tras reiniciar el estado',
+    (height) => {
+      const state = createTowerState(800, 600);
+
+      // Corrompe deliberadamente anchorScreenY antes de resetGame, para confirmar
+      // que resetGame lo recalcula (y no simplemente lo deja intacto por accidente).
+      state.anchorScreenY = -1;
+
+      resetGame(state, 800, height);
+
+      expect(state.anchorScreenY).toBe(height * 0.62);
+    }
+  );
+});
+
+// Feature: base-platform-canvas-clamp (bugfix), Property 1: Bug Condition
+// El ancho de la Plataforma Base excede `width` en canvases angostos.
+// **Validates: Requirements 1.1, 1.2, 1.3**
+// NOTA: este test se escribe ANTES del fix, sobre el código SIN corregir. Se
+// espera que FALLE — la falla confirma que el bug existe (baseFloor.width se
+// fija incondicionalmente a BASE_PLATFORM_WIDTH sin acotar a `width`, y
+// baseFloor.x resulta negativo). NO se debe arreglar el test ni el código
+// cuando falle en este punto del plan.
+describe('createTowerState/resetGame — Property 1 (Bug Condition): ancho de la Plataforma Base acotado a width en canvases angostos', () => {
+  it('Property 1 (createTowerState): para width en [MIN_WIDTH, BASE_PLATFORM_WIDTH - 1], floors[0].width === Math.max(MIN_WIDTH, Math.min(BASE_PLATFORM_WIDTH, width)) y floors[0].x === (width - floors[0].width) / 2 (comportamiento ESPERADO tras el fix)', () => {
+    const widthArb = fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH - 1 });
+    const heightArb = fc.integer({ min: 300, max: 1200 });
+
+    fc.assert(
+      fc.property(
+        widthArb,
+        heightArb,
+        (width, height) => {
+          const state = createTowerState(width, height);
+          const baseFloor = state.floors[0];
+
+          const expectedWidth = Math.max(MIN_WIDTH, Math.min(BASE_PLATFORM_WIDTH, width));
+          expect(baseFloor.width).toBe(expectedWidth);
+          expect(baseFloor.x).toBe((width - baseFloor.width) / 2);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('Property 1 (resetGame): para width en [MIN_WIDTH, BASE_PLATFORM_WIDTH - 1] sobre un state preexistente, floors[0].width === Math.max(MIN_WIDTH, Math.min(BASE_PLATFORM_WIDTH, width)) y floors[0].x === (width - floors[0].width) / 2 (comportamiento ESPERADO tras el fix)', () => {
+    const widthArb = fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH - 1 });
+    const heightArb = fc.integer({ min: 300, max: 1200 });
+
+    fc.assert(
+      fc.property(
+        widthArb,
+        heightArb,
+        (width, height) => {
+          // state preexistente construido con un width amplio de escritorio,
+          // luego reiniciado con el width angosto bajo prueba.
+          const state = createTowerState(800, height);
+
+          resetGame(state, width, height);
+          const baseFloor = state.floors[0];
+
+          const expectedWidth = Math.max(MIN_WIDTH, Math.min(BASE_PLATFORM_WIDTH, width));
+          expect(baseFloor.width).toBe(expectedWidth);
+          expect(baseFloor.x).toBe((width - baseFloor.width) / 2);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('Ejemplo concreto — móvil típico: width=375, esperado floors[0].width=375, floors[0].x=0 (createTowerState y resetGame)', () => {
+    const stateCreated = createTowerState(375, 600);
+    expect(stateCreated.floors[0].width).toBe(375);
+    expect(stateCreated.floors[0].x).toBe(0);
+
+    const stateReset = createTowerState(800, 600);
+    resetGame(stateReset, 375, 600);
+    expect(stateReset.floors[0].width).toBe(375);
+    expect(stateReset.floors[0].x).toBe(0);
+  });
+
+  it('Ejemplo concreto — extremo angosto: width=300, esperado floors[0].width=300, floors[0].x=0 (createTowerState y resetGame)', () => {
+    const stateCreated = createTowerState(300, 600);
+    expect(stateCreated.floors[0].width).toBe(300);
+    expect(stateCreated.floors[0].x).toBe(0);
+
+    const stateReset = createTowerState(800, 600);
+    resetGame(stateReset, 300, 600);
+    expect(stateReset.floors[0].width).toBe(300);
+    expect(stateReset.floors[0].x).toBe(0);
+  });
+});
+
+// Feature: base-platform-canvas-clamp (bugfix), Property 2: Preservation
+// El ancho y la posición de la Plataforma Base en escritorio permanecen sin cambios.
+// **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5**
+// NOTA: estos tests se escriben ANTES del fix, sobre el código SIN corregir. Se
+// espera que PASEN, capturando el comportamiento base a preservar tras el fix.
+describe('createTowerState/resetGame — Property 2 (Preservation): escritorio y campos no relacionados con width/x sin cambios', () => {
+  it('Property 2a (createTowerState): para width >= BASE_PLATFORM_WIDTH (incluyendo undefined), floors[0].width === BASE_PLATFORM_WIDTH y floors[0].x === (width - BASE_PLATFORM_WIDTH) / 2', () => {
+    const widthArb = fc.oneof(
+      fc.constant(undefined),
+      fc.integer({ min: BASE_PLATFORM_WIDTH, max: BASE_PLATFORM_WIDTH + 2000 })
+    );
+    const heightArb = fc.integer({ min: 300, max: 1200 });
+
+    fc.assert(
+      fc.property(
+        widthArb,
+        heightArb,
+        (width, height) => {
+          const state = createTowerState(width, height);
+          const baseFloor = state.floors[0];
+
+          expect(baseFloor.width).toBe(BASE_PLATFORM_WIDTH);
+          expect(baseFloor.x).toBe((width - BASE_PLATFORM_WIDTH) / 2);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('Property 2b (resetGame): para width >= BASE_PLATFORM_WIDTH (incluyendo undefined) sobre un state preexistente, floors[0].width === BASE_PLATFORM_WIDTH y floors[0].x === (width - BASE_PLATFORM_WIDTH) / 2', () => {
+    const widthArb = fc.oneof(
+      fc.constant(undefined),
+      fc.integer({ min: BASE_PLATFORM_WIDTH, max: BASE_PLATFORM_WIDTH + 2000 })
+    );
+    const heightArb = fc.integer({ min: 300, max: 1200 });
+
+    fc.assert(
+      fc.property(
+        widthArb,
+        heightArb,
+        (width, height) => {
+          const state = createTowerState(375, height);
+
+          resetGame(state, width, height);
+          const baseFloor = state.floors[0];
+
+          expect(baseFloor.width).toBe(BASE_PLATFORM_WIDTH);
+          expect(baseFloor.x).toBe((width - BASE_PLATFORM_WIDTH) / 2);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('Property 2c: para width arbitrario (angosto o no, incluyendo undefined), baseFloor.bottom/top/height/isDoor permanecen 0/64/64/false, tanto en createTowerState como en resetGame', () => {
+    const widthArb = fc.oneof(
+      fc.constant(undefined),
+      fc.integer({ min: 0, max: BASE_PLATFORM_WIDTH + 2000 })
+    );
+    const heightArb = fc.integer({ min: 300, max: 1200 });
+
+    fc.assert(
+      fc.property(
+        widthArb,
+        heightArb,
+        (width, height) => {
+          const createdState = createTowerState(width, height);
+          const createdBaseFloor = createdState.floors[0];
+
+          expect(createdBaseFloor.bottom).toBe(0);
+          expect(createdBaseFloor.top).toBe(64);
+          expect(createdBaseFloor.height).toBe(64);
+          expect(createdBaseFloor.isDoor).toBe(false);
+
+          const resetState = createTowerState(800, height);
+          resetGame(resetState, width, height);
+          const resetBaseFloor = resetState.floors[0];
+
+          expect(resetBaseFloor.bottom).toBe(0);
+          expect(resetBaseFloor.top).toBe(64);
+          expect(resetBaseFloor.height).toBe(64);
+          expect(resetBaseFloor.isDoor).toBe(false);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('Property 2d: para dos width arbitrarios distintos (misma height), los campos del state no relacionados con baseFloor.width/x permanecen idénticos entre sí, tanto en createTowerState como en resetGame (excluyendo seed/torchSeed/clouds/activeBiome/activeTimeOfDay no deterministas)', () => {
+    const widthArb = fc.oneof(
+      fc.constant(undefined),
+      fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH + 2000 })
+    );
+    const heightArb = fc.integer({ min: 300, max: 1200 });
+
+    // Extrae únicamente los campos que, según el design, no dependen de
+    // baseFloor.width/baseFloor.x ni son inherentemente no deterministas.
+    // Nota: "moving" se excluye deliberadamente — resetGame invoca
+    // newMovingBlock(state, baseFloor, width), cuyo resultado (minX/maxX/x)
+    // depende legítimamente de `width`, por lo que difiere entre widthA/widthB
+    // sin que eso constituya ningún cambio de comportamiento no deseado.
+    const pickStableFields = (state) => ({
+      screen: state.screen,
+      moveSpeed: state.moveSpeed,
+      perfectStreak: state.perfectStreak,
+      streakWidthBonus: state.streakWidthBonus,
+      camElev: state.camElev,
+      camElevTarget: state.camElevTarget,
+      anchorScreenY: state.anchorScreenY,
+      knight: state.knight,
+      doorsPassed: state.doorsPassed,
+      pendingBossLevel: state.pendingBossLevel,
+      lastTs: state.lastTs,
+    });
+
+    fc.assert(
+      fc.property(
+        widthArb,
+        widthArb,
+        heightArb,
+        (widthA, widthB, height) => {
+          const stateA = createTowerState(widthA, height);
+          const stateB = createTowerState(widthB, height);
+
+          expect(pickStableFields(stateB)).toEqual(pickStableFields(stateA));
+
+          const resetStateA = createTowerState(800, height);
+          resetGame(resetStateA, widthA, height);
+          const resetStateB = createTowerState(800, height);
+          resetGame(resetStateB, widthB, height);
+
+          expect(pickStableFields(resetStateB)).toEqual(pickStableFields(resetStateA));
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// Feature: base-platform-canvas-clamp (bugfix), Tarea 4.5 (opcional): pruebas
+// unitarias concretas adicionales del fix (ejemplos fijos, sin fast-check).
+// **Validates: Requirements 2.1, 2.2, 2.3, 3.1, 3.2, 3.3, 3.4, 3.5**
+describe('createTowerState/resetGame — Tarea 4.5: casos concretos adicionales del fix', () => {
+  it('createTowerState(375, height) produce floors[0].width === 375 y floors[0].x === 0 (móvil angosto)', () => {
+    const state = createTowerState(375, 600);
+    const baseFloor = state.floors[0];
+
+    expect(baseFloor.width).toBe(375);
+    expect(baseFloor.x).toBe(0);
+  });
+
+  it('createTowerState(800, height) produce floors[0].width === BASE_PLATFORM_WIDTH (630) y floors[0].x === 85 (escritorio, sin regresión)', () => {
+    const state = createTowerState(800, 600);
+    const baseFloor = state.floors[0];
+
+    expect(baseFloor.width).toBe(BASE_PLATFORM_WIDTH);
+    expect(baseFloor.width).toBe(630);
+    expect(baseFloor.x).toBe(85);
+  });
+
+  it('createTowerState(30, height) produce floors[0].width === MIN_WIDTH (46, piso mínimo)', () => {
+    const state = createTowerState(30, 600);
+    const baseFloor = state.floors[0];
+
+    expect(baseFloor.width).toBe(MIN_WIDTH);
+    expect(baseFloor.width).toBe(46);
+  });
+
+  it('resetGame(state, 375, height) produce floors[0].width === 375 y floors[0].x === 0, igual que createTowerState(375, height)', () => {
+    const createdState = createTowerState(375, 600);
+
+    const resetState = createTowerState(800, 600);
+    resetGame(resetState, 375, 600);
+
+    expect(resetState.floors[0].width).toBe(createdState.floors[0].width);
+    expect(resetState.floors[0].x).toBe(createdState.floors[0].x);
+    expect(resetState.floors[0].width).toBe(375);
+    expect(resetState.floors[0].x).toBe(0);
+  });
+
+  it('createTowerState/resetGame con width angosto dejan bottom === 0, top === 64, height === 64, isDoor === false en baseFloor', () => {
+    const createdState = createTowerState(375, 600);
+    const createdBaseFloor = createdState.floors[0];
+
+    expect(createdBaseFloor.bottom).toBe(0);
+    expect(createdBaseFloor.top).toBe(64);
+    expect(createdBaseFloor.height).toBe(64);
+    expect(createdBaseFloor.isDoor).toBe(false);
+
+    const resetState = createTowerState(800, 600);
+    resetGame(resetState, 375, 600);
+    const resetBaseFloor = resetState.floors[0];
+
+    expect(resetBaseFloor.bottom).toBe(0);
+    expect(resetBaseFloor.top).toBe(64);
+    expect(resetBaseFloor.height).toBe(64);
+    expect(resetBaseFloor.isDoor).toBe(false);
+  });
+});
+
+// Feature: canvas-relative-physics-balance, Property 1: Paridad exacta con el comportamiento
+// actual en Reference_Canvas_Width (decidesFall)
+// **Validates: Requirements 1.2, 1.4, 1.6, 3.2**
+describe('decidesFall — Property 1 (canvas-relative-physics-balance): paridad exacta en Reference_Canvas_Width', () => {
+  it('Property 1: para cualquier overlap, decidesFall(overlap, 800) === (overlap < 16), y decidesFall(overlap) === decidesFall(overlap, 800)', () => {
+    const overlapArb = fc.double({ min: -5000, max: 5000, noNaN: true });
+
+    fc.assert(
+      fc.property(
+        overlapArb,
+        (overlap) => {
+          expect(decidesFall(overlap, 800)).toBe(overlap < 16);
+          expect(decidesFall(overlap)).toBe(decidesFall(overlap, 800));
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// Feature: canvas-relative-physics-balance, Property 2: El Umbral_de_Caida efectivo es
+// estrictamente monótono creciente en W
+// **Validates: Requirements 1.3**
+describe('computeFallThreshold — Property 2 (canvas-relative-physics-balance): monotonía estricta en W', () => {
+  it('Property 2: para cualquier par W1 < W2 (ambos > 0), computeFallThreshold(W1) < computeFallThreshold(W2)', () => {
+    const widthPairArb = fc
+      .tuple(
+        fc.double({ min: 0.01, max: 5000, noNaN: true }),
+        fc.double({ min: 0.01, max: 5000, noNaN: true })
+      )
+      .filter(([a, b]) => a !== b)
+      .map(([a, b]) => (a < b ? [a, b] : [b, a]));
+
+    fc.assert(
+      fc.property(
+        widthPairArb,
+        ([W1, W2]) => {
+          expect(computeFallThreshold(W1)).toBeLessThan(computeFallThreshold(W2));
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// Feature: canvas-relative-physics-balance, Property 3: El cálculo del Umbral_de_Caida es determinista
+// **Validates: Requirements 1.5**
+describe('computeFallThreshold — Property 3 (canvas-relative-physics-balance): determinismo', () => {
+  it('Property 3: para cualquier W > 0, invocar computeFallThreshold(W) varias veces siempre devuelve el mismo valor', () => {
+    const widthArb = fc.double({ min: 0.01, max: 5000, noNaN: true });
+
+    fc.assert(
+      fc.property(
+        widthArb,
+        (W) => {
+          const first = computeFallThreshold(W);
+          for (let i = 0; i < 5; i++) {
+            expect(computeFallThreshold(W)).toBe(first);
+          }
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// Feature: canvas-relative-physics-balance, Property 4: El Margen_de_Movimiento efectivo es
+// siempre exactamente proporcional a canvasWidth, sin excepción ni tolerancia
+// **Validates: Requirements 2.1, 2.3, 2.4**
+describe('computeMovementMargin — Property 4 (canvas-relative-physics-balance): proporcionalidad exacta sin tolerancia', () => {
+  it('Property 4: para cualquier canvasWidth > 0 (incluyendo 799/801), computeMovementMargin(canvasWidth) === canvasWidth * Movement_Margin_Fraction', () => {
+    const canvasWidthArb = fc.oneof(
+      fc.double({ min: 0.01, max: 5000, noNaN: true }),
+      fc.constant(799),
+      fc.constant(801),
+      fc.constant(800)
+    );
+
+    fc.assert(
+      fc.property(
+        canvasWidthArb,
+        (canvasWidth) => {
+          expect(computeMovementMargin(canvasWidth)).toBe(canvasWidth * Movement_Margin_Fraction);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// Feature: canvas-relative-physics-balance, Property 5: Paridad exacta con el comportamiento
+// actual en Reference_Canvas_Width (newMovingBlock)
+// **Validates: Requirements 2.2, 2.5, 2.6, 2.7, 3.3**
+describe('newMovingBlock — Property 5 (canvas-relative-physics-balance): paridad exacta minX/maxX en Reference_Canvas_Width', () => {
+  it('Property 5: para cualquier afterFloor y w, minX/maxX calculados con canvasWidth=800 coinciden con la fórmula literal usando 90', () => {
+    const afterFloorArb = fc.record({
+      x: fc.integer({ min: 0, max: 1000 }),
+      width: fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH }),
+    });
+    const wArb = fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH });
+
+    fc.assert(
+      fc.property(
+        afterFloorArb,
+        wArb,
+        (afterFloor, w) => {
+          const canvasWidth = Reference_Canvas_Width; // 800
+          const minX = Math.max(0, afterFloor.x - computeMovementMargin(canvasWidth));
+          const maxX = Math.min(canvasWidth ?? (afterFloor.x + afterFloor.width + computeMovementMargin(canvasWidth)), afterFloor.x + afterFloor.width + computeMovementMargin(canvasWidth)) - w;
+
+          const expectedMinX = Math.max(0, afterFloor.x - 90);
+          const expectedMaxX = Math.min(canvasWidth, afterFloor.x + afterFloor.width + 90) - w;
+
+          expect(minX).toBe(expectedMinX);
+          expect(maxX).toBe(expectedMaxX);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// Feature: canvas-relative-physics-balance, Property 6: minX y maxX siempre usan el mismo
+// Margen_de_Movimiento efectivo, para cualquier canvasWidth
+// **Validates: Requirements 2.4, 2.5, 2.6**
+describe('newMovingBlock — Property 6 (canvas-relative-physics-balance): consistencia interna minX/maxX del margen efectivo', () => {
+  it('Property 6: para canvasWidth > 0, afterFloor y w arbitrarios, el margen implícito derivado de minX y de maxX es el mismo y coincide con computeMovementMargin(canvasWidth)', () => {
+    const canvasWidthArb = fc.integer({ min: MIN_WIDTH, max: 5000 });
+    const afterFloorArb = fc.record({
+      x: fc.integer({ min: 0, max: 1000 }),
+      width: fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH }),
+    });
+    const wArb = fc.integer({ min: MIN_WIDTH, max: BASE_PLATFORM_WIDTH });
+
+    fc.assert(
+      fc.property(
+        canvasWidthArb,
+        afterFloorArb,
+        wArb,
+        (canvasWidth, afterFloor, w) => {
+          const expectedMargin = computeMovementMargin(canvasWidth);
+          const minX = Math.max(0, afterFloor.x - expectedMargin);
+          const maxX = Math.min(canvasWidth, afterFloor.x + afterFloor.width + expectedMargin) - w;
+
+          // Margen implícito derivado de minX (solo válido cuando el clamp de Math.max(0, ...)
+          // no se activó, es decir, cuando afterFloor.x - expectedMargin >= 0)
+          if (afterFloor.x - expectedMargin >= 0) {
+            const impliedMarginFromMinX = afterFloor.x - minX;
+            expect(impliedMarginFromMinX).toBeCloseTo(expectedMargin, 9);
+          }
+
+          // Margen implícito derivado de maxX (solo válido cuando el clamp de Math.min(canvasWidth, ...)
+          // no se activó, es decir, cuando afterFloor.x + afterFloor.width + expectedMargin <= canvasWidth)
+          if (afterFloor.x + afterFloor.width + expectedMargin <= canvasWidth) {
+            const impliedMarginFromMaxX = (maxX + w) - (afterFloor.x + afterFloor.width);
+            expect(impliedMarginFromMaxX).toBeCloseTo(expectedMargin, 9);
+          }
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// Feature: canvas-relative-physics-balance, Property 7: El cálculo del umbral/margen efectivo
+// no altera moveSpeed ni otros sistemas fuera de alcance
+// **Validates: Requirements 4.2**
+describe('computeFallThreshold/computeMovementMargin/decidesFall — Property 7 (canvas-relative-physics-balance): aislamiento respecto a moveSpeed/streak', () => {
+  it('Property 7: invocar computeFallThreshold, computeMovementMargin y decidesFall en aislamiento no altera state.moveSpeed, state.perfectStreak, state.streakWidthBonus', () => {
+    const canvasWidthArb = fc.double({ min: 0.01, max: 5000, noNaN: true });
+    const overlapArb = fc.double({ min: -5000, max: 5000, noNaN: true });
+    const moveSpeedArb = fc.float({ min: Math.fround(0.1), max: Math.fround(1000), noNaN: true });
+    const perfectStreakArb = fc.nat({ max: 200 });
+    const streakWidthBonusArb = fc.nat({ max: 2000 });
+
+    fc.assert(
+      fc.property(
+        canvasWidthArb,
+        overlapArb,
+        moveSpeedArb,
+        perfectStreakArb,
+        streakWidthBonusArb,
+        (canvasWidth, overlap, moveSpeed, perfectStreak, streakWidthBonus) => {
+          const state = createTowerState(800, 600);
+          state.moveSpeed = moveSpeed;
+          state.perfectStreak = perfectStreak;
+          state.streakWidthBonus = streakWidthBonus;
+
+          computeFallThreshold(canvasWidth);
+          computeMovementMargin(canvasWidth);
+          decidesFall(overlap, canvasWidth);
+
+          expect(state.moveSpeed).toBe(moveSpeed);
+          expect(state.perfectStreak).toBe(perfectStreak);
+          expect(state.streakWidthBonus).toBe(streakWidthBonus);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// Feature: canvas-relative-physics-balance, Tarea 5.8: unit tests de casos límite y no-regresión
+// **Validates: Requirements 3.1, 4.1, 4.3, 4.4, 4.5**
+describe('canvas-relative-physics-balance — unit tests de casos límite y no-regresión', () => {
+  it('constantes: Reference_Canvas_Width === 800, Fall_Threshold_Fraction === 0.02, Movement_Margin_Fraction === 0.1125', () => {
+    expect(Reference_Canvas_Width).toBe(800);
+    expect(Fall_Threshold_Fraction).toBe(0.02);
+    expect(Movement_Margin_Fraction).toBe(0.1125);
+  });
+
+  it('computeFallThreshold(800) === 16 y computeMovementMargin(800) === 90', () => {
+    expect(computeFallThreshold(800)).toBe(16);
+    expect(computeMovementMargin(800)).toBe(90);
+  });
+
+  it('decidesFall casos límite exactos del umbral (borde estricto <)', () => {
+    expect(decidesFall(15)).toBe(true);
+    expect(decidesFall(15, 800)).toBe(true);
+    expect(decidesFall(16)).toBe(false);
+    expect(decidesFall(16, 800)).toBe(false);
+  });
+
+  it('ejemplo móvil concreto: computeFallThreshold(375) y computeMovementMargin(375) son proporcionalmente menores que sus equivalentes en 800', () => {
+    const mobileFallThreshold = computeFallThreshold(375);
+    const mobileMovementMargin = computeMovementMargin(375);
+
+    expect(mobileFallThreshold).toBeLessThan(computeFallThreshold(800));
+    expect(mobileMovementMargin).toBeLessThan(computeMovementMargin(800));
+
+    // Proporcionalidad exacta: mismo ratio que 375/800
+    expect(mobileFallThreshold).toBeCloseTo(16 * (375 / 800), 10);
+    expect(mobileMovementMargin).toBeCloseTo(90 * (375 / 800), 10);
+  });
+
+  it('llamadas existentes de un solo argumento en tower.test.js (decidesFall(computeOverlap(prevFloor, movingBlock))) siguen pasando sin modificarlas', () => {
+    const prevFloor = { x: 300, width: 200, top: 64 };
+    const movingBlock = { x: 320, width: 100, height: 40 };
+
+    const overlap = computeOverlap(prevFloor, movingBlock);
+    expect(decidesFall(overlap)).toBe(overlap < 16);
+  });
+
+  it('regresión de aridad: dropBlock.length y newMovingBlock.length no cambian', () => {
+    expect(dropBlock.length).toBe(2);
+    expect(newMovingBlock.length).toBe(3);
+  });
+
+  it('no-regresión de isReliefPlatformFloor/streakWidthBonus/perfectStreak: invocar newMovingBlock con distintos canvasWidth no afecta estos valores fuera de alcance', () => {
+    const state = createTowerState(800, 600);
+    state.floors = new Array(RELIEF_PLATFORM_FIRST_FLOOR); // piso elegible como Plataforma_Respiro
+    state.perfectStreak = 7;
+    state.streakWidthBonus = 123;
+
+    const afterFloor = { x: 0, width: 400 };
+    const floorNumBefore = state.floors.length;
+
+    newMovingBlock(state, afterFloor, 375);
+    expect(isReliefPlatformFloor(state.floors.length)).toBe(isReliefPlatformFloor(floorNumBefore));
+    expect(state.perfectStreak).toBe(7);
+    expect(state.streakWidthBonus).toBe(123);
+
+    newMovingBlock(state, afterFloor, 1200);
+    expect(isReliefPlatformFloor(state.floors.length)).toBe(isReliefPlatformFloor(floorNumBefore));
+    expect(state.perfectStreak).toBe(7);
+    expect(state.streakWidthBonus).toBe(123);
   });
 });

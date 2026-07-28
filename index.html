@@ -60,7 +60,9 @@
     border:1px solid rgba(217,179,77,.45);
     padding:7px 16px; font-family:var(--font-display); font-weight:700; font-size:14px;
     letter-spacing:.03em; color:var(--gold);
+    transition:filter .15s, transform .15s;
   }
+  .hud-pill:active{filter:brightness(1.15); transform:scale(.96);}
   .hud-pill span{color:var(--ink);}
 
   /* ---------- overlays ---------- */
@@ -179,11 +181,13 @@
   }
   .card{
     width:150px; height:190px; perspective:1200px; cursor:pointer;
+    transition:transform .15s;
   }
   .card.locked{cursor:default;}
   /* Tarjeta fallada: aspecto gris/inhabilitado hasta que se resuelva el combate. */
   .card.failed{cursor:default; filter:grayscale(1) brightness(.62); opacity:.55; transition:filter .3s ease, opacity .3s ease;}
   .card.failed .card-front{border-color:rgba(255,255,255,.12);}
+  .card:not(.locked):not(.failed):active{transform:scale(.97);}
   .card-inner{
     position:relative; width:100%; height:100%; transition:transform .55s cubic-bezier(.4,.2,.2,1);
     transform-style:preserve-3d;
@@ -245,14 +249,19 @@
     font-size:clamp(15px, 1.8vw, 18px); line-height:1.35; color:var(--ink-dim); /* mín 15px > 10.5px */
     background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.16);
     padding:12px 14px; margin-bottom:10px; cursor:pointer;
+    transition:transform .15s;
   }
   .qmodal-opt:hover{background:rgba(255,255,255,.12);}
   .qmodal-opt.correct{background:rgba(89,194,122,.35); border-color:var(--success); color:#fff;}
   .qmodal-opt.incorrect{background:rgba(226,73,58,.35); border-color:var(--danger); color:#fff;}
   .qmodal-opt:disabled{cursor:default;}
+  .qmodal-opt:not(:disabled):active{transform:scale(.97);}
 
   @media (prefers-reduced-motion: reduce){
     .qmodal-overlay{ transition-duration:0ms; } /* refuerzo declarativo (Movimiento_Reducido) */
+    .card{ transition-duration:0ms; }
+    .qmodal-opt{ transition-duration:0ms; }
+    .hud-pill{ transition-duration:0ms; }
   }
 
   #audioSettingsPanel .panel{
@@ -389,8 +398,18 @@
       max-width:95% !important; padding:26px 20px 22px;
       border-radius:10px;
     }
-    .card{width:118px; height:168px;}
+    .card{
+      flex: 0 1 calc((100% - 3 * 14px) / 4);
+      max-width: calc((100% - 3 * 14px) / 4);
+      width: auto;
+      aspect-ratio: 118 / 168;
+      height: auto;
+    }
     .combatant-hp{width:140px;}
+    .hud-pill{
+      font-size: 12px;
+      padding: 5px 8px;
+    }
     #leaderboardScreen .overlay-content{max-width:95%; max-height:85vh;}
     .leaderboard-table tbody td{
       font-size:12px; padding:8px 6px;
@@ -406,6 +425,11 @@
     #playerNameInput{font-size:14px; padding:10px 12px;}
     .name-hint{font-size:11px;}
     .player-name-display{font-size:16px;}
+    .crest{font-size:30px;}
+    .panel h1{font-size:20px;}
+    .subtitle{font-size:13px;}
+    .rules li{font-size:12px;}
+    .btn-primary{padding:11px 20px; font-size:13.5px;}
   }
 </style>
 </head>

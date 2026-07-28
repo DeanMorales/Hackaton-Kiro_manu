@@ -1,0 +1,169 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Añadir Patron_Presionado a `.card` en `index.html`": [
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195542060
+      },
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195555794
+      },
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195637706
+      }
+    ],
+    "2. Añadir Patron_Presionado a `.qmodal-opt` en `index.html`": [
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195542186
+      },
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195650649
+      },
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195709124
+      }
+    ],
+    "3. Añadir Patron_Presionado a `.hud-pill` en `index.html`": [
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195542255
+      },
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195651349
+      },
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195709665
+      }
+    ],
+    "4. Extender el bloque `@media (prefers-reduced-motion: reduce)` existente en `index.html`": [
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195542314
+      },
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195756327
+      }
+    ],
+    "6. Checkpoint final - Ensure all tests pass": [
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195542367
+      },
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195961060
+      }
+    ],
+    "7. Documentar la nota de QA manual (informativa, no automatizable)": [
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195542423
+      },
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785196014103
+      }
+    ],
+    "5.1 Verificar `.card:not(.locked):not(.failed):active` con `transform:scale(...)` y `transition` de `.card` incluyendo `transform`": [
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195901083
+      }
+    ],
+    "5. Escribir tests de verificación estática del CSS": [
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195901186
+      }
+    ],
+    "5.2 Verificar ausencia de una regla `.card:active` genérica sin los `:not()`": [
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195902324
+      }
+    ],
+    "5.3 Verificar que `clip-path` de `.card-face`/`.card-front`/`.card-back` permanece idéntico por comparación textual exacta": [
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195903374
+      }
+    ],
+    "5.4 Verificar que `.card-inner` no recibe ninguna nueva regla `:active` y conserva `transform-style:preserve-3d`": [
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195904778
+      }
+    ],
+    "5.5 Verificar `.qmodal-opt:not(:disabled):active` con `transform:scale(...)` y ausencia de `background` en esa regla": [
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195905859
+      }
+    ],
+    "5.6 Verificar que `.qmodal-opt.correct`/`.qmodal-opt.incorrect` conservan literalmente su `background` actual": [
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195906859
+      }
+    ],
+    "5.7 Verificar `.hud-pill:active` (y no `#settingsBtn:active`) con `filter` y `transform`, y `transition` de `.hud-pill` incluyendo `filter` y `transform`": [
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195908146
+      }
+    ],
+    "5.8 Verificar que el bloque `@media (prefers-reduced-motion: reduce)` contiene las 3 reglas nuevas (`.card`, `.qmodal-opt`, `.hud-pill` con `transition-duration:0ms;`)": [
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195910538
+      }
+    ],
+    "5.9 Verificar que `.qmodal-opt:hover{background:rgba(255,255,255,.12);}` permanece intacto literalmente": [
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195910666
+      }
+    ],
+    "5.10 Verificar que `.opt-btn` no recibe ninguna nueva regla `:active` con `transform:scale`/`filter:brightness`": [
+      {
+        "executionId": "331f6399-1efa-4296-9e68-18fbd1c1d989",
+        "chatSessionId": "sess_99d55039-ec20-496d-8e1f-320393a018d2",
+        "timestamp": 1785195911458
+      }
+    ]
+  }
+}

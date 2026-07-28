@@ -275,3 +275,81 @@ describe('drawSky/drawGround/render — no interferencia con combate/física de 
     );
   });
 });
+
+// Feature: landscape-orientation-support — elevToScreen y el parámetro ratio
+import { computeVerticalAnchorRatio } from './anchorRatio.js';
+
+describe('elevToScreen — Property 7 y 8 (parámetro ratio)', () => {
+  it('Property 7: elevToScreen preserva las distancias relativas de elevación, para cualquier ratio', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: -5000, max: 5000 }),
+        fc.integer({ min: -5000, max: 5000 }),
+        fc.integer({ min: -5000, max: 5000 }),
+        fc.integer({ min: 1, max: 5000 }),
+        fc.constantFrom(0.62, 0.75),
+        (camElev, elev1, elev2, H, ratio) => {
+          const y1 = elevToScreen(camElev, elev1, H, ratio);
+          const y2 = elevToScreen(camElev, elev2, H, ratio);
+          expect(y1 - y2).toBeCloseTo(elev2 - elev1, 9);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('Property 8: El cambio de ratio nunca altera los tamaños fijos en píxeles dibujados', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: -5000, max: 5000 }),
+        fc.integer({ min: -5000, max: 5000 }),
+        fc.integer({ min: 1, max: 5000 }),
+        (camElev, elev, H) => {
+          const ratioA = 0.62;
+          const ratioB = 0.75;
+          const yA = elevToScreen(camElev, elev, H, ratioA);
+          const yB = elevToScreen(camElev, elev, H, ratioB);
+
+          // Solo el origen (anchor) se desplaza según el ratio; ningún tamaño
+          // fijo en píxeles (como los offsets hardcodeados de drawKnight,
+          // p.ej. -13,-26) depende de H*ratio, así que la diferencia entre
+          // ambos orígenes debe ser exactamente H*(ratioB - ratioA).
+          expect(yB - yA).toBeCloseTo(H * (ratioB - ratioA), 9);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+describe('elevToScreen — unit tests de no-regresión y ejemplos concretos (tareas 2.3, 2.4, 2.5)', () => {
+  it('con 3 argumentos (sin ratio), usa el default 0.62: elevToScreen(camElev, elev, H) === H*0.62 - (elev-camElev)', () => {
+    const camElev = 40;
+    const elev = 15;
+    const H = 600;
+
+    expect(elevToScreen(camElev, elev, H)).toBeCloseTo(H * 0.62 - (elev - camElev), 9);
+  });
+
+  it('landscape móvil (W=667, H=375): computeVerticalAnchorRatio === 0.75 y elevToScreen lo usa correctamente', () => {
+    const W = 667;
+    const H = 375;
+    const camElev = 20;
+    const elev = 5;
+
+    const ratio = computeVerticalAnchorRatio(W, H);
+    expect(ratio).toBe(0.75);
+    expect(elevToScreen(camElev, elev, H, ratio)).toBeCloseTo(H * 0.75 - (elev - camElev), 9);
+  });
+
+  it('desktop/portrait (W=800, H=600): computeVerticalAnchorRatio === 0.62 y coincide con el default de 3 argumentos', () => {
+    const W = 800;
+    const H = 600;
+    const camElev = 20;
+    const elev = 5;
+
+    const ratio = computeVerticalAnchorRatio(W, H);
+    expect(ratio).toBe(0.62);
+    expect(elevToScreen(camElev, elev, H, ratio)).toBeCloseTo(elevToScreen(camElev, elev, H), 9);
+  });
+});

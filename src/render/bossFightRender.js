@@ -5,6 +5,8 @@
    actual: no decide cuándo cambiar de animación (eso vive en la orquestación de
    src/main.js). */
 
+import { computeVerticalAnchorRatio } from './anchorRatio.js';
+
 /**
  * Layout del área de combate, expresado como fracciones de W/H para que se
  * adapte a cualquier tamaño de canvas.
@@ -12,7 +14,6 @@
 export const COMBAT_LAYOUT = {
   warriorXRatio: 0.24, // centro del guerrero, como fracción del ancho del área de combate
   bossXRatio: 0.76,    // centro del boss, como fracción del ancho del área de combate
-  groundYRatio: 0.62,  // línea base compartida, como fracción de H
 };
 
 /** Desplazamiento vertical fijo (en píxeles) aplicado a ambos personajes al dibujar. */
@@ -24,6 +25,112 @@ const BOSS_EXTRA_VERTICAL_OFFSET_PX = 91;
 const BOSS_HORIZONTAL_OFFSET_PX = -100;
 /** Desplazamiento horizontal exclusivo del Warrior_Sprite (positivo = hacia la derecha). */
 const WARRIOR_HORIZONTAL_OFFSET_PX = 40;
+
+/**
+ * Ancho de canvas, en píxeles, para el cual `displayWidth`/`displayHeight` de
+ * Sprite_Metadata fueron calibrados sin necesitar reducción (comportamiento de
+ * escritorio actual).
+ */
+export const Reference_Canvas_Width = 800;
+
+/**
+ * Valor mínimo permitido para el Sprite_Scale_Factor, por debajo del cual un
+ * Combat_Sprite dejaría de ser legible.
+ */
+export const Minimum_Scale_Factor = 0.55;
+
+/**
+ * Calcula el Sprite_Scale_Factor a partir del ancho actual del canvas `W`.
+ *
+ * - Si `W >= Reference_Canvas_Width`, devuelve `1` (sin reducción, paridad de
+ *   escritorio).
+ * - En otro caso, devuelve `W / Reference_Canvas_Width` clampado al rango
+ *   `[Minimum_Scale_Factor, 1]`.
+ * - `W <= 0` (entrada inválida, no debería ocurrir en producción) se trata
+ *   como un ancho muy pequeño y se clampa a `Minimum_Scale_Factor` sin lanzar.
+ *
+ * Función pura, determinista y sin efectos secundarios.
+ *
+ * @param {number} W - ancho del canvas.
+ * @returns {number} factor de escala dentro de `[Minimum_Scale_Factor, 1]`.
+ */
+export function computeSpriteScaleFactor(W) {
+  if (W >= Reference_Canvas_Width) return 1;
+  const ratio = W / Reference_Canvas_Width;
+  return Math.min(1, Math.max(Minimum_Scale_Factor, ratio));
+}
+
+/**
+ * Calcula las dimensiones de dibujo escaladas (Scaled_Display_Width/Height)
+ * multiplicando `width`/`height` por `factor`.
+ *
+ * Función pura: recibe y devuelve valores planos, sin leer ni mutar ninguna
+ * instancia de `SpriteAnimationEngine` (Requirement 2.2).
+ *
+ * @param {{ width: number, height: number }} dimensions - `displayWidth`/`displayHeight` de Sprite_Metadata.
+ * @param {number} factor - Sprite_Scale_Factor a aplicar.
+ * @returns {{ width: number, height: number }} dimensiones escaladas.
+ */
+export function scaleDimensions({ width, height }, factor) {
+  return {
+    width: width * factor,
+    height: height * factor,
+  };
+}
+
+/**
+ * Escala un Combat_Layout_Offset (desplazamiento fijo en píxeles) por el
+ * mismo Sprite_Scale_Factor usado para las dimensiones (Requirement 3.3).
+ *
+ * Función pura.
+ *
+ * @param {number} offsetPx - desplazamiento fijo sin escalar.
+ * @param {number} factor - Sprite_Scale_Factor a aplicar.
+ * @returns {number} desplazamiento escalado.
+ */
+export function scaleOffset(offsetPx, factor) {
+  return offsetPx * factor;
+}
+
+/**
+ * Calcula el origen de dibujo `(x, y)`, en coordenadas de pantalla (píxeles
+ * reales), a partir de la línea de suelo compartida, el ratio horizontal del
+ * Combat_Sprite, sus dimensiones ya escaladas y sus Combat_Layout_Offset sin
+ * escalar (el escalado de los offsets se aplica internamente mediante
+ * `scaleOffset`, Requirement 3.3).
+ *
+ * - `y` posiciona los pies del Combat_Sprite sobre `groundY`, calculado a
+ *   partir de `scaledHeight` (Requirement 3.1).
+ * - `x` centra el Combat_Sprite sobre `canvasWidth * xRatio`, calculado a
+ *   partir de `scaledWidth` (Requirement 3.2).
+ *
+ * Función pura, sin efectos secundarios.
+ *
+ * @param {object} params
+ * @param {number} params.groundY - línea de suelo compartida (`H * computeVerticalAnchorRatio(W, H)`).
+ * @param {number} params.canvasWidth - ancho actual del canvas (`W`).
+ * @param {number} params.xRatio - ratio horizontal del Combat_Sprite (`warriorXRatio`/`bossXRatio`).
+ * @param {number} params.scaledWidth - `Scaled_Display_Width` del Combat_Sprite.
+ * @param {number} params.scaledHeight - `Scaled_Display_Height` del Combat_Sprite.
+ * @param {number} params.horizontalOffsetPx - Combat_Layout_Offset horizontal sin escalar.
+ * @param {number} params.verticalOffsetPx - Combat_Layout_Offset vertical sin escalar.
+ * @param {number} params.scaleFactor - Sprite_Scale_Factor a aplicar a los offsets.
+ * @returns {{ x: number, y: number }} coordenadas de pantalla en píxeles reales.
+ */
+export function computeDrawOrigin({
+  groundY,
+  canvasWidth,
+  xRatio,
+  scaledWidth,
+  scaledHeight,
+  horizontalOffsetPx,
+  verticalOffsetPx,
+  scaleFactor,
+}) {
+  const y = groundY - scaledHeight + scaleOffset(verticalOffsetPx, scaleFactor);
+  const x = canvasWidth * xRatio - scaledWidth / 2 + scaleOffset(horizontalOffsetPx, scaleFactor);
+  return { x, y };
+}
 
 /**
  * Dibuja el fondo de combate (Battle_Background) estirado a pantalla completa
@@ -56,18 +163,48 @@ export function drawBattleBackground(ctx, W, H, backgroundImage) {
  * @param {import('./spriteEngine.js').SpriteAnimationEngine} bossEngine
  */
 export function drawCombatants(ctx, W, H, warriorEngine, bossEngine) {
-  const groundY = H * COMBAT_LAYOUT.groundYRatio;
+  const factor = computeSpriteScaleFactor(W);
+  const groundY = H * computeVerticalAnchorRatio(W, H);
 
-  warriorEngine.draw(
-    ctx,
-    W * COMBAT_LAYOUT.warriorXRatio - warriorEngine.displayWidth / 2 + WARRIOR_HORIZONTAL_OFFSET_PX,
-    groundY - warriorEngine.displayHeight + VERTICAL_OFFSET_PX
+  const warriorDims = scaleDimensions(
+    { width: warriorEngine.displayWidth, height: warriorEngine.displayHeight },
+    factor
   );
-  bossEngine.draw(
-    ctx,
-    W * COMBAT_LAYOUT.bossXRatio - bossEngine.displayWidth / 2 + BOSS_HORIZONTAL_OFFSET_PX,
-    groundY - bossEngine.displayHeight + VERTICAL_OFFSET_PX + BOSS_EXTRA_VERTICAL_OFFSET_PX
+  const warriorOrigin = computeDrawOrigin({
+    groundY,
+    canvasWidth: W,
+    xRatio: COMBAT_LAYOUT.warriorXRatio,
+    scaledWidth: warriorDims.width,
+    scaledHeight: warriorDims.height,
+    horizontalOffsetPx: WARRIOR_HORIZONTAL_OFFSET_PX,
+    verticalOffsetPx: VERTICAL_OFFSET_PX,
+    scaleFactor: factor,
+  });
+
+  ctx.save();
+  ctx.scale(factor, factor);
+  warriorEngine.draw(ctx, warriorOrigin.x / factor, warriorOrigin.y / factor);
+  ctx.restore();
+
+  const bossDims = scaleDimensions(
+    { width: bossEngine.displayWidth, height: bossEngine.displayHeight },
+    factor
   );
+  const bossOrigin = computeDrawOrigin({
+    groundY,
+    canvasWidth: W,
+    xRatio: COMBAT_LAYOUT.bossXRatio,
+    scaledWidth: bossDims.width,
+    scaledHeight: bossDims.height,
+    horizontalOffsetPx: BOSS_HORIZONTAL_OFFSET_PX,
+    verticalOffsetPx: VERTICAL_OFFSET_PX + BOSS_EXTRA_VERTICAL_OFFSET_PX,
+    scaleFactor: factor,
+  });
+
+  ctx.save();
+  ctx.scale(factor, factor);
+  bossEngine.draw(ctx, bossOrigin.x / factor, bossOrigin.y / factor);
+  ctx.restore();
 }
 
 /**

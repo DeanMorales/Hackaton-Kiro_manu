@@ -7,6 +7,21 @@ export const DOOR_INTERVAL = 5;
 export const BASE_WIDTH = 210;
 export const MIN_WIDTH = 46;
 
+// --- canvas-relative-physics-balance: constantes y funciones puras de física relativa ---
+export const Reference_Canvas_Width = 800; // Requirement 3.1
+export const Fall_Threshold_Fraction = 16 / Reference_Canvas_Width;    // Requirement 1.1, evalúa a 0.02
+export const Movement_Margin_Fraction = 90 / Reference_Canvas_Width;   // Requirement 2.1, evalúa a 0.1125
+
+// Requirement 1.1/1.3/1.5: Umbral_de_Caida efectivo, proporcional a W, determinista y puro
+export function computeFallThreshold(W) {
+  return W * Fall_Threshold_Fraction;
+}
+
+// Requirement 2.1: Margen_de_Movimiento efectivo, proporcional a canvasWidth
+export function computeMovementMargin(canvasWidth) {
+  return canvasWidth * Movement_Margin_Fraction;
+}
+
 // --- tower-progression-scaling: constantes de progresión ---
 export const BASE_PLATFORM_WIDTH = BASE_WIDTH * 3; // 630px, Requirement 1.1
 export const SPEED_INCREMENT_FACTOR = 1.30;          // Requirement 2/3
@@ -57,8 +72,8 @@ export function computeOverlap(prevFloor, movingBlock) {
   return right - left;
 }
 
-export function decidesFall(overlap) {
-  return overlap < 16;
+export function decidesFall(overlap, W = Reference_Canvas_Width) {
+  return overlap < computeFallThreshold(W);
 }
 
 export function computeNewFloor(prevFloor, movingBlock, isDoor, seed) {
@@ -91,11 +106,15 @@ export function easeOutQuad(t) { return 1 - (1 - t) * (1 - t); }
 // --- mutadores de estado equivalentes a los del monolito ---
 
 export function createTowerState(width, height) {
+  // Requirement 2.2/2.3: acotar el ancho de la Plataforma Base a `width`
+  // en canvases más angostos que BASE_PLATFORM_WIDTH, igual patrón que
+  // relief-platform-canvas-clamp; MIN_WIDTH evita anchos degenerados.
+  const basePlatformWidth = Math.max(MIN_WIDTH, Math.min(computeBasePlatformWidth(), width ?? Infinity));
   const baseFloor = {
     bottom: 0,
     top: 64,
-    x: (width - computeBasePlatformWidth()) / 2,
-    width: computeBasePlatformWidth(),
+    x: (width - basePlatformWidth) / 2,
+    width: basePlatformWidth,
     height: 64,
     isDoor: false,
     seed: Math.random(),
@@ -172,12 +191,16 @@ export function newMovingBlock(state, afterFloor, canvasWidth) {
   // con ancho fijo igual al largo de la base del castillo (BASE_PLATFORM_WIDTH) y un +0.5%
   // compuesto de velocidad (acotado a SPEED_CAP) que se mantiene hasta la siguiente aparición.
   if (isReliefPlatformFloor(state.floors.length)) {
-    w = BASE_PLATFORM_WIDTH;
+    // Requirement 2.2/2.3: acotar el ancho "premio" de Plataforma_Respiro a canvasWidth
+    // en canvases más angostos que BASE_PLATFORM_WIDTH, igual que ya hace la rama normal;
+    // MIN_WIDTH evita anchos degenerados en canvases extremadamente angostos.
+    w = Math.max(MIN_WIDTH, Math.min(BASE_PLATFORM_WIDTH, canvasWidth ?? Infinity));
     state.moveSpeed = applyReliefPlatformSpeedBoost(state.moveSpeed);
   }
 
-  const minX = Math.max(0, afterFloor.x - 90);
-  const maxX = Math.min(canvasWidth ?? (afterFloor.x + afterFloor.width + 90), afterFloor.x + afterFloor.width + 90) - w;
+  const effectiveMargin = computeMovementMargin(canvasWidth);
+  const minX = Math.max(0, afterFloor.x - effectiveMargin);
+  const maxX = Math.min(canvasWidth ?? (afterFloor.x + afterFloor.width + effectiveMargin), afterFloor.x + afterFloor.width + effectiveMargin) - w;
 
   // El bloque puede arrancar desde la derecha o desde la izquierda aleatoriamente
   const startFromRight = Math.random() < 0.5;
@@ -197,11 +220,15 @@ export function newMovingBlock(state, afterFloor, canvasWidth) {
 }
 
 export function resetGame(state, width, height) {
+  // Requirement 2.2/2.3: acotar el ancho de la Plataforma Base a `width`
+  // en canvases más angostos que BASE_PLATFORM_WIDTH, igual patrón que
+  // relief-platform-canvas-clamp; MIN_WIDTH evita anchos degenerados.
+  const basePlatformWidth = Math.max(MIN_WIDTH, Math.min(computeBasePlatformWidth(), width ?? Infinity));
   const baseFloor = {
     bottom: 0,
     top: 64,
-    x: (width - computeBasePlatformWidth()) / 2,
-    width: computeBasePlatformWidth(),
+    x: (width - basePlatformWidth) / 2,
+    width: basePlatformWidth,
     height: 64,
     isDoor: false,
     seed: Math.random(),
@@ -248,7 +275,7 @@ export function dropBlock(state, width) {
   const moving = state.moving;
   const overlap = computeOverlap(prev, moving);
 
-  if (decidesFall(overlap)) {
+  if (decidesFall(overlap, width)) {
     return { type: 'fell', floorNum: state.floors.length - 1 };
   }
 

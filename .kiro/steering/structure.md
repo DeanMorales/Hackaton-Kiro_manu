@@ -1,54 +1,51 @@
 # Estructura del proyecto
 
-## Estado actual (monolito de un archivo)
+## Estado actual (arquitectura modular)
+
 ```
-Hackaton-Kiro_manu/
+Hackaton-Kiro/
 ├── README.md
-├── torre-de-las-nubes.html   ← HTML + CSS + JS, todo inline
+├── CONTRIBUTING.md
+├── index.html                 ← punto de entrada HTML (Vite)
+├── package.json                ← dependencias y scripts (Vite, Vitest, fast-check)
+├── torre-de-las-nubes.html    ← monolito histórico, CONGELADO (ver nota abajo)
+├── src/
+│   ├── data/          # AWS_SERVICES, banco de preguntas (QUESTIONS), bossRoster, playerName, scoreManager/scoreStore
+│   ├── audio/         # sfx.js, music.js, combatSfx.js, milestoneSfx.js (Web Audio API + archivos de audio)
+│   ├── engine/        # tower.js — estado y física de la torre (pisos, bloque en movimiento, velocidad, plataformas)
+│   ├── combat/        # fight.js — lógica del duelo contra el guardián (cartas, pips, dificultad)
+│   ├── render/        # draw.js, bossFightRender.js, spriteEngine.js — dibujo en canvas
+│   ├── ui/            # screens.js, leaderboard.js, celebration.js, modalState.js — overlays DOM y HUD
+│   ├── integration/   # tests de integración entre módulos
+│   └── main.js        # bucle principal, wiring de todos los módulos
+├── public/
+│   └── sprites/, audio/  # assets estáticos servidos por Vite
 └── .kiro/
-    ├── steering/              ← este directorio (contexto persistente)
-    └── specs/                 ← specs de features/bugfix (se crean bajo demanda)
+    ├── steering/      ← este directorio (contexto persistente)
+    └── specs/         ← specs de features/bugfix (una carpeta por spec, con requirements.md/design.md/tasks.md)
 ```
 
-## Mapa interno de `torre-de-las-nubes.html`
-El archivo sigue un orden consistente que debe respetarse al editar o al planear una futura modularización:
+Cada módulo de `src/` sigue el patrón "lógica pura, sin efectos secundarios de UI": `engine/`, `combat/` y `data/` no tocan el DOM ni el audio directamente; esas responsabilidades viven en `ui/`, `render/`, `audio/` y se orquestan desde `main.js`.
 
-1. **`<head>`**: metadatos, fuentes, `<style>` con variables CSS y todas las reglas (HUD, overlays, arena de combate, cartas, animaciones, media queries).
-2. **`<body>`**: estructura DOM estática de las pantallas:
-   - `#app` → `canvas#gameCanvas` (mundo de juego)
-   - `#hud` (piso actual, contador de puerta)
-   - `#startScreen` (reglas + botón iniciar)
-   - `#bossScreen` (arena, barras de vida, `#cardsRow`)
-   - `#gameOverScreen` (título, detalle, botón reintentar)
-3. **`<script>` (IIFE)**, en este orden:
-   - **DATA**: `AWS_SERVICES`, `QUESTIONS` (banco de preguntas por servicio), `BOSS_NAMES`, helpers `shuffle`/`pickQuestion`.
-   - **SFX**: `beep()` + objeto `sfx` (Web Audio API).
-   - **CANVAS SETUP**: `canvas`, `ctx`, `resize()`.
-   - **GAME STATE**: constantes (`DOOR_INTERVAL`, `BASE_WIDTH`, `MIN_WIDTH`) y objeto `state` (torre, bloque en movimiento, cámara, caballero, nubes).
-   - **INPUT**: `dropBlock()`, `triggerFall()`, `showGameOver()`, listeners de puntero/teclado/botones.
-   - **BOSS FIGHT**: `fight` (estado del combate), `startBossFight()`, `renderPips()`, `renderCards()`, `onCardClick()`, `answerCard()`, `showBanner()`, `endFight()`.
-   - **UPDATE LOOP**: `easeOutQuad()`, `update(dt, now)`.
-   - **RENDER**: `drawSky()`, `drawCloud()`, `drawFacetedBlock()`, `drawTorch()`, `drawTower()`, `drawMovingBlock()`, `drawKnight()`, `render()`.
-   - **MAIN LOOP**: `loop(ts)` + arranque (`resize()`, `requestAnimationFrame(loop)`).
+## Nota histórica: el monolito (`torre-de-las-nubes.html`)
+
+El proyecto comenzó como un único archivo HTML con CSS y JavaScript inline (todo en un `<script>` IIFE). Ese archivo (`torre-de-las-nubes.html`) permanece en el repositorio pero está **congelado**: no se modifica ni se mantiene en paralelo con `src/`. Toda la lógica de juego vigente vive exclusivamente en la arquitectura modular bajo `src/`. La migración completa se documentó en el spec `modular-architecture-migration`.
 
 ## Convención para specs (`.kiro/specs/`)
+
 Cada feature o bugfix nuevo vive en `.kiro/specs/{nombre-en-kebab-case}/` con:
 - `requirements.md`
 - `design.md`
 - `tasks.md`
 
-Los specs se crean incrementalmente: no se reescribe el archivo del juego sin pasar primero por un spec aprobado, salvo cambios triviales explícitamente solicitados fuera del flujo de spec.
+Los specs se crean incrementalmente: no se reescribe código de juego sin pasar primero por un spec aprobado, salvo cambios triviales explícitamente solicitados fuera del flujo de spec. Los specs de tipo bugfix siguen la metodología de "bug condition": un test que falla ANTES del fix (confirmando el bug) y tests de preservación que ya pasan antes del fix (documentando el comportamiento a proteger).
 
-## Convención al añadir nuevos módulos (una vez se modularice)
-Cuando el proyecto pase de un solo HTML a múltiples archivos (ver `tech.md`), la estructura sugerida es:
-```
-src/
-├── data/          (servicios AWS, preguntas)
-├── engine/        (torre, física de bloques, cámara)
-├── combat/        (lógica de duelo con el jefe)
-├── render/        (dibujo en canvas)
-├── ui/            (overlays DOM, HUD)
-├── audio/         (sfx)
-└── main.js        (bucle principal, wiring)
-```
-Esta migración solo se ejecuta cuando exista un spec explícito para ello.
+## Convención de módulos (vigente)
+
+- `src/data/`: servicios AWS, banco de preguntas por dificultad/dominio del examen, roster de jefes, gestión de nombre de jugador y de puntuaciones.
+- `src/engine/`: única fuente de verdad del estado de la torre (`state`), funciones puras extraídas para property-based testing.
+- `src/combat/`: estado y lógica del duelo, sin dependencias de `engine/` ni del DOM.
+- `src/render/`: todo el dibujo en `<canvas>` (mundo de juego y arena de combate).
+- `src/ui/`: toda la manipulación de overlays/HUD del DOM.
+- `src/audio/`: síntesis y reproducción de efectos de sonido y música.
+- `src/main.js`: el único módulo que importa y conecta (wiring) todos los demás; contiene el bucle principal (`requestAnimationFrame`).
